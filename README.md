@@ -1,10 +1,6 @@
-# NIntercept
-
-## NIntercept.DynamicProxy
+# NIntercept.DynamicProxy
  
-> Allows to create proxies and intercept property, method, event and indexer calls. 
-
-_Does not require that the class implements MarshalByRefObject or an interface (RealProxy)._
+> Allows to create proxies and intercept property, indexer, method and event calls. 
 
 Methods:
 
@@ -19,9 +15,9 @@ Supported:
 * _Multi signatures_
 * Interception on _private members_ for **CreateClassProxy**
 
-### Samples
+## Samples
 
-#### CreateClassProxy
+### CreateClassProxy
 
 ```cs
 class Program
@@ -154,7 +150,7 @@ Property: 'B'
 [LogInterceptor] Exit 'MyEvent', Result: ''
 ```
 
-#### CreateClassProxyWithTarget
+### CreateClassProxyWithTarget
 
 ```cs
 var target = new MyClass();
@@ -162,7 +158,7 @@ var proxy = generator.CreateClassProxyWithTarget<MyClass>(target, new MyIntercep
 proxy.MethodA("My value");
 ```
 
-#### CreateInterfaceProxyWithTarget
+### CreateInterfaceProxyWithTarget
 
 ```cs
 var target = new MyService();
@@ -170,12 +166,12 @@ var proxy = generator.CreateInterfaceProxyWithTarget<IMyService>(target, new MyI
 proxy.MethodA("My value");
 ```
 
-### Interceptors
+## Interceptors
 
 Create a class that implements **IInterceptor** interface or use **Interceptor** / **AsyncInterceptor** base classes.
 
 
-### Attributes
+## Attributes
 
 2 ways to define interceptors 
 
@@ -225,7 +221,7 @@ public class MyClass
 
 Note: for interfaces, add the the attributes on interface members.
 
-### Async interception 
+## Async interception 
 
 ```cs
 public class MyAsyncInterceptor : IInterceptor
@@ -283,7 +279,7 @@ public class MyAsyncInterceptor : AsyncInterceptor
 }
 ```
 
-### ObjectFactory
+## ObjectFactory
 
 Change the default **factory** with an **IoC Container**
 
@@ -324,7 +320,7 @@ public class MyInterceptor : IInterceptor
 }
 ```
 
-### Save The Assembly (.NET Framework Only)
+## Save The Assembly (.NET Framework Only)
 
 ```cs
 var generator = new ProxyGenerator(new PersistentProxyBuilder());
@@ -407,7 +403,7 @@ var accessor = new TypeAccessor(target);
 accessor.Properties["MyProperty"].InterceptSet(new object[] { "New Value" }, new LogInterceptor());
 ```
 
-### Support
+## Support
 
 * .NET Framework 4.5 and 4.7.2
 * .NET Core 3.1
