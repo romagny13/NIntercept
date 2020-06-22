@@ -112,16 +112,16 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\NIntercept.DynamicProxy\NIntercept.DynamicProxy.csproj">
-      <Project>{dc5f403c-b05e-4dd7-9a2e-e07ee5ed22e0}</Project>
-      <Name>NIntercept.DynamicProxy</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Page Include="Views\MainWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Source\NIntercept\NIntercept.csproj">
+      <Project>{2e8e933b-a81f-46bb-995c-475d3399d8ac}</Project>
+      <Name>NIntercept</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

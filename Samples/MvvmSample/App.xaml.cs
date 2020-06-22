@@ -182,14 +182,16 @@ namespace MvvmSample
 
             this.proxies = new Dictionary<Type, object>();
             this.container = container;
-            this.generator = new ProxyGenerator();
-
+            this.generator = new ProxyGenerator(new PersistentProxyBuilder());
             Initialize();
+            generator.ProxyBuilder.ModuleScope.Save();
         }
 
         protected virtual void Initialize()
         {
-            proxies.Add(typeof(MainWindowViewModel), generator.CreateClassProxy<MainWindowViewModel>());
+            var options = new ProxyGeneratorOptions();
+            options.AddMixinInstance(new PropertyChangedNotifier());
+            proxies.Add(typeof(MainWindowViewModel), generator.CreateClassProxy<MainWindowViewModel>(options)) ;
         }
 
         public object GetService(Type serviceType)

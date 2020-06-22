@@ -7,13 +7,8 @@ using System.Windows;
 
 namespace MvvmSample.ViewModels
 {
-    public interface IPropertyChangedAware : INotifyPropertyChanged
-    {
-        void OnPropertyChanged(string propertyName);
-    }
 
-    // [AllInterceptor(typeof(AllPropertyChangedInterceptor))]
-    public class MainWindowViewModel : IPropertyChangedAware
+    public class MainWindowViewModel
     {
         private DelegateCommand updateTitleCommand;
 
@@ -25,7 +20,6 @@ namespace MvvmSample.ViewModels
             Title = "Main title";
         }
 
-        //[PropertySetInterceptor(typeof(CanExecuteCommandInterceptor))]
         [PropertyChanged]
         public virtual string Title { get; set; }
 
@@ -37,13 +31,6 @@ namespace MvvmSample.ViewModels
                     updateTitleCommand = new DelegateCommand(ExecuteUpdateTitleCommand);
                 return updateTitleCommand;
             }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         [MethodInterceptor(typeof(MyAsyncInterceptor))]
@@ -94,38 +81,41 @@ namespace MvvmSample.ViewModels
         public Type InterceptorType => typeof(PropertyChangedInterceptor);
     }
 
-    // property targetted
-    public class PropertyChangedInterceptor : IInterceptor
+    public interface IPropertyChangedNotifier : INotifyPropertyChanged
     {
-        public void Intercept(IInvocation invocation)
-        {
-            invocation.Proceed();
+        void OnPropertyChanged(object target, string propertyName);
+    }
 
-            var inpc = invocation.Proxy as IPropertyChangedAware;
-            if (inpc != null)
+    [Serializable]
+    public class PropertyChangedNotifier : IPropertyChangedNotifier
+    {
+        public void OnPropertyChanged(object target, string propertyName)
+        {
+            PropertyChanged?.Invoke(target, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+    }
+
+    public class PropertyChangedInterceptor : Interceptor
+    {
+        protected override void OnEnter(IInvocation invocation) { }
+        protected override void OnException(IInvocation invocation, Exception exception)
+        {
+            Console.WriteLine($"Error: {exception.Message}");
+        }
+
+        protected override void OnExit(IInvocation invocation)
+        {
+            if (!invocation.CallerMethod.Name.StartsWith("set_"))
+                return;
+
+            IPropertyChangedNotifier propertyChangedNotifier = invocation.Proxy as IPropertyChangedNotifier;
+            if (propertyChangedNotifier != null)
             {
                 string propertyName = invocation.Member.Name;
-                inpc.OnPropertyChanged(propertyName);
+                propertyChangedNotifier.OnPropertyChanged(invocation.Proxy, propertyName);
             }
         }
     }
-
-
-    // for all properties of class
-    //public class AllPropertyChangedInterceptor2 : IInterceptor
-    //{
-    //    public void Intercept(IInvocation invocation)
-    //    {
-    //        invocation.Proceed();
-
-    //        var method = invocation.Method;
-    //        if (method.Name.StartsWith(SetPrefix))
-    //        {
-    //            var inpc = invocation.Proxy as IPropertyChangedAware;
-    //            if (inpc != null)
-    //                inpc.OnPropertyChanged(invocation.Method.Name);
-    //        }
-    //    }
-    //}
-
 }

@@ -1,6 +1,7 @@
-# NIntercept.DynamicProxy
+# NIntercept
  
 > Allows to create proxies and intercept property, indexer, method and event calls. 
+
 
 Methods:
 
@@ -279,6 +280,94 @@ public class MyAsyncInterceptor : AsyncInterceptor
 }
 ```
 
+## Mixin
+
+Example add INotifyPropertyChanged to Proxy created
+
+```cs
+public class MainWindowViewModel
+{
+    private DelegateCommand updateTitleCommand;
+
+    public MainWindowViewModel()
+    {
+        Title = "Main title";
+    }
+
+    [PropertyChanged]
+    public virtual string Title { get; set; }
+
+    public DelegateCommand UpdateTitleCommand
+    {
+        get
+        {
+            if (updateTitleCommand == null)
+                updateTitleCommand = new DelegateCommand(ExecuteUpdateTitleCommand);
+            return updateTitleCommand;
+        }
+    }
+
+    protected virtual void ExecuteUpdateTitleCommand()
+    {
+        Title += "!";
+    }
+}
+```
+
+```cs
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Property)]
+public class PropertyChangedAttribute : Attribute, IPropertySetInterceptorProvider
+{
+    public Type InterceptorType => typeof(PropertyChangedInterceptor);
+}
+
+public interface IPropertyChangedNotifier : INotifyPropertyChanged
+{
+    void OnPropertyChanged(object target, string propertyName);
+}
+
+[Serializable]
+public class PropertyChangedNotifier : IPropertyChangedNotifier
+{
+    public void OnPropertyChanged(object target, string propertyName)
+    {
+        PropertyChanged?.Invoke(target, new PropertyChangedEventArgs(propertyName));
+    }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+}
+
+public class PropertyChangedInterceptor : Interceptor
+{
+    protected override void OnEnter(IInvocation invocation) { }
+    protected override void OnException(IInvocation invocation, Exception exception)
+    {
+        Console.WriteLine($"Error: {exception.Message}");
+    }
+
+    protected override void OnExit(IInvocation invocation)
+    {
+        if (!invocation.CallerMethod.Name.StartsWith("set_"))
+            return;
+
+        IPropertyChangedNotifier propertyChangedNotifier = invocation.Proxy as IPropertyChangedNotifier;
+        if (propertyChangedNotifier != null)
+        {
+            string propertyName = invocation.Member.Name;
+            propertyChangedNotifier.OnPropertyChanged(invocation.Proxy, propertyName);
+        }
+    }
+}
+```
+
+Define the options
+
+```cs
+var options = new ProxyGeneratorOptions();
+options.AddMixinInstance(new PropertyChangedNotifier());
+generator.CreateClassProxy<MainWindowViewModel>(options);
+```
+
 ## ObjectFactory
 
 Change the default **factory** with an **IoC Container**
@@ -326,14 +415,14 @@ public class MyInterceptor : IInterceptor
 var generator = new ProxyGenerator(new PersistentProxyBuilder());
 
 // or with Default ProxyBuilder
-// var generator = new ProxyGenerator(new ProxyBuilder(new ProxyModuleBuilder(true)));
+// var generator = new ProxyGenerator(new ProxyBuilder(new ModuleScope(true)));
 // Or
-// var generator = new ProxyGenerator(new ProxyBuilder(new ProxyModuleBuilder("MyAssembly","MyModule",true))); 
+// var generator = new ProxyGenerator(new ProxyBuilder(new ModuleScope("MyAssembly","MyModule",true))); 
 // with strong name key
-// var generator = new ProxyGenerator(new ProxyBuilder(new ProxyModuleBuilder("MyAssembly","MyModule",true, true))); 
+// var generator = new ProxyGenerator(new ProxyBuilder(new ModuleScope("MyAssembly","MyModule",true, true))); 
 var proxy = generator.CreateClassProxy<MyClass>(new MyInterceptor());
 
-generator.ProxyBuilder.ProxyModuleBuilder.Save();
+generator.ProxyBuilder.ModuleScope.Save();
 ```
 
 ## Reflection 

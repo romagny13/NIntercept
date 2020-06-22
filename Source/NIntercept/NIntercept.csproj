@@ -1,0 +1,55 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <FileVersion>0.1.0.0</FileVersion>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <PackageId>NIntercept</PackageId>
+    <Description>Allows to create proxies and intercept property, method, event and indexer calls. </Description>
+    <Copyright>Copyright © ROMAGNY13. All Rights Reserved</Copyright>
+    <PackageProjectUrl>https://github.com/romagny13/NIntercept</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/romagny13/NIntercept</RepositoryUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
+    <PackageTags>interception proxy</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <Authors>ROMAGNY13</Authors>
+    <Company>ROMAGNY13</Company>
+    <TargetFrameworks>net45;net472;netstandard2.0;netcoreapp3.1</TargetFrameworks>
+    <Version>0.1.0.0</Version>
+    <RootNamespace>NIntercept</RootNamespace>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'netcoreapp3.1'">
+    <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
+  </ItemGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <DebugType>Portable</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <DebugType>Full</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="NIntercept.snk" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="NIntercept.snk" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>
