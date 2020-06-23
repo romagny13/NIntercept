@@ -190,8 +190,8 @@ public class GetMessageInterceptor : IInterceptor
 
 ```cs
 var proxy = generator.CreateInterfaceProxyWithoutTarget<IMyService>();
-var message = proxy.GetMessage("Marie");
-Console.WriteLine(message);
+var message = proxy.GetMessage("World");
+Console.WriteLine(message); // write "Hello World!"
 ```
 
 ## Interceptors
