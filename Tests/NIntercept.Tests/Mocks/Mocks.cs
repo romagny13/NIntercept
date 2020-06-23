@@ -5,6 +5,41 @@ using System.Reflection.Emit;
 
 namespace NIntercept.Tests
 {
+    public class ServiceLocatorMock : IProxyServiceProvider
+    {
+        public ICallbackMethodBuilder CallbackMethodBuilder { get; set; }
+
+        public IInvocationTypeBuilder InvocationTypeBuilder { get; set; }
+
+        public IProxyEventBuilder ProxyEventBuilder { get; set; }
+
+        public IProxyMethodBuilder ProxyMethodBuilder { get; set; }
+
+        public IProxyPropertyBuilder ProxyPropertyBuilder { get; set; }
+    }
+
+    public class CallbackMethodBuilderMock : CallbackMethodBuilder
+    {
+        public bool IsUsed { get; set; }
+
+        public override MethodBuilder CreateMethod(ModuleBuilder moduleBuilder, TypeBuilder typeBuilder, CallbackMethodDefinition callbackMethodDefinition, FieldBuilder[] fields)
+        {
+            IsUsed = true;
+            return base.CreateMethod(moduleBuilder, typeBuilder, callbackMethodDefinition, fields);
+        }
+    }
+
+    public class InvocationTypeBuilderMock : InvocationTypeBuilder
+    {
+        public bool IsUsed { get; set; }
+
+        public override Type CreateType(ModuleBuilder moduleBuilder, TypeBuilder proxyTypeBuilder, InvocationTypeDefinition invocationTypeDefinition, MethodBuilder callbackMethodBuilder)
+        {
+            IsUsed = true;
+            return base.CreateType(moduleBuilder, proxyTypeBuilder, invocationTypeDefinition, callbackMethodBuilder);
+        }
+    }
+
     public class ProxyEventBuilderMock : ProxyEventBuilder
     {
         public bool IsUsed { get; set; }

@@ -5,10 +5,10 @@ namespace NIntercept
 {
     public interface IProxyBuilder
     {
-        IProxyEventBuilder ProxyEventBuilder { get; set; }
-        IProxyMethodBuilder ProxyMethodBuilder { get; set; }
+        IProxyEventBuilder ProxyEventBuilder { get;  }
+        IProxyMethodBuilder ProxyMethodBuilder { get; }
         ModuleScope ModuleScope { get; }
-        IProxyPropertyBuilder ProxyPropertyBuilder { get; set; }
+        IProxyPropertyBuilder ProxyPropertyBuilder { get; }
 
         TypeBuilder CreateType(ProxyTypeDefinition typeDefinition, IInterceptor[] interceptors);
     }

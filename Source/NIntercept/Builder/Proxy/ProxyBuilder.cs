@@ -7,23 +7,10 @@ using System.Reflection.Emit;
 
 namespace NIntercept
 {
+
     public class ProxyBuilder : IProxyBuilder
     {
-        private static readonly IProxyPropertyBuilder DefaultProxyPropertyBuilder;
-        private static readonly IProxyMethodBuilder DefaultProxyMethodBuilder;
-        private static readonly IProxyEventBuilder DefaultProxyEventBuilder;
         private ModuleScope moduleScope;
-        private IProxyPropertyBuilder proxyPropertyBuilder;
-        private IProxyMethodBuilder proxyMethodBuilder;
-        private IProxyEventBuilder proxyEventBuilder;
-
-        static ProxyBuilder()
-        {
-            DefaultProxyPropertyBuilder = new ProxyPropertyBuilder();
-            DefaultProxyMethodBuilder = new ProxyMethodBuilder();
-            DefaultProxyEventBuilder = new ProxyEventBuilder();
-        }
-
         public ProxyBuilder(ModuleScope moduleScope)
         {
             if (moduleScope is null)
@@ -41,22 +28,19 @@ namespace NIntercept
             get { return moduleScope; }
         }
 
-        public virtual IProxyPropertyBuilder ProxyPropertyBuilder
+        public IProxyPropertyBuilder ProxyPropertyBuilder
         {
-            get { return proxyPropertyBuilder ?? DefaultProxyPropertyBuilder; }
-            set { proxyPropertyBuilder = value; }
+            get { return ProxyServiceLocator.Current.ProxyPropertyBuilder; }
         }
 
-        public virtual IProxyMethodBuilder ProxyMethodBuilder
+        public IProxyMethodBuilder ProxyMethodBuilder
         {
-            get { return proxyMethodBuilder ?? DefaultProxyMethodBuilder; }
-            set { proxyMethodBuilder = value; }
+            get { return ProxyServiceLocator.Current.ProxyMethodBuilder; }
         }
 
-        public virtual IProxyEventBuilder ProxyEventBuilder
+        public IProxyEventBuilder ProxyEventBuilder
         {
-            get { return proxyEventBuilder ?? DefaultProxyEventBuilder; }
-            set { proxyEventBuilder = value; }
+            get { return ProxyServiceLocator.Current.ProxyEventBuilder; }
         }
 
         public TypeBuilder CreateType(ProxyTypeDefinition typeDefinition, IInterceptor[] interceptors)
@@ -97,7 +81,7 @@ namespace NIntercept
             typeBuilder.SetCustomAttribute(new CustomAttributeBuilder(Constructors.XmlIncludeAttributeConstructor, new object[] { typeDefinition.Type }));
 
             var options = typeDefinition.Options;
-            if(options != null)
+            if (options != null)
             {
                 foreach (var additionalTypeAttribute in options.AdditionalTypeAttributes)
                     typeBuilder.SetCustomAttribute(additionalTypeAttribute);

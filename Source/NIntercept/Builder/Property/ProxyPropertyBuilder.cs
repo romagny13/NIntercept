@@ -7,18 +7,9 @@ namespace NIntercept
 {
     public class ProxyPropertyBuilder : IProxyPropertyBuilder
     {
-        private static readonly IProxyMethodBuilder DefaultProxyMethodBuilder;
-        private IProxyMethodBuilder proxyMethodBuilder;
-
-        static ProxyPropertyBuilder()
+        public IProxyMethodBuilder ProxyMethodBuilder
         {
-            DefaultProxyMethodBuilder = new ProxyMethodBuilder();
-        }
-
-        public virtual IProxyMethodBuilder ProxyMethodBuilder
-        {
-            get { return proxyMethodBuilder ?? DefaultProxyMethodBuilder; }
-            set { proxyMethodBuilder = value; }
+            get { return ProxyServiceLocator.Current.ProxyMethodBuilder; }
         }
 
         public virtual PropertyBuilder CreateProperty(ModuleScope moduleScope, TypeBuilder proxyTypeBuilder, PropertyDefinition propertyDefinition, FieldBuilder[] fields)

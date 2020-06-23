@@ -6,24 +6,11 @@ namespace NIntercept.Definition
     public class ModuleDefinition
     {
         private static object locker = new object();
-        private static IClassProxyMemberSelector DefaultMemberSelector;
         private TypeDefinitionCollection typeDefinitions;
-        private IClassProxyMemberSelector memberSelector;
-
-        static ModuleDefinition()
-        {
-            DefaultMemberSelector = new ClassProxyMemberSelector();
-        }
 
         public ModuleDefinition()
         {
             typeDefinitions = new TypeDefinitionCollection();
-        }
-
-        public IClassProxyMemberSelector MemberSelector
-        {
-            get { return memberSelector ?? DefaultMemberSelector; }
-            set { memberSelector = value; }
         }
 
         public TypeDefinitionCollection TypeDefinitions

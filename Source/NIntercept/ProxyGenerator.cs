@@ -63,8 +63,6 @@ namespace NIntercept
             if (parentType is null)
                 throw new ArgumentNullException(nameof(parentType));
 
-            Initialize(options);
-
             ProxyTypeDefinition typeDefinition = GetTypeDefinition(parentType, null, options);
             return CreateProxy(typeDefinition, options, interceptors);
         }
@@ -102,8 +100,6 @@ namespace NIntercept
             if (targetType.IsInterface)
                 throw new InvalidOperationException($"Interface unexpected for the method CreateClassProxyWithTarget. Type '{targetType.Name}'");
 
-            Initialize(options);
-
             ProxyTypeDefinition typeDefinition = GetTypeDefinition(target.GetType(), target, options);
             return CreateProxy(typeDefinition, options, interceptors);
         }
@@ -132,9 +128,7 @@ namespace NIntercept
             return ProtectedCreateInterfaceProxy(interfaceType, target, options, interceptors);
         }
 
-
         #endregion
-
 
         #region CreateInterfaceWithoutTarget
 
@@ -169,14 +163,11 @@ namespace NIntercept
             if (target != null && !interfaceType.IsAssignableFrom(target.GetType()))
                 throw new InvalidOperationException($"The target '{target.GetType().Name}' doesn't implement the interface '{interfaceType.Name}'");
 
-            Initialize(options);
-
             ProxyTypeDefinition typeDefinition = GetTypeDefinition(interfaceType, target, options);
             return CreateProxy(typeDefinition, options, interceptors);
         }
 
         #endregion
-
 
         protected virtual object CreateProxy(ProxyTypeDefinition typeDefinition, ProxyGeneratorOptions options, IInterceptor[] interceptors)
         {
@@ -226,15 +217,6 @@ namespace NIntercept
         protected virtual ProxyTypeDefinition GetTypeDefinition(Type type, object target, ProxyGeneratorOptions options)
         {
             return ModuleDefinition.GetOrAdd(type, target, options);
-        }
-
-        protected virtual void Initialize(ProxyGeneratorOptions options)
-        {
-            if (options != null)
-            {
-                if (options.ClassProxyMemberSelector != null)
-                    ModuleDefinition.MemberSelector = options.ClassProxyMemberSelector;
-            }
         }
 
         protected virtual object CreateProxyInstance(Type proxyType, object[] parameters)

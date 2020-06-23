@@ -7,7 +7,15 @@ namespace NIntercept.Definition
 {
     public class ClassProxyDefinition : ProxyTypeDefinition
     {
-        public ClassProxyDefinition(ModuleDefinition moduleDefinition, Type type, object target, ProxyGeneratorOptions options) 
+        private static readonly IClassProxyMemberSelector DefaultMemberSelector;
+        private IClassProxyMemberSelector memberSelector;
+
+        static ClassProxyDefinition()
+        {
+            DefaultMemberSelector = new ClassProxyMemberSelector();
+        }
+
+        public ClassProxyDefinition(ModuleDefinition moduleDefinition, Type type, object target, ProxyGeneratorOptions options)
             : base(moduleDefinition, type, target, options)
         {
         }
@@ -17,9 +25,19 @@ namespace NIntercept.Definition
             return this;
         }
 
-        protected IClassProxyMemberSelector MemberSelector
+        public IClassProxyMemberSelector MemberSelector
         {
-            get { return ModuleDefinition.MemberSelector; }
+            get
+            {
+                if (memberSelector == null)
+                {
+                    if (Options != null && Options.ClassProxyMemberSelector != null)
+                        memberSelector = Options.ClassProxyMemberSelector;
+                    else
+                        memberSelector = DefaultMemberSelector;
+                }
+                return memberSelector;
+            }
         }
 
         public override TypeDefinitionType TypeDefinitionType

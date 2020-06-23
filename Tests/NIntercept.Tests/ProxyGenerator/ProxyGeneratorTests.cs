@@ -1,19 +1,13 @@
-﻿using NIntercept;
-using NIntercept.Definition;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 using Unity;
-using Unity.Extension;
 
 namespace NIntercept.Tests
 {
+  
 
     [TestClass]
     public class ProxyGeneratorTests
@@ -57,14 +51,22 @@ namespace NIntercept.Tests
             var generator = new ProxyGenerator();
 
             var m1 = new TypeDefintionCollectorMock();
-            var m2 = new ProxyEventBuilderMock();
-            var m3 = new ProxyPropertyBuilderMock();
-            var m4 = new ProxyMethodBuilderMock();
+            var m2 = new ProxyPropertyBuilderMock();
+            var m3 = new ProxyMethodBuilderMock();
+            var m4 = new ProxyEventBuilderMock();
+            var m5 = new CallbackMethodBuilderMock();
+            var m6 = new InvocationTypeBuilderMock();
+
+            var mock = new ServiceLocatorMock();
+
+            ProxyServiceLocator.SetLocatorProvider(() => mock);
 
             generator.ModuleDefinition = m1;
-            generator.ProxyBuilder.ProxyEventBuilder = m2;
-            generator.ProxyBuilder.ProxyPropertyBuilder = m3;
-            generator.ProxyBuilder.ProxyMethodBuilder = m4;
+            mock.ProxyPropertyBuilder = m2;
+            mock.ProxyMethodBuilder = m3;
+            mock.ProxyEventBuilder = m4;
+            mock.CallbackMethodBuilder = m5;
+            mock.InvocationTypeBuilder = m6;
 
 
             generator.CreateClassProxy<TypeP2>();
@@ -73,6 +75,10 @@ namespace NIntercept.Tests
             Assert.IsTrue(m2.IsUsed);
             Assert.IsTrue(m3.IsUsed);
             Assert.IsTrue(m4.IsUsed);
+            Assert.IsTrue(m5.IsUsed);
+            Assert.IsTrue(m6.IsUsed);
+
+            ProxyServiceLocator.SetLocatorProvider(() => new DefaultServiceProvider());
         }
 
         #region Methods

@@ -6,18 +6,9 @@ namespace NIntercept
 {
     public class ProxyEventBuilder : IProxyEventBuilder
     {
-        private static readonly IProxyMethodBuilder DefaultProxyMethodBuilder;
-        private IProxyMethodBuilder proxyMethodBuilder;
-
-        static ProxyEventBuilder()
+        public IProxyMethodBuilder ProxyMethodBuilder
         {
-            DefaultProxyMethodBuilder = new ProxyMethodBuilder();
-        }
-
-        public virtual IProxyMethodBuilder ProxyMethodBuilder
-        {
-            get { return proxyMethodBuilder ?? DefaultProxyMethodBuilder; }
-            set { proxyMethodBuilder = value; }
+            get { return ProxyServiceLocator.Current.ProxyMethodBuilder; }
         }
 
         public virtual EventBuilder CreateEvent(ModuleScope moduleScope, TypeBuilder proxyTypeBuilder, EventDefinition eventDefinition, FieldBuilder[] fields)

@@ -2,6 +2,7 @@
 
 namespace NIntercept
 {
+
     public class ObjectFactory
     {
         private static Func<Type, object> DefaultFactory;

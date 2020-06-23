@@ -9,27 +9,14 @@ namespace NIntercept
 {
     public class ProxyMethodBuilder : IProxyMethodBuilder
     {
-        private static readonly IInvocationTypeBuilder DefaultInvocationTypeBuilder;
-        private static readonly ICallbackMethodBuilder DefaultCallbackMethodBuilder;
-        private IInvocationTypeBuilder invocationTypeBuilder;
-        private ICallbackMethodBuilder callbackMethodBuilder;
-
-        static ProxyMethodBuilder()
-        {
-            DefaultInvocationTypeBuilder = new InvocationTypeBuilder();
-            DefaultCallbackMethodBuilder = new CallbackMethodBuilder();
-        }
-
         public virtual IInvocationTypeBuilder InvocationTypeBuilder
         {
-            get { return invocationTypeBuilder ?? DefaultInvocationTypeBuilder; }
-            set { invocationTypeBuilder = value; }
+            get { return ProxyServiceLocator.Current.InvocationTypeBuilder; }
         }
 
         public virtual ICallbackMethodBuilder CallbackMethodBuilder
         {
-            get { return callbackMethodBuilder ?? DefaultCallbackMethodBuilder; }
-            set { callbackMethodBuilder = value; }
+            get { return ProxyServiceLocator.Current.CallbackMethodBuilder; }
         }
 
         public virtual MethodBuilder CreateMethod(ModuleScope moduleScope, TypeBuilder proxyTypeBuilder,
