@@ -7,6 +7,6 @@ namespace NIntercept
     {
         IProxyMethodBuilder ProxyMethodBuilder { get; set; }
 
-        EventBuilder CreateEvent(ModuleScope moduleScope, TypeBuilder typeBuilder, EventDefinition eventDefinition, FieldBuilder[] fields);
+        EventBuilder CreateEvent(ModuleScope moduleScope, TypeBuilder proxyTypeBuilder, EventDefinition eventDefinition, FieldBuilder[] fields);
     }
 }

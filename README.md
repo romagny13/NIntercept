@@ -8,6 +8,7 @@ Methods:
 * **CreateClassProxy** (creates a class that inherits from the base class, overrides **virtual** methods and call base methods)
 * **CreateClassProxyWithTarget**
 * **CreateInterfaceProxyWithTarget** (creates a class that implements the **interface** and calls target methods)
+* **CreateInterfaceProxyWithoutTarget** use interceptors to get and set return value
 
 Supported:
 
@@ -165,6 +166,32 @@ proxy.MethodA("My value");
 var target = new MyService();
 var proxy = generator.CreateInterfaceProxyWithTarget<IMyService>(target, new MyInterceptor());
 proxy.MethodA("My value");
+```
+
+### CreateInterfaceProxyWithoutTarget
+
+```cs
+public interface IMyService
+{
+    [MethodInterceptor(typeof(GetMessageInterceptor))]
+    string GetMessage(string name);
+}
+
+public class GetMessageInterceptor : IInterceptor
+{
+    public void Intercept(IInvocation invocation)
+    {
+        // invocation.Proceed(); do not call Proceed
+
+        invocation.ReturnValue = $"Hello {invocation.Parameters[0]}!";
+    }
+}
+```
+
+```cs
+var proxy = generator.CreateInterfaceProxyWithoutTarget<IMyService>();
+var message = proxy.GetMessage("Marie");
+Console.WriteLine(message);
 ```
 
 ## Interceptors

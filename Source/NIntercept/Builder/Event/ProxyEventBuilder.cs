@@ -20,24 +20,24 @@ namespace NIntercept
             set { proxyMethodBuilder = value; }
         }
 
-        public virtual EventBuilder CreateEvent(ModuleScope moduleScope, TypeBuilder typeBuilder, EventDefinition eventDefinition, FieldBuilder[] fields)
+        public virtual EventBuilder CreateEvent(ModuleScope moduleScope, TypeBuilder proxyTypeBuilder, EventDefinition eventDefinition, FieldBuilder[] fields)
         {
-            EventBuilder eventBuilder = DefineEvent(typeBuilder, eventDefinition);
+            EventBuilder eventBuilder = DefineEvent(proxyTypeBuilder, eventDefinition);
 
             AddEventMethodDefinition addEventMethodDefinition = eventDefinition.AddEventMethodDefinition;
             if (addEventMethodDefinition != null)
             {
-                MethodBuilder addMethodBuilder = ProxyMethodBuilder.CreateMethod(moduleScope, typeBuilder, addEventMethodDefinition, eventDefinition.Event, fields);
+                MethodBuilder addMethodBuilder = ProxyMethodBuilder.CreateMethod(moduleScope, proxyTypeBuilder, addEventMethodDefinition, eventDefinition.Event, fields);
                 // copy attributes to method
-                InterceptorAttributeHelper.AddInterceptorAttributes(addMethodBuilder, eventDefinition.AddEventInterceptorAttributes);
+                AttributeHelper.AddInterceptorAttributes(addMethodBuilder, eventDefinition.AddEventInterceptorAttributes);
                 eventBuilder.SetAddOnMethod(addMethodBuilder);
             }
 
             RemoveEventMethodDefinition removeEventMethodDefinition = eventDefinition.RemoveEventMethodDefinition;
             if (removeEventMethodDefinition != null)
             {
-                MethodBuilder removeMethodBuilder = ProxyMethodBuilder.CreateMethod(moduleScope, typeBuilder, removeEventMethodDefinition, eventDefinition.Event, fields);
-                InterceptorAttributeHelper.AddInterceptorAttributes(removeMethodBuilder, eventDefinition.RemoveEventInterceptorAttributes);
+                MethodBuilder removeMethodBuilder = ProxyMethodBuilder.CreateMethod(moduleScope, proxyTypeBuilder, removeEventMethodDefinition, eventDefinition.Event, fields);
+                AttributeHelper.AddInterceptorAttributes(removeMethodBuilder, eventDefinition.RemoveEventInterceptorAttributes);
                 eventBuilder.SetRemoveOnMethod(removeMethodBuilder);
             }
 

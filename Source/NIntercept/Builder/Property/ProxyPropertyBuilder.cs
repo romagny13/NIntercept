@@ -21,25 +21,25 @@ namespace NIntercept
             set { proxyMethodBuilder = value; }
         }
 
-        public virtual PropertyBuilder CreateProperty(ModuleScope moduleScope, TypeBuilder typeBuilder, PropertyDefinition propertyDefinition, FieldBuilder[] fields)
+        public virtual PropertyBuilder CreateProperty(ModuleScope moduleScope, TypeBuilder proxyTypeBuilder, PropertyDefinition propertyDefinition, FieldBuilder[] fields)
         {
             Type returnType = propertyDefinition.PropertyType;
-            PropertyBuilder propertyBuilder = typeBuilder.DefineProperty(propertyDefinition.Name, propertyDefinition.Attributes, returnType, new Type[] { returnType });
+            PropertyBuilder propertyBuilder = proxyTypeBuilder.DefineProperty(propertyDefinition.Name, propertyDefinition.Attributes, returnType, new Type[] { returnType });
 
             PropertyGetMethodDefinition propertyGetMethodDefinition = propertyDefinition.PropertyGetMethodDefinition;
             if (propertyGetMethodDefinition != null)
             {
-                MethodBuilder getMethodBuilder = ProxyMethodBuilder.CreateMethod(moduleScope, typeBuilder, propertyGetMethodDefinition, propertyDefinition.Property, fields);
+                MethodBuilder getMethodBuilder = ProxyMethodBuilder.CreateMethod(moduleScope, proxyTypeBuilder, propertyGetMethodDefinition, propertyDefinition.Property, fields);
                 // copy attributes to method
-                InterceptorAttributeHelper.AddInterceptorAttributes(getMethodBuilder, propertyDefinition.PropertyGetInterceptorAttributes);
+                AttributeHelper.AddInterceptorAttributes(getMethodBuilder, propertyDefinition.PropertyGetInterceptorAttributes);
                 propertyBuilder.SetGetMethod(getMethodBuilder);
             }
 
             PropertySetMethodDefinition propertySetMethodDefinition = propertyDefinition.PropertySetMethodDefinition;
             if (propertySetMethodDefinition != null)
             {
-                MethodBuilder setMethodBuilder = ProxyMethodBuilder.CreateMethod(moduleScope, typeBuilder, propertySetMethodDefinition, propertyDefinition.Property, fields);
-                InterceptorAttributeHelper.AddInterceptorAttributes(setMethodBuilder, propertyDefinition.PropertySetInterceptorAttributes);
+                MethodBuilder setMethodBuilder = ProxyMethodBuilder.CreateMethod(moduleScope, proxyTypeBuilder, propertySetMethodDefinition, propertyDefinition.Property, fields);
+                AttributeHelper.AddInterceptorAttributes(setMethodBuilder, propertyDefinition.PropertySetInterceptorAttributes);
                 propertyBuilder.SetSetMethod(setMethodBuilder);
             }
 

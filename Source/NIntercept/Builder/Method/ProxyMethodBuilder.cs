@@ -10,14 +10,14 @@ namespace NIntercept
     public class ProxyMethodBuilder : IProxyMethodBuilder
     {
         private static readonly IInvocationTypeBuilder DefaultInvocationTypeBuilder;
-        private static readonly ICallbackMethodBuilder DefaultMethodCallbackBuilder;
+        private static readonly ICallbackMethodBuilder DefaultCallbackMethodBuilder;
         private IInvocationTypeBuilder invocationTypeBuilder;
-        private ICallbackMethodBuilder methodCallbackBuilder;
+        private ICallbackMethodBuilder callbackMethodBuilder;
 
         static ProxyMethodBuilder()
         {
             DefaultInvocationTypeBuilder = new InvocationTypeBuilder();
-            DefaultMethodCallbackBuilder = new CallbackMethodBuilder();
+            DefaultCallbackMethodBuilder = new CallbackMethodBuilder();
         }
 
         public virtual IInvocationTypeBuilder InvocationTypeBuilder
@@ -26,25 +26,25 @@ namespace NIntercept
             set { invocationTypeBuilder = value; }
         }
 
-        public virtual ICallbackMethodBuilder MethodCallbackBuilder
+        public virtual ICallbackMethodBuilder CallbackMethodBuilder
         {
-            get { return methodCallbackBuilder ?? DefaultMethodCallbackBuilder; }
-            set { methodCallbackBuilder = value; }
+            get { return callbackMethodBuilder ?? DefaultCallbackMethodBuilder; }
+            set { callbackMethodBuilder = value; }
         }
 
-        public virtual MethodBuilder CreateMethod(ModuleScope moduleScope, TypeBuilder typeBuilder,
+        public virtual MethodBuilder CreateMethod(ModuleScope moduleScope, TypeBuilder proxyTypeBuilder,
             MethodDefinition methodDefinition, MemberInfo member, FieldBuilder[] fields)
         {
             ModuleBuilder moduleBuilder = moduleScope.Module;
 
-            MethodBuilder callbackMethodBuilder = CreateCallbackMethod(moduleBuilder, typeBuilder, methodDefinition, fields);
+            MethodBuilder callbackMethodBuilder = CreateCallbackMethod(moduleBuilder, proxyTypeBuilder, methodDefinition, fields);
 
-            Type invocationType = GetOrCreateInvocationType(moduleScope, methodDefinition, moduleBuilder, callbackMethodBuilder);
+            Type invocationType = GetOrCreateInvocationType(moduleScope, proxyTypeBuilder, methodDefinition, moduleBuilder, callbackMethodBuilder);
 
             if (invocationType.IsGenericType)
                 invocationType = MakeGenericType(invocationType, methodDefinition.Method);
 
-            MethodBuilder methodBuilder = DefineMethod(typeBuilder, methodDefinition);
+            MethodBuilder methodBuilder = DefineMethod(proxyTypeBuilder, methodDefinition);
 
             methodBuilder.SetReturnType(methodDefinition.ReturnType);
 
@@ -54,7 +54,7 @@ namespace NIntercept
                 DefineParameters(methodBuilder, methodDefinition);
 
             if (ShouldAddInterceptionAttributes(methodDefinition))
-                InterceptorAttributeHelper.AddInterceptorAttributes(methodBuilder, methodDefinition.InterceptorAttributes);
+                AttributeHelper.AddInterceptorAttributes(methodBuilder, methodDefinition.InterceptorAttributes);
 
             // method body
             var il = methodBuilder.GetILGenerator();
@@ -95,17 +95,17 @@ namespace NIntercept
 
             EmitReturnValue(il, method, invocationLocalBuilder, returnValueLocalBuilder);
 
-            DefineMethodOverride(typeBuilder, methodBuilder, method);
+            DefineMethodOverride(proxyTypeBuilder, methodBuilder, method);
 
             return methodBuilder;
         }
 
-        protected Type GetOrCreateInvocationType(ModuleScope moduleScope, MethodDefinition methodDefinition, ModuleBuilder moduleBuilder, MethodBuilder callbackMethodBuilder)
+        protected Type GetOrCreateInvocationType(ModuleScope moduleScope, TypeBuilder proxyTypeBuilder, MethodDefinition methodDefinition, ModuleBuilder moduleBuilder, MethodBuilder callbackMethodBuilder)
         {
             Type invocationType = moduleScope.InvocationTypeRegistry.GetBuildType(methodDefinition.InvocationTypeDefinition.Name);
             if (invocationType == null)
             {
-                invocationType = InvocationTypeBuilder.CreateType(moduleBuilder, methodDefinition.InvocationTypeDefinition, callbackMethodBuilder);
+                invocationType = InvocationTypeBuilder.CreateType(moduleBuilder, proxyTypeBuilder, methodDefinition.InvocationTypeDefinition, callbackMethodBuilder);
                 moduleScope.InvocationTypeRegistry.Add(methodDefinition.InvocationTypeDefinition.Name, invocationType);
             }
             return invocationType;
@@ -113,7 +113,7 @@ namespace NIntercept
 
         protected MethodBuilder CreateCallbackMethod(ModuleBuilder moduleBuilder, TypeBuilder typeBuilder, MethodDefinition methodDefinition, FieldBuilder[] fields)
         {
-            return MethodCallbackBuilder.CreateMethod(moduleBuilder, typeBuilder, methodDefinition.MethodCallbackDefinition, fields);
+            return CallbackMethodBuilder.CreateMethod(moduleBuilder, typeBuilder, methodDefinition.MethodCallbackDefinition, fields);
         }
 
         protected Type MakeGenericType(Type type, MethodInfo method)

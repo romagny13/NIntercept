@@ -7,6 +7,6 @@ namespace NIntercept
     {
         IProxyMethodBuilder ProxyMethodBuilder { get; set; }
 
-        PropertyBuilder CreateProperty(ModuleScope moduleScope, TypeBuilder typeBuilder, PropertyDefinition propertyDefinition, FieldBuilder[] fields);
+        PropertyBuilder CreateProperty(ModuleScope moduleScope, TypeBuilder proxyTypeBuilder, PropertyDefinition propertyDefinition, FieldBuilder[] fields);
     }
 }

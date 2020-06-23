@@ -5,6 +5,7 @@ using System.Reflection.Emit;
 
 namespace NIntercept
 {
+
     public class ProxyGenerator : IProxyGenerator
     {
         private readonly ModuleDefinition DefaultModuleDefinition;
@@ -113,35 +114,59 @@ namespace NIntercept
 
         public TInterface CreateInterfaceProxyWithTarget<TInterface>(TInterface target, params IInterceptor[] interceptors) where TInterface : class
         {
-            return (TInterface)ProtectedCreateInterfaceProxyWithTarget(typeof(TInterface), target, null, interceptors);
+            return (TInterface)ProtectedCreateInterfaceProxy(typeof(TInterface), target, null, interceptors);
         }
 
         public object CreateInterfaceProxyWithTarget(Type interfaceType, object target, IInterceptor[] interceptors)
         {
-            return ProtectedCreateInterfaceProxyWithTarget(interfaceType, target, null, interceptors);
+            return ProtectedCreateInterfaceProxy(interfaceType, target, null, interceptors);
         }
 
         public TInterface CreateInterfaceProxyWithTarget<TInterface>(TInterface target, ProxyGeneratorOptions options, params IInterceptor[] interceptors) where TInterface : class
         {
-            return (TInterface)ProtectedCreateInterfaceProxyWithTarget(typeof(TInterface), target, options, interceptors);
+            return (TInterface)ProtectedCreateInterfaceProxy(typeof(TInterface), target, options, interceptors);
         }
 
         public object CreateInterfaceProxyWithTarget(Type interfaceType, object target, ProxyGeneratorOptions options, IInterceptor[] interceptors)
         {
-            return ProtectedCreateInterfaceProxyWithTarget(interfaceType, target, options, interceptors);
+            return ProtectedCreateInterfaceProxy(interfaceType, target, options, interceptors);
         }
 
-        protected virtual object ProtectedCreateInterfaceProxyWithTarget(Type interfaceType, object target, ProxyGeneratorOptions options, IInterceptor[] interceptors)
+
+        #endregion
+
+
+        #region CreateInterfaceWithoutTarget
+
+        public TInterface CreateInterfaceProxyWithoutTarget<TInterface>(params IInterceptor[] interceptors) where TInterface : class
+        {
+            return (TInterface)ProtectedCreateInterfaceProxy(typeof(TInterface), null, null, interceptors);
+        }
+
+        public object CreateInterfaceProxyWithoutTarget(Type interfaceType, IInterceptor[] interceptors)
+        {
+            return ProtectedCreateInterfaceProxy(interfaceType, null, null, interceptors);
+        }
+
+        public TInterface CreateInterfaceProxyWithoutTarget<TInterface>(ProxyGeneratorOptions options, params IInterceptor[] interceptors) where TInterface : class
+        {
+            return (TInterface)ProtectedCreateInterfaceProxy(typeof(TInterface), null, options, interceptors);
+        }
+
+        public object CreateInterfaceProxyWithoutTarget(Type interfaceType, ProxyGeneratorOptions options, IInterceptor[] interceptors)
+        {
+            return ProtectedCreateInterfaceProxy(interfaceType, null, options, interceptors);
+        }
+
+        protected virtual object ProtectedCreateInterfaceProxy(Type interfaceType, object target, ProxyGeneratorOptions options, IInterceptor[] interceptors)
         {
             if (interfaceType is null)
                 throw new ArgumentNullException(nameof(interfaceType));
-            if (target is null)
-                throw new ArgumentNullException(nameof(target));
 
             if (!interfaceType.IsInterface)
                 throw new InvalidOperationException($"Interface expected for '{interfaceType.Name}'");
 
-            if (!interfaceType.IsAssignableFrom(target.GetType()))
+            if (target != null && !interfaceType.IsAssignableFrom(target.GetType()))
                 throw new InvalidOperationException($"The target '{target.GetType().Name}' doesn't implement the interface '{interfaceType.Name}'");
 
             Initialize(options);
@@ -151,6 +176,7 @@ namespace NIntercept
         }
 
         #endregion
+
 
         protected virtual object CreateProxy(ProxyTypeDefinition typeDefinition, ProxyGeneratorOptions options, IInterceptor[] interceptors)
         {
@@ -228,7 +254,7 @@ namespace NIntercept
 
         protected void OnProxyTypeCreated(Type type, object target, Type proxyType, ProxyGeneratorOptions options)
         {
-            ProxyTypeCreated?.Invoke(this, new ProxyTypeCreatedEventArgs(type, target,proxyType, options));
+            ProxyTypeCreated?.Invoke(this, new ProxyTypeCreatedEventArgs(type, target, proxyType, options));
         }
 
         public event EventHandler<ProxyTypeCreatedEventArgs> ProxyTypeCreated;

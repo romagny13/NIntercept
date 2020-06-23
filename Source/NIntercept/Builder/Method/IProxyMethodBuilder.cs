@@ -7,7 +7,7 @@ namespace NIntercept
     public interface IProxyMethodBuilder
     {
         IInvocationTypeBuilder InvocationTypeBuilder { get; set; }
-        ICallbackMethodBuilder MethodCallbackBuilder { get; set; }
+        ICallbackMethodBuilder CallbackMethodBuilder { get; set; }
 
         MethodBuilder CreateMethod(ModuleScope moduleScope, TypeBuilder typeBuilder, MethodDefinition methodDefinition, MemberInfo member, FieldBuilder[] fields);
     }

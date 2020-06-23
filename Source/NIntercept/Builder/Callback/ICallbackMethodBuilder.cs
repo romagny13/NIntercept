@@ -5,6 +5,6 @@ namespace NIntercept
 {
     public interface ICallbackMethodBuilder
     {
-        MethodBuilder CreateMethod(ModuleBuilder moduleBuilder, TypeBuilder typeBuilder, CallbackMethodDefinition methodCallbackDefinition, FieldBuilder[] fields);
+        MethodBuilder CreateMethod(ModuleBuilder moduleBuilder, TypeBuilder typeBuilder, CallbackMethodDefinition callbackMethodDefinition, FieldBuilder[] fields);
     }
 }

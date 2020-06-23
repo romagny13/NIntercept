@@ -120,6 +120,8 @@ namespace NIntercept
 
         public virtual void ClearCache()
         {
+            fields.Clear();
+            constructors.Clear();
             properties.Clear();
             methods.Clear();
             events.Clear();

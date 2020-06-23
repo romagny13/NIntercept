@@ -985,7 +985,10 @@ namespace NIntercept.Tests
 
     public class MyEventArgs : EventArgs
     {
+        public MyEventArgs(string p1)
+        {
 
+        }
     }
 
     public class MySetAtt : PropertySetInterceptorAttribute

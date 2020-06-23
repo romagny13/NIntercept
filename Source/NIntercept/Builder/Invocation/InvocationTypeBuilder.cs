@@ -9,7 +9,7 @@ namespace NIntercept
 {
     public class InvocationTypeBuilder : IInvocationTypeBuilder
     {
-        public virtual Type CreateType(ModuleBuilder moduleBuilder, InvocationTypeDefinition invocationTypeDefinition, MethodBuilder concreteMethodBuilder)
+        public virtual Type CreateType(ModuleBuilder moduleBuilder, TypeBuilder proxyTypeBuilder, InvocationTypeDefinition invocationTypeDefinition, MethodBuilder callbackMethodBuilder)
         {
             TypeBuilder typeBuilder = DefineType(moduleBuilder, invocationTypeDefinition);
 
@@ -44,13 +44,13 @@ namespace NIntercept
             // Call proxy callback method
             il.Emit(OpCodes.Nop);
             il.Emit(OpCodes.Ldarg_0);
-            // Cast? il.Emit(OpCodes.Isinst, method.DeclaringType);
+            // il.Emit(OpCodes.Castclass, proxyTypeBuilder); // Cast?
             il.Emit(OpCodes.Call, typeof(Invocation).GetMethod("get_Proxy"));
             il.Emit(OpCodes.Stloc, proxyLocalBuilder);
             il.Emit(OpCodes.Ldloc, proxyLocalBuilder);
 
             SetArgsWithParameters(il, methodOnTargetDefinition, genericTypeParameters, refLocals);
-            CallInvokeMethodOnTarget(il, method, concreteMethodBuilder, genericTypeParameters);
+            CallInvokeMethodOnTarget(il, method, callbackMethodBuilder, genericTypeParameters);
 
             SetParametersWithRefs(il, refLocals);
             SetInvocationReturnValue(il, method, genericTypeParameters, returnType, resultLocalBuilder);
@@ -118,7 +118,7 @@ namespace NIntercept
         {
             var target = invocationTypeDefinition.Target;
             var targetType = target != null ? target.GetType() : typeof(object);
-            typeBuilder.AddConstructor(new Type[] { targetType, typeof(IInterceptor[]), typeof(MemberInfo), typeof(MethodInfo), typeof(object), typeof(object[]) }, InvocationMethods.InvocationDefaultConstructor);
+            typeBuilder.AddConstructor(new Type[] { targetType, typeof(IInterceptor[]), typeof(MemberInfo), typeof(MethodInfo), typeof(object), typeof(object[]) }, Constructors.InvocationDefaultConstructor);
         }
 
         protected virtual void SetArgsWithParameters(ILGenerator il, InvokeMethodOnTargetDefinition invokeMethodOnTargetDefinition,

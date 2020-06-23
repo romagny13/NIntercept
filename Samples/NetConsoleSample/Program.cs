@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 
 namespace NetConsoleSample
 {
-    // TODO: Name for typedef
-
     class Program
     {
         static void Main(string[] args)
@@ -16,6 +14,7 @@ namespace NetConsoleSample
             var generator = new ProxyGenerator(new PersistentProxyBuilder());
 
             RunCompleteSample(generator);
+            RunInterfaceProxyWithoutTargetSample(generator);
             RunMultiTargetAttributeSample(generator);
             RunMixinsSample(generator);
             RunIndexerSamples(generator);
@@ -24,7 +23,7 @@ namespace NetConsoleSample
             generator.ProxyBuilder.ModuleScope.Save();
 
             Console.ReadKey();
-        }      
+        }
 
         private static void RunCompleteSample(ProxyGenerator generator)
         {
@@ -87,7 +86,7 @@ namespace NetConsoleSample
 
         private static void RunMixinsSample(ProxyGenerator generator)
         {
-            Console.WriteLine("----------------------          Mixins        ----------------------");
+            Console.WriteLine("----------------------           Mixins          ----------------------");
 
             var options = new ProxyGeneratorOptions();
             options.AddMixinInstance(new PropertyChangedNotifier());
@@ -99,7 +98,37 @@ namespace NetConsoleSample
             proxy.UpdateTitle(); // caution with ClassProxy and InterfaceProxy with targets, cannot work because the target is called, and this is not the property Title of the proxy that is called
 
         }
+
+        private static void RunInterfaceProxyWithoutTargetSample(ProxyGenerator generator)
+        {
+            Console.WriteLine("---------------------- InterfaceProxy without target----------------------");
+
+            var proxy = generator.CreateInterfaceProxyWithoutTarget<IMyService>();
+
+            var result = proxy.GetMessage("Marie");
+            Console.WriteLine($"Result:{result}");
+        }
     }
+
+    public class LogInterceptor : Interceptor
+    {
+        protected override void OnEnter(IInvocation invocation)
+        {
+            var parameter = invocation.Parameters.Length > 0 ? invocation.Parameters[0] : null;
+            Console.WriteLine($"[LogInterceptor] Enter '{invocation.CallerMethod.Name}' '{parameter}'");
+        }
+
+        protected override void OnException(IInvocation invocation, Exception exception)
+        {
+            Console.WriteLine($"[LogInterceptor] Exception '{invocation.CallerMethod.Name}', '{exception.Message}'");
+        }
+
+        protected override void OnExit(IInvocation invocation)
+        {
+            Console.WriteLine($"[LogInterceptor] Exit '{invocation.CallerMethod.Name}', Result: '{invocation.ReturnValue}'");
+        }
+    }
+
 
     #region Complete sample
 
@@ -350,26 +379,6 @@ namespace NetConsoleSample
 
     #endregion
 
-  
-    public class LogInterceptor : Interceptor
-    {
-        protected override void OnEnter(IInvocation invocation)
-        {
-            var parameter = invocation.Parameters.Length > 0 ? invocation.Parameters[0] : null;
-            Console.WriteLine($"[LogInterceptor] Enter '{invocation.CallerMethod.Name}' '{parameter}'");
-        }
-
-        protected override void OnException(IInvocation invocation, Exception exception)
-        {
-            Console.WriteLine($"[LogInterceptor] Exception '{invocation.CallerMethod.Name}', '{exception.Message}'");
-        }
-
-        protected override void OnExit(IInvocation invocation)
-        {
-            Console.WriteLine($"[LogInterceptor] Exit '{invocation.CallerMethod.Name}', Result: '{invocation.ReturnValue}'");
-        }
-    }
-
     #region Mixin
 
     public class MyClassNotified
@@ -420,6 +429,26 @@ namespace NetConsoleSample
                 Console.WriteLine($"[PropertyChangedNotifierInterceptor] Notify changed:{propertyName}");
                 propertyChangedNotifier.OnPropertyChanged(invocation.Proxy, propertyName);
             }
+        }
+    }
+
+    #endregion
+
+    #region InterfaceProxy without target
+
+    public interface IMyService
+    {
+        [MethodInterceptor(typeof(GetMessageInterceptor))]
+        string GetMessage(string name);
+    }
+
+    public class GetMessageInterceptor : IInterceptor
+    {
+        public void Intercept(IInvocation invocation)
+        {
+            // invocation.Proceed(); do not call Proceed
+
+            invocation.ReturnValue = $"Hello {invocation.Parameters[0]}!";
         }
     }
 

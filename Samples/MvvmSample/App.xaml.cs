@@ -191,7 +191,7 @@ namespace MvvmSample
         {
             var options = new ProxyGeneratorOptions();
             options.AddMixinInstance(new PropertyChangedNotifier());
-            proxies.Add(typeof(MainWindowViewModel), generator.CreateClassProxy<MainWindowViewModel>(options)) ;
+            proxies.Add(typeof(MainWindowViewModel), generator.CreateClassProxy<MainWindowViewModel>(options));
         }
 
         public object GetService(Type serviceType)

@@ -11,6 +11,7 @@ namespace NIntercept.Tests
         public void Startup()
         {
             MyGenericClass.States.Clear();
+            EventGenericClass.States.Clear();
             InterceptorForGeneric1.invocationBefore = null;
             InterceptorForGeneric1.invocationAfter = null;
             MyGenericClass.a = null;
@@ -162,6 +163,50 @@ namespace NIntercept.Tests
             Assert.AreEqual("A", MyGenericClass.a);
             Assert.AreEqual(typeof(MyItem), r.GetType());
         }
+
+        [TestMethod]
+        public void Event_Generic_Test()
+        {
+            var proxyGenerator = new ProxyGenerator();
+            var proxy = proxyGenerator.CreateClassProxy<EventGenericClass>(new IntForEventGenericClass());
+
+            Assert.AreEqual(0, EventGenericClass.States.Count);
+
+            bool isCalled = false;
+
+            EventHandler<MyEventArgs> ev = null;
+            ev = (s, e) =>
+            {
+                isCalled = true;
+            };
+
+            proxy.MyEvent += ev;
+
+            Assert.AreEqual(3, EventGenericClass.States.Count);
+            Assert.AreEqual(StateTypes.Interceptor1_IsCalledBefore, EventGenericClass.States[0]);
+            Assert.AreEqual(StateTypes.AddEvent_IsCalled, EventGenericClass.States[1]);
+            Assert.AreEqual(StateTypes.Interceptor1_IsCalledAfter, EventGenericClass.States[2]);
+
+            proxy.RaiseMyEvent();
+
+            Assert.AreEqual(true, isCalled);
+
+            EventGenericClass.States.Clear();
+
+            proxy.MyEvent -= ev;
+
+            Assert.AreEqual(3, EventGenericClass.States.Count);
+            Assert.AreEqual(StateTypes.Interceptor1_IsCalledBefore, EventGenericClass.States[0]);
+            Assert.AreEqual(StateTypes.RemoveEvent_IsCalled, EventGenericClass.States[1]);
+            Assert.AreEqual(StateTypes.Interceptor1_IsCalledAfter, EventGenericClass.States[2]);
+
+            EventGenericClass.States.Clear();
+            isCalled = false;
+
+            proxy.RaiseMyEvent();
+
+            Assert.AreEqual(false, isCalled);
+        }
     }
 
 
@@ -245,6 +290,53 @@ namespace NIntercept.Tests
             return new T2();
         }
     }
+
+    public interface IEventGenericClass
+    {
+        event EventHandler<MyEventArgs> MyEvent;
+
+        void RaiseMyEvent();
+    }
+
+    public class EventGenericClass : IEventGenericClass
+    {
+        public static List<StateTypes> States = new List<StateTypes>();
+
+        private event EventHandler<MyEventArgs> myEvent;
+
+        public virtual event EventHandler<MyEventArgs> MyEvent
+        {
+            add
+            {
+                States.Add(StateTypes.AddEvent_IsCalled);
+                myEvent += value;
+            }
+            remove
+            {
+                States.Add(StateTypes.RemoveEvent_IsCalled);
+                myEvent -= value;
+            }
+        }
+
+        public void RaiseMyEvent()
+        {
+            myEvent?.Invoke(this, new MyEventArgs("P1"));
+        }
+    }
+
+
+    public class IntForEventGenericClass : IInterceptor
+    {
+        public void Intercept(IInvocation invocation)
+        {
+            EventGenericClass.States.Add(StateTypes.Interceptor1_IsCalledBefore);
+
+            invocation.Proceed();
+
+            EventGenericClass.States.Add(StateTypes.Interceptor1_IsCalledAfter);
+        }
+    }
+
 
     public class InterceptorForGeneric1 : IInterceptor
     {

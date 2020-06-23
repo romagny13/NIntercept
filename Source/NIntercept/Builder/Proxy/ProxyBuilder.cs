@@ -24,12 +24,12 @@ namespace NIntercept
             DefaultProxyEventBuilder = new ProxyEventBuilder();
         }
 
-        public ProxyBuilder(ModuleScope proxyModuleBuilder)
+        public ProxyBuilder(ModuleScope moduleScope)
         {
-            if (proxyModuleBuilder is null)
-                throw new ArgumentNullException(nameof(proxyModuleBuilder));
+            if (moduleScope is null)
+                throw new ArgumentNullException(nameof(moduleScope));
 
-            this.moduleScope = proxyModuleBuilder;
+            this.moduleScope = moduleScope;
         }
 
         public ProxyBuilder()
@@ -39,11 +39,6 @@ namespace NIntercept
         public ModuleScope ModuleScope
         {
             get { return moduleScope; }
-        }
-
-        protected ModuleBuilder ModuleBuilder
-        {
-            get { return moduleScope.Module; }
         }
 
         public virtual IProxyPropertyBuilder ProxyPropertyBuilder
@@ -64,7 +59,7 @@ namespace NIntercept
             set { proxyEventBuilder = value; }
         }
 
-        public virtual TypeBuilder CreateType(ProxyTypeDefinition typeDefinition, IInterceptor[] interceptors)
+        public TypeBuilder CreateType(ProxyTypeDefinition typeDefinition, IInterceptor[] interceptors)
         {
             if (typeDefinition is null)
                 throw new ArgumentNullException(nameof(typeDefinition));
@@ -75,7 +70,7 @@ namespace NIntercept
             FieldBuilder[] mixinFields = DefineMixinFields(typeBuilder, typeDefinition.MixinDefinitions);
             FieldBuilder[] allFields = mixinFields.Length > 0 ? fields.Concat(mixinFields).ToArray() : fields;
 
-            DefineConstructors(typeBuilder, typeDefinition, allFields); 
+            DefineConstructors(typeBuilder, typeDefinition, allFields);
             DefineProperties(typeBuilder, typeDefinition, fields);
             DefineMethods(typeBuilder, typeDefinition, fields);
             DefineEvents(typeBuilder, typeDefinition, fields);
@@ -84,33 +79,62 @@ namespace NIntercept
             return typeBuilder;
         }
 
-        protected virtual TypeBuilder DefineType(TypeDefinition typeDefinition)
+        protected TypeBuilder DefineType(ProxyTypeDefinition typeDefinition)
         {
-            TypeBuilder typeBuilder = ModuleBuilder.DefineType(typeDefinition.FullName, typeDefinition.TypeAttributes);
-
-            typeBuilder.AddCustomAttribute(typeof(SerializableAttribute));
-
-            InterfaceProxyDefinition interfaceDefinition = typeDefinition as InterfaceProxyDefinition;
-            if (interfaceDefinition != null)
-            {
-                typeBuilder.AddInterfaceImplementation(typeDefinition.Type);
-
-                typeBuilder.AddInterfacesToImplement(interfaceDefinition.Interfaces);
-
-                InterceptorAttributeHelper.AddInterceptorAttributes(typeBuilder, typeDefinition.InterceptorAttributes);
-            }
-            else
+            TypeBuilder typeBuilder = moduleScope.Module.DefineType(typeDefinition.FullName, typeDefinition.TypeAttributes);
+            if (typeDefinition.TypeDefinitionType == TypeDefinitionType.ClassProxy)
                 typeBuilder.SetParent(typeDefinition.Type); // inherit attributes from parent
+
+            DefineTypeAttributes(typeBuilder, typeDefinition);
+            DefineInterfaces(typeBuilder, typeDefinition);
 
             return typeBuilder;
         }
 
+        protected void DefineTypeAttributes(TypeBuilder typeBuilder, ProxyTypeDefinition typeDefinition)
+        {
+            typeBuilder.SetCustomAttribute(new CustomAttributeBuilder(Constructors.SerializableAttributeConstructor, new object[0]));
+            typeBuilder.SetCustomAttribute(new CustomAttributeBuilder(Constructors.XmlIncludeAttributeConstructor, new object[] { typeDefinition.Type }));
+
+            var options = typeDefinition.Options;
+            if(options != null)
+            {
+                foreach (var additionalTypeAttribute in options.AdditionalTypeAttributes)
+                    typeBuilder.SetCustomAttribute(additionalTypeAttribute);
+            }
+
+            if (typeDefinition.TypeDefinitionType == TypeDefinitionType.InterfaceProxy)
+            {
+                AttributeHelper.AddInterceptorAttributes(typeBuilder, typeDefinition.InterceptorAttributes);
+            }
+        }
+
+        protected void DefineInterfaces(TypeBuilder typeBuilder, ProxyTypeDefinition typeDefinition)
+        {
+            if (typeDefinition.TypeDefinitionType == TypeDefinitionType.InterfaceProxy)
+            {
+                InterfaceProxyDefinition interfaceDefinition = typeDefinition as InterfaceProxyDefinition;
+                typeBuilder.AddInterfaceImplementation(typeDefinition.Type);
+                typeBuilder.AddInterfacesToImplement(interfaceDefinition.Interfaces);
+            }
+
+            foreach (var mixinDefinition in typeDefinition.MixinDefinitions)
+                typeBuilder.AddInterfacesToImplement(mixinDefinition.Interfaces);
+        }
+
+        protected virtual FieldBuilder DefineField(TypeBuilder typeBuilder, string fieldName, Type fieldType)
+        {
+            FieldBuilder field = typeBuilder.DefineField(fieldName, fieldType, FieldAttributes.Private);
+            field.SetCustomAttribute(new CustomAttributeBuilder(Constructors.XmlIgnoreAttributeConstructor, new object[0]));
+            return field;
+        }
+
         protected FieldBuilder[] DefineFields(TypeBuilder typeBuilder, ProxyTypeDefinition typeDefinition)
         {
-            FieldBuilder interceptorsField = typeBuilder.DefineField("_interceptors", typeof(IInterceptor[]), FieldAttributes.Private);
+            FieldBuilder interceptorsField = DefineField(typeBuilder, "_interceptors", typeof(IInterceptor[]));
             if (typeDefinition.Target != null)
             {
-                FieldBuilder targetField = typeBuilder.DefineField("_target", typeDefinition.TargetType, FieldAttributes.Private);
+                FieldBuilder targetField = DefineField(typeBuilder, "_target", typeDefinition.TargetType);
                 return new FieldBuilder[] { interceptorsField, targetField };
             }
             return new FieldBuilder[] { interceptorsField };
@@ -123,12 +147,12 @@ namespace NIntercept
             for (int i = 0; i < length; i++)
             {
                 var mixinDefinition = mixinDefinitions[i];
-                fields[i] = typeBuilder.DefineField($"_{NamingHelper.ToCamelCase(mixinDefinition.Name)}", mixinDefinition.Type, FieldAttributes.Private);
+                fields[i] = DefineField(typeBuilder, $"_{NamingHelper.ToCamelCase(mixinDefinition.Name)}", mixinDefinition.Type);
             }
             return fields;
         }
 
-        protected virtual void DefineConstructors(TypeBuilder typeBuilder, TypeDefinition typeDefinition, FieldBuilder[] fields)
+        protected void DefineConstructors(TypeBuilder typeBuilder, TypeDefinition typeDefinition, FieldBuilder[] fields)
         {
             if (typeDefinition.IsInterface)
                 typeBuilder.AddConstructor(fields);
@@ -143,7 +167,7 @@ namespace NIntercept
             }
         }
 
-        protected virtual void DefineProperties(TypeBuilder typeBuilder, TypeDefinition typeDefinition, FieldBuilder[] fields)
+        protected void DefineProperties(TypeBuilder typeBuilder, TypeDefinition typeDefinition, FieldBuilder[] fields)
         {
             foreach (var propertyDefinition in typeDefinition.PropertyDefinitions)
                 DefineProperty(typeBuilder, propertyDefinition, fields);
@@ -159,7 +183,7 @@ namespace NIntercept
             }
         }
 
-        protected virtual void DefineMethods(TypeBuilder typeBuilder, TypeDefinition typeDefinition, FieldBuilder[] fields)
+        protected void DefineMethods(TypeBuilder typeBuilder, TypeDefinition typeDefinition, FieldBuilder[] fields)
         {
             foreach (var methodDefinition in typeDefinition.MethodDefinitions)
                 DefineMethod(typeBuilder, methodDefinition, fields);
@@ -175,7 +199,7 @@ namespace NIntercept
             }
         }
 
-        protected virtual void DefineEvents(TypeBuilder typeBuilder, TypeDefinition typeDefinition, FieldBuilder[] fields)
+        protected void DefineEvents(TypeBuilder typeBuilder, TypeDefinition typeDefinition, FieldBuilder[] fields)
         {
             foreach (var eventDefinition in typeDefinition.EventDefinitions)
                 DefineEvent(typeBuilder, eventDefinition, fields);
@@ -191,14 +215,11 @@ namespace NIntercept
             }
         }
 
-        protected virtual void DefineMixins(TypeBuilder typeBuilder, MixinDefinition[] mixinDefinitions, FieldBuilder[] mixinFields, FieldBuilder interceptorsField)
+        protected void DefineMixins(TypeBuilder typeBuilder, MixinDefinition[] mixinDefinitions, FieldBuilder[] mixinFields, FieldBuilder interceptorsField)
         {
             for (int i = 0; i < mixinFields.Length; i++)
             {
                 MixinDefinition mixinDefinition = mixinDefinitions[i];
-
-                typeBuilder.AddInterfacesToImplement(mixinDefinition.Interfaces);
-
                 FieldBuilder mixinField = mixinFields[i];
                 FieldBuilder[] fields = new FieldBuilder[] { interceptorsField, mixinField };
 
@@ -216,20 +237,19 @@ namespace NIntercept
             }
         }
 
-        protected virtual void DefineProperty(TypeBuilder typeBuilder, PropertyDefinition propertyDefinition, FieldBuilder[] fields)
+        protected void DefineProperty(TypeBuilder typeBuilder, PropertyDefinition propertyDefinition, FieldBuilder[] fields)
         {
             ProxyPropertyBuilder.CreateProperty(ModuleScope, typeBuilder, propertyDefinition, fields);
         }
 
-        protected virtual void DefineMethod(TypeBuilder typeBuilder, MethodDefinition methodDefinition, FieldBuilder[] fields)
+        protected void DefineMethod(TypeBuilder typeBuilder, MethodDefinition methodDefinition, FieldBuilder[] fields)
         {
             ProxyMethodBuilder.CreateMethod(ModuleScope, typeBuilder, methodDefinition, methodDefinition.Method, fields);
         }
 
-        protected virtual void DefineEvent(TypeBuilder typeBuilder, EventDefinition eventDefinition, FieldBuilder[] fields)
+        protected void DefineEvent(TypeBuilder typeBuilder, EventDefinition eventDefinition, FieldBuilder[] fields)
         {
             ProxyEventBuilder.CreateEvent(ModuleScope, typeBuilder, eventDefinition, fields);
         }
     }
-
 }

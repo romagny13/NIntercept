@@ -63,19 +63,6 @@ namespace NIntercept
             return customAttributeBuilder;
         }
 
-        public static void AddCustomAttribute(this TypeBuilder typeBuilder, Type attributeType)
-        {
-            if (attributeType is null)
-                throw new ArgumentNullException(nameof(attributeType));
-
-            ConstructorInfo constructor = attributeType.GetConstructor(Type.EmptyTypes);
-            if (constructor == null)
-                throw new ArgumentException($"No constructor with empty parameters found for '{attributeType.Name}'");
-
-            CustomAttributeBuilder customAttributeBuilder = new CustomAttributeBuilder(constructor, new object[0]);
-            typeBuilder.SetCustomAttribute(customAttributeBuilder);
-        }
-
         #region ctor
 
         public static ConstructorBuilder AddConstructor(this TypeBuilder typeBuilder, FieldBuilder[] fields, ConstructorInfo baseCtor)

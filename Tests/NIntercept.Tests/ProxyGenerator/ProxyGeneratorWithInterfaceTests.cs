@@ -1068,6 +1068,51 @@ namespace NIntercept.Tests
             Assert.AreEqual("A", ((IContract1)proxy).MyProperty);
             Assert.AreEqual("B", ((IContract2)proxy).MyProperty);
         }
+
+        [TestMethod]
+        public void Event_Generic_Test()
+        {
+            var proxyGenerator = new ProxyGenerator();
+
+            var target = new EventGenericClass();
+            var proxy = proxyGenerator.CreateInterfaceProxyWithTarget<IEventGenericClass>(target, new IntForEventGenericClass());
+
+            Assert.AreEqual(0, EventGenericClass.States.Count);
+
+            bool isCalled = false;
+
+            EventHandler<MyEventArgs> ev = null;
+            ev = (s, e) =>
+            {
+                isCalled = true;
+            };
+            proxy.MyEvent += ev;
+
+            Assert.AreEqual(3, EventGenericClass.States.Count);
+            Assert.AreEqual(StateTypes.Interceptor1_IsCalledBefore, EventGenericClass.States[0]);
+            Assert.AreEqual(StateTypes.AddEvent_IsCalled, EventGenericClass.States[1]);
+            Assert.AreEqual(StateTypes.Interceptor1_IsCalledAfter, EventGenericClass.States[2]);
+
+            proxy.RaiseMyEvent();
+
+            Assert.AreEqual(true, isCalled);
+
+            EventGenericClass.States.Clear();
+
+            proxy.MyEvent -= ev;
+
+            Assert.AreEqual(3, EventGenericClass.States.Count);
+            Assert.AreEqual(StateTypes.Interceptor1_IsCalledBefore, EventGenericClass.States[0]);
+            Assert.AreEqual(StateTypes.RemoveEvent_IsCalled, EventGenericClass.States[1]);
+            Assert.AreEqual(StateTypes.Interceptor1_IsCalledAfter, EventGenericClass.States[2]);
+
+            EventGenericClass.States.Clear();
+            isCalled = false;
+
+            proxy.RaiseMyEvent();
+
+            Assert.AreEqual(false, isCalled);
+        }
     }
 
 

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using System.Xml.Serialization;
 
 namespace NIntercept.Tests.Builder
 {
@@ -28,9 +29,10 @@ namespace NIntercept.Tests.Builder
             var evAddAtt = type.GetEvent("MyEvent").AddMethod.GetCustomAttributes();
             var evRemoveAtt = type.GetEvent("MyEvent").RemoveMethod.GetCustomAttributes();
 
-            Assert.AreEqual(2, typeAtt.Count());
+            Assert.AreEqual(3, typeAtt.Count());
             Assert.AreEqual(typeof(SerializableAttribute), typeAtt.FirstOrDefault().GetType());
-            Assert.AreEqual(typeof(AllInterceptorAttribute), typeAtt.ElementAt(1).GetType());
+            Assert.AreEqual(typeof(XmlIncludeAttribute), typeAtt.ElementAt(1).GetType());
+            Assert.AreEqual(typeof(AllInterceptorAttribute), typeAtt.ElementAt(2).GetType());
 
             Assert.AreEqual(1, propGetAtt.Count());
             Assert.AreEqual(typeof(CompilerGeneratedAttribute), propGetAtt.FirstOrDefault().GetType());
@@ -65,9 +67,10 @@ namespace NIntercept.Tests.Builder
             var evAddAtt = type.GetEvent("MyEvent").AddMethod.GetCustomAttributes();
             var evRemoveAtt = type.GetEvent("MyEvent").RemoveMethod.GetCustomAttributes();
 
-            Assert.AreEqual(2, typeAtt.Count());
+            Assert.AreEqual(3, typeAtt.Count());
             Assert.AreEqual(typeof(SerializableAttribute), typeAtt.FirstOrDefault().GetType());
-            Assert.AreEqual(typeof(AllInterceptorAttribute), typeAtt.ElementAt(1).GetType());
+            Assert.AreEqual(typeof(XmlIncludeAttribute), typeAtt.ElementAt(1).GetType());
+            Assert.AreEqual(typeof(AllInterceptorAttribute), typeAtt.ElementAt(2).GetType());
 
             Assert.AreEqual(0, propGetAtt.Count());
             Assert.AreEqual(1, propSetAtt.Count());
@@ -98,9 +101,10 @@ namespace NIntercept.Tests.Builder
             var evAddAtt = type.GetEvent("MyEvent").AddMethod.GetCustomAttributes();
             var evRemoveAtt = type.GetEvent("MyEvent").RemoveMethod.GetCustomAttributes();
 
-            Assert.AreEqual(2, typeAtt.Count());
+            Assert.AreEqual(3, typeAtt.Count());
             Assert.AreEqual(typeof(SerializableAttribute), typeAtt.FirstOrDefault().GetType());
-            Assert.AreEqual(typeof(AllInterceptorAttribute), typeAtt.ElementAt(1).GetType());
+            Assert.AreEqual(typeof(XmlIncludeAttribute), typeAtt.ElementAt(1).GetType());
+            Assert.AreEqual(typeof(AllInterceptorAttribute), typeAtt.ElementAt(2).GetType());
 
             Assert.AreEqual(0, propGetAtt.Count());
             Assert.AreEqual(1, propSetAtt.Count());

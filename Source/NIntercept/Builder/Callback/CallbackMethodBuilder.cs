@@ -9,21 +9,21 @@ namespace NIntercept
 {
     public class CallbackMethodBuilder : ICallbackMethodBuilder
     {
-        public virtual MethodBuilder CreateMethod(ModuleBuilder moduleBuilder, TypeBuilder typeBuilder, CallbackMethodDefinition methodCallbackDefinition, FieldBuilder[] fields)
+        public virtual MethodBuilder CreateMethod(ModuleBuilder moduleBuilder, TypeBuilder typeBuilder, CallbackMethodDefinition callbackMethodDefinition, FieldBuilder[] fields)
         {
-            MethodBuilder methodBuilder = DefineMethod(typeBuilder, methodCallbackDefinition);
+            MethodBuilder methodBuilder = DefineMethod(typeBuilder, callbackMethodDefinition);
 
-            GenericTypeParameterBuilder[] genericTypeParameters = methodBuilder.DefineGenericParameters(methodCallbackDefinition.GenericArguments);
-            if (methodCallbackDefinition.ParameterDefinitions.Length > 0)
-                DefineParameters(methodBuilder, methodCallbackDefinition);
+            GenericTypeParameterBuilder[] genericTypeParameters = methodBuilder.DefineGenericParameters(callbackMethodDefinition.GenericArguments);
+            if (callbackMethodDefinition.ParameterDefinitions.Length > 0)
+                DefineParameters(methodBuilder, callbackMethodDefinition);
 
             var il = methodBuilder.GetILGenerator();
 
             il.Emit(OpCodes.Nop);
 
-            Type returnType = methodCallbackDefinition.ReturnType;
+            Type returnType = callbackMethodDefinition.ReturnType;
             // locals
-            LocalBuilder resultLocalBuilder = null; 
+            LocalBuilder resultLocalBuilder = null;
             if (returnType != typeof(void))
             {
                 if (returnType.ContainsGenericParameters)
@@ -32,7 +32,7 @@ namespace NIntercept
                     resultLocalBuilder = il.DeclareLocal(returnType);
             }
 
-            object target = methodCallbackDefinition.TypeDefinition.Target;
+            object target = callbackMethodDefinition.TypeDefinition.Target;
             if (target != null)
             {
                 // return ((TargetType)target).Method(p1, p2 ...);
@@ -46,22 +46,35 @@ namespace NIntercept
                 il.Emit(OpCodes.Ldarg_0);
             }
 
-            var parameterDefinitions = methodCallbackDefinition.ParameterDefinitions;
+            var parameterDefinitions = callbackMethodDefinition.ParameterDefinitions;
             for (int i = 0; i < parameterDefinitions.Length; i++)
                 il.EmitLdarg(i + 1);
 
-            CallMethodOnTarget(il, methodCallbackDefinition, genericTypeParameters);
-
-            if (returnType != typeof(void))
+            if (callbackMethodDefinition.TypeDefinition.TypeDefinitionType == TypeDefinitionType.InterfaceProxy && target == null)
+                ThrowInvalidOperationException(il, callbackMethodDefinition);
+            else
             {
-                il.Emit(OpCodes.Stloc, resultLocalBuilder);
-                il.Emit(OpCodes.Ldloc, resultLocalBuilder);
+                CallMethodOnTarget(il, callbackMethodDefinition, genericTypeParameters);
+
+                if (returnType != typeof(void))
+                {
+                    il.Emit(OpCodes.Stloc, resultLocalBuilder);
+                    il.Emit(OpCodes.Ldloc, resultLocalBuilder);
+                }
+
+                il.Emit(OpCodes.Nop);
+                il.Emit(OpCodes.Ret);
             }
 
-            il.Emit(OpCodes.Nop);
-            il.Emit(OpCodes.Ret);
-
             return methodBuilder;
+        }
+
+        protected void ThrowInvalidOperationException(ILGenerator il, CallbackMethodDefinition callbackMethodDefinition)
+        {
+            il.Emit(OpCodes.Nop);
+            il.Emit(OpCodes.Ldstr, $"InterfaceProxy {callbackMethodDefinition.TypeDefinition.Name} without Target. Set the return value with an interceptor and do not call Proceed.");
+            il.Emit(OpCodes.Newobj, typeof(InvalidOperationException).GetConstructor(new Type[] { typeof(string) }));
+            il.Emit(OpCodes.Throw);
         }
 
         protected virtual MethodBuilder DefineMethod(TypeBuilder typeBuilder, CallbackMethodDefinition methodCallbackDefinition)

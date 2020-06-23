@@ -1938,6 +1938,7 @@ namespace NIntercept.Tests
         First
     }
 
+    [Serializable]
     public class MyItem
     {
         public string MyProperty { get; set; }

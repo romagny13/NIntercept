@@ -1,6 +1,7 @@
 ﻿using NIntercept.Definition;
 using System;
 using System.Collections.Generic;
+using System.Reflection.Emit;
 
 namespace NIntercept
 {
@@ -8,10 +9,12 @@ namespace NIntercept
     {
         private List<object> mixinInstances;
         private IClassProxyMemberSelector classProxyMemberSelector;
-
+        private List<CustomAttributeBuilder> additionalTypeAttributes;
+    
         public ProxyGeneratorOptions()
         {
             mixinInstances = new List<object>();
+            additionalTypeAttributes = new List<CustomAttributeBuilder>();
         }
 
         protected internal List<object> MixinInstances
@@ -23,6 +26,11 @@ namespace NIntercept
         {
             get { return classProxyMemberSelector; }
             set { classProxyMemberSelector = value; }
+        }
+
+        public List<CustomAttributeBuilder> AdditionalTypeAttributes
+        {
+            get { return additionalTypeAttributes; }
         }
 
         public void AddMixinInstance(object instance)

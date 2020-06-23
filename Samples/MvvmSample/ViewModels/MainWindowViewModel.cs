@@ -107,9 +107,6 @@ namespace MvvmSample.ViewModels
 
         protected override void OnExit(IInvocation invocation)
         {
-            if (!invocation.CallerMethod.Name.StartsWith("set_"))
-                return;
-
             IPropertyChangedNotifier propertyChangedNotifier = invocation.Proxy as IPropertyChangedNotifier;
             if (propertyChangedNotifier != null)
             {

@@ -3,6 +3,8 @@ using System;
 
 namespace NIntercept.Tests
 {
+
+    // TODO: test generic events
     [TestClass]
     public class ProxyGeneratorOptionsTests
     {

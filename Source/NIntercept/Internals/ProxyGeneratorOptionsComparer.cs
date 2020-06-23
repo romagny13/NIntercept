@@ -11,6 +11,7 @@ namespace NIntercept
             if (x == null || y == null)
                 return false;
 
+            // MixinInstances
             int xCount = x.MixinInstances.Count;
             int yCount = y.MixinInstances.Count;
 
@@ -25,6 +26,22 @@ namespace NIntercept
                 var xMixin = x.MixinInstances[i];
                 var yMixin = y.MixinInstances[i];
                 if (xMixin.GetType() != yMixin.GetType())
+                    return false;
+            }
+
+            // ClassProxyMemberSelector
+            if (x.ClassProxyMemberSelector?.GetType() != y.ClassProxyMemberSelector?.GetType())
+                return false;
+
+            // AdditionalTypeAttributes
+            int xAdditionalTypeAttributesCount = x.AdditionalTypeAttributes.Count;
+            int yAdditionalTypeAttributesCount = y.AdditionalTypeAttributes.Count;
+            if (xAdditionalTypeAttributesCount != yAdditionalTypeAttributesCount)
+                return false;
+
+            for (int i = 0; i < xAdditionalTypeAttributesCount; i++)
+            {
+                if (x.AdditionalTypeAttributes[i].GetType() != y.AdditionalTypeAttributes[i].GetType())
                     return false;
             }
 
