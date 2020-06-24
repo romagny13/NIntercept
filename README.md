@@ -17,6 +17,14 @@ Supported:
 * _Multi signatures_
 * Interception on _private members_ for **CreateClassProxy**
 
+## Install
+
+**NuGet Package**
+
+```
+Install-Package NIntercept
+```
+
 ## Samples
 
 ### CreateClassProxy
