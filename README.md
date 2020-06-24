@@ -15,7 +15,7 @@ Supported:
 * _Generics_
 * _Parameters ref and out_
 * _Multi signatures_
-* Interception on _private members_ for **CreateClassProxy**
+* Interception on _private members_ for **ClassProxy**
 
 ## Install
 
@@ -440,6 +440,51 @@ public class MyInterceptor : IInterceptor
     }
 }
 ```
+
+... or get the same instance of the interceptor. Usefull for Example with InterfaceProxy without target
+
+```cs
+var container = new UnityContainer();
+
+container.RegisterType<MyInterceptor>(new ContainerControlledLifetimeManager());
+
+ObjectFactory.SetDefaultFactory(type => container.Resolve(type));
+var generator = new ProxyGenerator();
+
+var proxy = generator.CreateInterfaceProxyWithoutTarget<IMyClass>();
+
+proxy.Title = "New Value";
+var title = proxy.Title;
+```
+
+```cs
+public class MyInterceptor : IInterceptor
+{
+    private string _title;
+
+    public void Intercept(IInvocation invocation)
+    {
+        if (invocation.CallerMethod.Name.StartsWith("set_"))
+            _title= invocation.GetParameter<string>(0); 
+        else
+            invocation.ReturnValue = _title;
+    }
+}
+
+public interface IMyClass
+{
+    [GetSetTitle]
+    string Title { get; set; }
+}
+
+public class GetSetTitleAttribute : Attribute, 
+    IPropertyGetInterceptorProvider, 
+    IPropertySetInterceptorProvider
+{
+    public Type InterceptorType => typeof(MyInterceptor);
+}
+```
+
 
 ## Save The Assembly (.NET Framework Only)
 
