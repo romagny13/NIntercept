@@ -4,7 +4,9 @@
     <FileVersion>0.1.0.0</FileVersion>
     <AssemblyVersion>0.1.0.0</AssemblyVersion>
     <PackageId>NIntercept</PackageId>
-    <Description>Allows to create proxies and intercept property, method, event and indexer calls. </Description>
+    <Description>Interception for NET
+
+Allows to create proxies and intercept property, method, event and indexer calls.</Description>
     <Copyright>Copyright © ROMAGNY13. All Rights Reserved</Copyright>
     <PackageProjectUrl>https://github.com/romagny13/NIntercept</PackageProjectUrl>
     <RepositoryUrl>https://github.com/romagny13/NIntercept</RepositoryUrl>
@@ -17,6 +19,8 @@
     <Version>0.1.0.0</Version>
     <RootNamespace>NIntercept</RootNamespace>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageIcon>nintercept.png</PackageIcon>
+    <PackageIconUrl />
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'netcoreapp3.1'">
@@ -39,6 +43,10 @@
 
   <ItemGroup>
     <None Remove="NIntercept.snk" />
+    <None Include="..\..\nintercept.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
