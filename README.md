@@ -503,7 +503,7 @@ var proxy = generator.CreateClassProxy<MyClass>(new MyInterceptor());
 generator.ProxyBuilder.ModuleScope.Save();
 ```
 
-_Note_: I recommend [ILSpy](https://github.com/icsharpcode/ILSpy)
+_Note: I recommend [ILSpy](https://github.com/icsharpcode/ILSpy)_
 
 ## Reflection 
 
