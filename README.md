@@ -2,13 +2,18 @@
  
 > Allows to create proxies and intercept property, indexer, method and event calls. 
 
+Proxies
 
-Methods:
+* **Class Proxy** creates a class that inherits from the **base class**, overrides **virtual** members and call base methods
+* **Class Proxy With Target** call target methods
+* **Interface Proxy With Target** creates a class that implements the **interface** and calls target methods
+* **Interface Proxy Without Target** interceptors are used to get and set **return value**
 
-* **CreateClassProxy** (creates a class that inherits from the base class, overrides **virtual** methods and call base methods)
-* **CreateClassProxyWithTarget**
-* **CreateInterfaceProxyWithTarget** (creates a class that implements the **interface** and calls target methods)
-* **CreateInterfaceProxyWithoutTarget** use interceptors to get and set return value
+Options:
+
+* **Mixin** allows to add features to proxy created. For example the proxy that implements INotifyPropertyChanged
+* **ClassProxyMemberSelector** allows to filter member to include. For example create an attribute and include only virtual members decorated with the attribute.
+* **AdditionalTypeAttributes** allows to add custom attributes on proxy generated.
 
 Supported:
 
@@ -27,7 +32,7 @@ Install-Package NIntercept
 
 ## Samples
 
-### CreateClassProxy
+### Class Proxy
 
 ```cs
 class Program
@@ -187,7 +192,7 @@ Property: 'B'
 [LogInterceptor] Exit 'MyEvent', Result: ''
 ```
 
-### CreateClassProxyWithTarget
+### Class Proxy With Target
 
 ```cs
 var target = new MyClass();
@@ -195,7 +200,7 @@ var proxy = generator.CreateClassProxyWithTarget<MyClass>(target, new MyIntercep
 proxy.MethodA("My value");
 ```
 
-### CreateInterfaceProxyWithTarget
+### Interface Proxy With Target
 
 ```cs
 var target = new MyService();
@@ -203,7 +208,7 @@ var proxy = generator.CreateInterfaceProxyWithTarget<IMyService>(target, new MyI
 proxy.MethodA("My value");
 ```
 
-### CreateInterfaceProxyWithoutTarget
+### Interface Proxy Without Target
 
 ```cs
 public interface IMyService
@@ -342,7 +347,9 @@ public class MyAsyncInterceptor : AsyncInterceptor
 }
 ```
 
-## Mixin
+## Mixins
+
+> Allows to add features to proxy generated
 
 Example add INotifyPropertyChanged to Proxy created
 
@@ -425,6 +432,8 @@ var options = new ProxyGeneratorOptions();
 options.AddMixinInstance(new PropertyChangedNotifier());
 generator.CreateClassProxy<MainWindowViewModel>(options);
 ```
+
+_Note: **caution** with **proxy** that uses a **target**. After calling a target member, we are out of the proxy (For example a method that updates a property)_
 
 ## ObjectFactory
 
@@ -515,6 +524,8 @@ public class GetSetTitleAttribute : Attribute,
 
 ## Save The Assembly (.NET Framework Only)
 
+_Use it only for Debug_
+
 ```cs
 var generator = new ProxyGenerator(new PersistentProxyBuilder());
 
@@ -529,7 +540,7 @@ var proxy = generator.CreateClassProxy<MyClass>(new MyInterceptor());
 generator.ProxyBuilder.ModuleScope.Save();
 ```
 
-_Note: I recommend [ILSpy](https://github.com/icsharpcode/ILSpy)_
+_Note: I recommend [ILSpy](https://github.com/icsharpcode/ILSpy)_ (IL with C# comments, not fail to decompile like JustDecompile)
 
 ## Reflection 
 
