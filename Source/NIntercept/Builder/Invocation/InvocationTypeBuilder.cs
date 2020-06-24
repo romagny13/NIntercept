@@ -45,21 +45,22 @@ namespace NIntercept
             il.Emit(OpCodes.Nop);
             il.Emit(OpCodes.Ldarg_0);
             // il.Emit(OpCodes.Castclass, proxyTypeBuilder); // Cast?
-            il.Emit(OpCodes.Call, typeof(Invocation).GetMethod("get_Proxy"));
+            il.Emit(OpCodes.Call, InvocationMethods.get_ProxyMethod);
             il.Emit(OpCodes.Stloc, proxyLocalBuilder);
             il.Emit(OpCodes.Ldloc, proxyLocalBuilder);
 
             SetArgsWithParameters(il, methodOnTargetDefinition, genericTypeParameters, refLocals);
-            CallInvokeMethodOnTarget(il, method, callbackMethodBuilder, genericTypeParameters);
 
+            CallInvokeMethodOnTarget(il, method, callbackMethodBuilder, genericTypeParameters);
             SetParametersWithRefs(il, refLocals);
             SetInvocationReturnValue(il, method, genericTypeParameters, returnType, resultLocalBuilder);
+
             il.Emit(OpCodes.Ret);
 
             return typeBuilder.BuildType();
         }
 
-        protected virtual PropertyBuilder ImplementInterceptorProviderTypeProperty(TypeBuilder typeBuilder, MethodDefinition methodDefinition)
+        protected PropertyBuilder ImplementInterceptorProviderTypeProperty(TypeBuilder typeBuilder, MethodDefinition methodDefinition)
         {
             PropertyBuilder propertyBuilder = typeBuilder.DefineProperty("InterceptorProviderType",
                 PropertyAttributes.None, typeof(Type), Type.EmptyTypes);
@@ -121,13 +122,13 @@ namespace NIntercept
             typeBuilder.AddConstructor(new Type[] { targetType, typeof(IInterceptor[]), typeof(MemberInfo), typeof(MethodInfo), typeof(object), typeof(object[]) }, Constructors.InvocationDefaultConstructor);
         }
 
-        protected virtual void SetArgsWithParameters(ILGenerator il, InvokeMethodOnTargetDefinition invokeMethodOnTargetDefinition,
+        protected void SetArgsWithParameters(ILGenerator il, InvokeMethodOnTargetDefinition invokeMethodOnTargetDefinition,
             GenericTypeParameterBuilder[] genericTypeParameters, Dictionary<int, LocalBuilder> refLocals)
         {
             foreach (var parameterDefinition in invokeMethodOnTargetDefinition.ParameterDefinitions)
             {
                 il.Emit(OpCodes.Ldarg_0);
-                il.Emit(OpCodes.Call, typeof(Invocation).GetMethod("get_Parameters"));
+                il.Emit(OpCodes.Call, InvocationMethods.get_ParametersMethod);
                 il.EmitLdc_I4(parameterDefinition.Index);
                 il.Emit(OpCodes.Ldelem_Ref);
 
@@ -155,35 +156,35 @@ namespace NIntercept
                 il.EmitCall(OpCodes.Call, callbackMethodBuilder, null);
         }
 
-        protected virtual void SetParametersWithRefs(ILGenerator methodIl, Dictionary<int, LocalBuilder> refLocals)
+        protected void SetParametersWithRefs(ILGenerator il, Dictionary<int, LocalBuilder> refLocals)
         {
             foreach (var refLocal in refLocals)
             {
-                methodIl.Emit(OpCodes.Ldarg_0);
-                methodIl.Emit(OpCodes.Call, typeof(Invocation).GetMethod("get_Parameters"));
-                methodIl.EmitLdc_I4(refLocal.Key);
-                methodIl.Emit(OpCodes.Ldloc, refLocal.Value);
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Call, InvocationMethods.get_ParametersMethod);
+                il.EmitLdc_I4(refLocal.Key);
+                il.Emit(OpCodes.Ldloc, refLocal.Value);
                 if (refLocal.Value.LocalType.IsValueType)
-                    methodIl.Emit(OpCodes.Box, refLocal.Value.LocalType);
-                methodIl.Emit(OpCodes.Stelem_Ref);
+                    il.Emit(OpCodes.Box, refLocal.Value.LocalType);
+                il.Emit(OpCodes.Stelem_Ref);
             }
         }
 
-        protected virtual void SetInvocationReturnValue(ILGenerator methodIl, MethodInfo method, GenericTypeParameterBuilder[] genericTypeParameters, Type returnType, LocalBuilder resultLocalBuilder)
+        protected void SetInvocationReturnValue(ILGenerator il, MethodInfo method, GenericTypeParameterBuilder[] genericTypeParameters, Type returnType, LocalBuilder resultLocalBuilder)
         {
             if (returnType != typeof(void))
             {
-                methodIl.Emit(OpCodes.Stloc, resultLocalBuilder);
+                il.Emit(OpCodes.Stloc, resultLocalBuilder);
 
-                methodIl.Emit(OpCodes.Ldarg_0);
-                methodIl.Emit(OpCodes.Ldloc, resultLocalBuilder);
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldloc, resultLocalBuilder);
 
                 if (returnType.ContainsGenericParameters)
-                    methodIl.Emit(OpCodes.Box, genericTypeParameters.First(p => p.Name == returnType.Name));
+                    il.Emit(OpCodes.Box, genericTypeParameters.First(p => p.Name == returnType.Name));
                 else if (method.ReturnType.IsValueType)
-                    methodIl.Emit(OpCodes.Box, returnType);
+                    il.Emit(OpCodes.Box, returnType);
 
-                methodIl.EmitCall(OpCodes.Call, typeof(Invocation).GetMethod("set_ReturnValue"), null);
+                il.EmitCall(OpCodes.Call, InvocationMethods.set_ReturnValueMethod, null);
             }
         }
     }

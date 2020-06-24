@@ -51,7 +51,7 @@ namespace NIntercept
                 il.EmitLdarg(i + 1);
 
             if (callbackMethodDefinition.TypeDefinition.TypeDefinitionType == TypeDefinitionType.InterfaceProxy && target == null)
-                ThrowInterfaceProxyWithoutTargetException(il, callbackMethodDefinition.TypeDefinition.Name);
+                ThrowInterfaceProxyWithoutTargetException(il, callbackMethodDefinition);
             else
             {
                 CallMethodOnTarget(il, callbackMethodDefinition, genericTypeParameters);
@@ -69,10 +69,10 @@ namespace NIntercept
             return methodBuilder;
         }
 
-        protected void ThrowInterfaceProxyWithoutTargetException(ILGenerator il, string name)
+        protected void ThrowInterfaceProxyWithoutTargetException(ILGenerator il, CallbackMethodDefinition callbackMethodDefinition)
         {
             il.Emit(OpCodes.Nop);
-            il.Emit(OpCodes.Ldstr, $"InterfaceProxy {name} without Target. Set the return value with an interceptor and do not call Proceed.");
+            il.Emit(OpCodes.Ldstr, $"InterfaceProxy without target '{callbackMethodDefinition.TypeDefinition.Name}', member '{callbackMethodDefinition.Method.Name}' . Use an interceptor to define the behavior and the return value. But do not call Proceed method with the interceptor.");
             il.Emit(OpCodes.Newobj, typeof(InvalidOperationException).GetConstructor(new Type[] { typeof(string) }));
             il.Emit(OpCodes.Throw);
         }

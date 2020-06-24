@@ -75,10 +75,10 @@ namespace NIntercept
             StoreArgsToArray(il, methodDefinition.ParameterDefinitions, parametersLocalBuilder);
 
             EmitHelper.CreateInvocation(il, invocationType, targetLocalBuilder, interceptorsLocalBuilder, memberLocalBuilder, proxyMethodLocalBuilder, proxyLocalBuilder, parametersLocalBuilder, invocationLocalBuilder);
-            EmitHelper.CallProceed(il, invocationType, invocationLocalBuilder);
+            EmitHelper.CallProceed(il, invocationLocalBuilder);
 
             // set ref parameters values after Proceed called
-            SetByRefArgs(il, methodDefinition.ParameterDefinitions, invocationType, invocationLocalBuilder);
+            SetByRefArgs(il, methodDefinition.ParameterDefinitions, invocationLocalBuilder);
 
             EmitReturnValue(il, method, invocationLocalBuilder, returnValueLocalBuilder);
 
@@ -160,7 +160,7 @@ namespace NIntercept
             il.Emit(OpCodes.Stloc, localBuilder);
         }
 
-        protected void SetByRefArgs(ILGenerator il, ParameterDefinition[] parameterDefinitions, Type invocationType, LocalBuilder invocationLocalBuilder)
+        protected void SetByRefArgs(ILGenerator il, ParameterDefinition[] parameterDefinitions, LocalBuilder invocationLocalBuilder)
         {
             foreach (var parameterDefinition in parameterDefinitions)
             {
@@ -169,7 +169,7 @@ namespace NIntercept
                     il.EmitLdarg(parameterDefinition.Index + 1);
 
                     il.Emit(OpCodes.Ldloc, invocationLocalBuilder);
-                    il.Emit(OpCodes.Call, invocationType.GetMethod("get_Parameters"));
+                    il.Emit(OpCodes.Call, InvocationMethods.get_ParametersMethod);
                     il.EmitLdc_I4(parameterDefinition.Index);
                     il.Emit(OpCodes.Ldelem_Ref);
 
@@ -187,7 +187,7 @@ namespace NIntercept
 
                 // return (string)invocation.ReturnValue;
                 il.Emit(OpCodes.Ldloc, invocationLocalBuilder);
-                il.Emit(OpCodes.Callvirt, typeof(Invocation).GetMethod("get_ReturnValue"));
+                il.Emit(OpCodes.Callvirt, InvocationMethods.get_ReturnValueMethod);
 
                 il.EmitUnboxOrCast(method.ReturnType);
 

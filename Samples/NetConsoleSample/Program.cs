@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace NetConsoleSample
 {
+
+
     class Program
     {
         static void Main(string[] args)

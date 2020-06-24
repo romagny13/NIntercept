@@ -67,6 +67,11 @@ namespace NIntercept
             set { returnValue = value; }
         }
 
+        protected IInterceptor[] Interceptors
+        {
+            get { return interceptors; }
+        }
+
         public virtual T GetParameter<T>(int index)
         {
             return (T)parameters[index];

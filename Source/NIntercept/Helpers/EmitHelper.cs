@@ -76,10 +76,10 @@ namespace NIntercept.Helpers
             il.Emit(OpCodes.Stloc, invocationLocalBuilder);
         }
 
-        public static void CallProceed(ILGenerator il, Type invocationType, LocalBuilder invocationLocalBuilder)
+        public static void CallProceed(ILGenerator il, LocalBuilder invocationLocalBuilder)
         {
             il.Emit(OpCodes.Ldloc, invocationLocalBuilder);
-            il.Emit(OpCodes.Callvirt, invocationType.GetMethod("Proceed"));
+            il.Emit(OpCodes.Callvirt, InvocationMethods.ProceedMethod);
             il.Emit(OpCodes.Nop);
         }
 
@@ -91,7 +91,7 @@ namespace NIntercept.Helpers
 
                 // return (string)invocation.ReturnValue;
                 il.Emit(OpCodes.Ldloc, invocationLocalBuilder);
-                il.Emit(OpCodes.Callvirt, typeof(Invocation).GetMethod("get_ReturnValue"));
+                il.Emit(OpCodes.Callvirt, InvocationMethods.get_ReturnValueMethod);
 
                 il.EmitUnboxOrCast(method.ReturnType);
 

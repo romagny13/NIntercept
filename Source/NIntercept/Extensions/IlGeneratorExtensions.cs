@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Reflection.Emit;
 
 namespace NIntercept
@@ -138,6 +139,8 @@ namespace NIntercept
                     throw new NotSupportedException();
             }
         }
+
+    
     }
 
 }

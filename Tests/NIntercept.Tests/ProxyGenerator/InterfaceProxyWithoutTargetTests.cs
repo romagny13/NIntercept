@@ -31,6 +31,11 @@ namespace NIntercept.Tests
 
             Assert.AreEqual("Ok", proxy.GetMessage());
 
+            // void method do not fail
+            proxy.Method();
+
+            Assert.AreEqual(true, VoidMethodInterceptor.IsCalled);
+
             // event
             bool isCalled = false;
             EventHandler ev = null;
@@ -47,6 +52,39 @@ namespace NIntercept.Tests
 
             Assert.AreEqual(true, IntMyEvent.IsRemove);
         }
+
+        //[TestMethod]
+        //public void Do_Not_Fail()
+        //{
+        //    var generator = new ProxyGenerator();
+        //    var proxy = generator.CreateInterfaceProxyWithoutTarget<ITypeW2>();
+
+        //    // property
+        //    proxy.Title = "New Value";
+        //    var title = proxy.Title;
+
+        //    Assert.AreEqual("New Value", title);
+
+        //    // method
+
+        //    Assert.AreEqual("Ok", proxy.GetMessage());
+
+        //    // event
+        //    bool isCalled = false;
+        //    EventHandler ev = null;
+        //    ev = (s, e) =>
+        //    {
+        //        isCalled = true;
+        //    };
+
+        //    proxy.MyEvent += ev;
+
+        //    Assert.AreEqual(true, IntMyEvent.IsAdd);
+
+        //    proxy.MyEvent -= ev;
+
+        //    Assert.AreEqual(true, IntMyEvent.IsRemove);
+        //}
     }
 
     public interface ITypeW1
@@ -57,7 +95,28 @@ namespace NIntercept.Tests
         [MethodInterceptor(typeof(GetMessageInterceptor))]
         string GetMessage();
 
+        [MethodInterceptor(typeof(VoidMethodInterceptor))]
+        void Method();
+
         [AddRemoveMyEvent]
+        event EventHandler MyEvent;
+    }
+    public class VoidMethodInterceptor : IInterceptor
+    {
+        public  static bool IsCalled { get; set; }
+
+        public void Intercept(IInvocation invocation)
+        {
+            IsCalled = true;
+        }
+    }
+
+    public interface ITypeW2
+    {
+        string Title { get; set; }
+
+        string GetMessage();
+
         event EventHandler MyEvent;
     }
 
