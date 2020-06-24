@@ -1,6 +1,6 @@
 # NIntercept
  
-> Allows to create proxies and intercept property, indexer, method and event calls. 
+>  Interception for NET. Allows to create proxies and intercept property, indexer, method and event calls. 
 
 Proxies
 
