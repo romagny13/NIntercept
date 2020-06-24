@@ -60,6 +60,33 @@ class Program
     }
 }
 
+public class MyClass : INotifyPropertyChangedAware
+{
+    private string myProperty;
+    [PropertySetInterceptor(typeof(PropertyChangedInterceptor))]
+    public virtual string MyProperty
+    {
+        get { return myProperty; }
+        set { myProperty = value; }
+    }
+
+    [MethodInterceptor(typeof(MyMethodInterceptor))]
+    public virtual void MyMethod(string value)
+    {
+        this.myProperty = value;
+    }
+
+    public void OnPropertyChanged(string propertyName)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    [AddEventInterceptor(typeof(EventInterceptor))]
+    public virtual event EventHandler MyEvent;
+
+    public event PropertyChangedEventHandler PropertyChanged;
+}
+
 public interface INotifyPropertyChangedAware : INotifyPropertyChanged
 {
     void OnPropertyChanged(string propertyName);
