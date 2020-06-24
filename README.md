@@ -388,7 +388,6 @@ public interface IPropertyChangedNotifier : INotifyPropertyChanged
     void OnPropertyChanged(object target, string propertyName);
 }
 
-[Serializable]
 public class PropertyChangedNotifier : IPropertyChangedNotifier
 {
     public void OnPropertyChanged(object target, string propertyName)
