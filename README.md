@@ -503,6 +503,8 @@ var proxy = generator.CreateClassProxy<MyClass>(new MyInterceptor());
 generator.ProxyBuilder.ModuleScope.Save();
 ```
 
+_Note_: I recommend [ILSpy](https://github.com/icsharpcode/ILSpy)
+
 ## Reflection 
 
 > Extension methods for PropertyInfo, EventInfo and MethodInfo.
