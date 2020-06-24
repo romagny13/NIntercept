@@ -441,7 +441,8 @@ public class MyInterceptor : IInterceptor
 }
 ```
 
-... or get the same instance of the interceptor. Usefull for Example with InterfaceProxy without target
+... Or get the **same instance** of the **interceptor**. Usefull for Example with **InterfaceProxy without target**.
+
 
 ```cs
 var container = new UnityContainer();
