@@ -5,9 +5,9 @@
 Proxies
 
 * **Class Proxy** creates a class that inherits from the **base class**, overrides **virtual** members and call base methods
-* **Class Proxy With Target** call target methods
-* **Interface Proxy With Target** creates a class that implements the **interface** and calls target methods
-* **Interface Proxy Without Target** interceptors are used to get and set **return value**
+* **Class Proxy with target** call target methods
+* **Interface Proxy with target** creates a class that implements the **interface** and calls target methods
+* **Interface Proxy without target** interceptors are used to get and set **return value**
 
 Options:
 
@@ -192,7 +192,7 @@ Property: 'B'
 [LogInterceptor] Exit 'MyEvent', Result: ''
 ```
 
-### Class Proxy With Target
+### Class Proxy with target
 
 ```cs
 var target = new MyClass();
@@ -200,7 +200,7 @@ var proxy = generator.CreateClassProxyWithTarget<MyClass>(target, new MyIntercep
 proxy.MethodA("My value");
 ```
 
-### Interface Proxy With Target
+### Interface Proxy with target
 
 ```cs
 var target = new MyService();
@@ -208,7 +208,7 @@ var proxy = generator.CreateInterfaceProxyWithTarget<IMyService>(target, new MyI
 proxy.MethodA("My value");
 ```
 
-### Interface Proxy Without Target
+### Interface Proxy without target
 
 ```cs
 public interface IMyService
