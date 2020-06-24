@@ -4,16 +4,16 @@
 
 Proxies
 
-* **Class Proxy** creates a class that inherits from the **base class**, overrides **virtual** members and call base methods
-* **Class Proxy with target** call target methods
-* **Interface Proxy with target** creates a class that implements the **interface** and calls target methods
-* **Interface Proxy without target** interceptors are used to get and set **return value**
+* **Class Proxy**: creates a class that inherits from the **base class**, overrides **virtual** members and call base methods
+* **Class Proxy with target**: call target methods
+* **Interface Proxy with target**: creates a class that implements the **interface** and calls target methods
+* **Interface Proxy without target**: interceptors are used to get and set **return value**
 
 Options:
 
-* **Mixin** allows to add features to proxy created. For example the proxy that implements INotifyPropertyChanged
-* **ClassProxyMemberSelector** allows to filter member to include. For example create an attribute and include only virtual members decorated with the attribute.
-* **AdditionalTypeAttributes** allows to add custom attributes on proxy generated.
+* **Mixins**: allows to add features to proxy created. For example the proxy that implements INotifyPropertyChanged
+* **ClassProxyMemberSelector**: allows to filter member to include. For example create an attribute and include only virtual members decorated with the attribute.
+* **AdditionalTypeAttributes**: allows to add custom attributes on proxy generated.
 
 Supported:
 
