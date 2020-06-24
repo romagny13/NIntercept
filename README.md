@@ -11,8 +11,8 @@ Proxies
 
 Options:
 
-* **Mixins**: allows to add features to proxy created. For example add INotifyPropertyChanged implementation.
-* **ClassProxyMemberSelector**: allows to filter member to include. For example create an attribute and include only virtual members decorated with the attribute.
+* **Mixins**: allows to **add features** to **proxy** created. For example add INotifyPropertyChanged implementation.
+* **ClassProxyMemberSelector**: allows to **filter members to include** for **Class Proxy**. For example create an attribute and include only virtual members decorated with the attribute.
 * **AdditionalTypeAttributes**: allows to add custom attributes on proxy generated.
 
 Supported:
