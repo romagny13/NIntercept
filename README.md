@@ -19,7 +19,7 @@ Supported:
 
 ## Install
 
-**NuGet Package**
+[NuGet Package](https://www.nuget.org/packages/NIntercept/)
 
 ```
 Install-Package NIntercept
