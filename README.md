@@ -39,7 +39,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        var generator = new ProxyGenerator(new PersistentProxyBuilder());
+        var generator = new ProxyGenerator();
 
         var proxy = generator.CreateClassProxy<MyClass>();
 
