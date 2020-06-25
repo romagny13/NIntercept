@@ -433,7 +433,7 @@ options.AddMixinInstance(new PropertyChangedNotifier());
 generator.CreateClassProxy<MainWindowViewModel>(options);
 ```
 
-_Note: **caution** with **proxy** that uses a **target**. After calling a target member, we are out of the proxy (For example a method that updates a property)_
+_Note: **caution** with **proxies** that have a **target**. After calling a target member, we are out of the proxy (For example a method that updates a target property)_
 
 ## ObjectFactory
 
