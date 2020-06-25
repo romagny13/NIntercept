@@ -7,7 +7,7 @@ Proxies
 * **Class Proxy**: creates a class that inherits from the **base class**, overrides **virtual** members and call base methods
 * **Class Proxy with target**: call target methods
 * **Interface Proxy with target**: creates a class that implements the **interface** and calls target methods
-* **Interface Proxy without target**: interceptors are used to get and set **return value**
+* **Interface Proxy without target**: interceptors are used to get and set the **return value**
 
 Options:
 
