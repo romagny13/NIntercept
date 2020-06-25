@@ -67,13 +67,8 @@ class Program
 
 public class MyClass : INotifyPropertyChangedAware
 {
-    private string myProperty;
     [PropertySetInterceptor(typeof(PropertyChangedInterceptor))]
-    public virtual string MyProperty
-    {
-        get { return myProperty; }
-        set { myProperty = value; }
-    }
+    public virtual string MyProperty { get; set; }
 
     [MethodInterceptor(typeof(MyMethodInterceptor))]
     public virtual void MyMethod(string value)
