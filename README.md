@@ -229,9 +229,9 @@ var message = proxy.GetMessage("World");
 Console.WriteLine(message); // write "Hello World!"
 ```
 
-## Constructor Injection
+### Constructor Injection
 
-Sample use Unity Container to resolve injection parameters
+Example: use Unity Container to resolve injection parameters
 
 ```cs
 public interface IMyService
