@@ -7,7 +7,7 @@ Proxies
 * **Class Proxy**: creates a class that inherits from the **base class**, overrides **virtual** members and call base methods
 * **Class Proxy with target**: call target methods
 * **Interface Proxy with target**: creates a class that implements the **interface** and calls target methods
-* **Interface Proxy without target**: interceptors are used to get and set **return value**
+* **Interface Proxy without target**: interceptors are used to get and set the **return value**
 
 Options:
 
@@ -39,7 +39,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        var generator = new ProxyGenerator(new PersistentProxyBuilder());
+        var generator = new ProxyGenerator();
 
         var proxy = generator.CreateClassProxy<MyClass>();
 
@@ -67,13 +67,8 @@ class Program
 
 public class MyClass : INotifyPropertyChangedAware
 {
-    private string myProperty;
     [PropertySetInterceptor(typeof(PropertyChangedInterceptor))]
-    public virtual string MyProperty
-    {
-        get { return myProperty; }
-        set { myProperty = value; }
-    }
+    public virtual string MyProperty { get; set; }
 
     [MethodInterceptor(typeof(MyMethodInterceptor))]
     public virtual void MyMethod(string value)
@@ -505,7 +500,7 @@ options.AddMixinInstance(new PropertyChangedNotifier());
 generator.CreateClassProxy<MainWindowViewModel>(options);
 ```
 
-_Note: **caution** with **proxy** that uses a **target**. After calling a target member, we are out of the proxy (For example a method that updates a property)_
+_Note: **caution** with **proxies** that have a **target**. After calling a target member, we are out of the proxy (For example a method that updates a target property)_
 
 ## ObjectFactory
 
