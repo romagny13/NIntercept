@@ -33,6 +33,10 @@ namespace NIntercept
             if (x.ClassProxyMemberSelector?.GetType() != y.ClassProxyMemberSelector?.GetType())
                 return false;
 
+            // ConstructorSelector
+            if (x.ConstructorSelector?.GetType() != y.ConstructorSelector?.GetType())
+                return false;
+
             // AdditionalTypeAttributes
             int xAdditionalTypeAttributesCount = x.AdditionalTypeAttributes.Count;
             int yAdditionalTypeAttributesCount = y.AdditionalTypeAttributes.Count;

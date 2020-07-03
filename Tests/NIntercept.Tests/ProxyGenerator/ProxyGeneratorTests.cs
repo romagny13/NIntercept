@@ -7,7 +7,7 @@ using Unity;
 
 namespace NIntercept.Tests
 {
-  
+
 
     [TestClass]
     public class ProxyGeneratorTests
@@ -981,36 +981,36 @@ namespace NIntercept.Tests
 
         }
 
-        [TestMethod]
-        public void Throws_With_No_Empty_Types_Base_Ctor()
-        {
-            var generator = new ProxyGenerator();
-            Assert.ThrowsException<NotSupportedException>(() => generator.CreateClassProxy<TypeP12>());
-            Assert.ThrowsException<NotSupportedException>(() => generator.CreateClassProxy<TypeP12_B>());
-            Assert.ThrowsException<ArgumentException>(() => generator.CreateClassProxy<TypeP12_C>());
-        }
+        //[TestMethod]
+        //public void Throws_With_No_Empty_Types_Base_Ctor()
+        //{
+        //    var generator = new ProxyGenerator();
+        //    Assert.ThrowsException<NotSupportedException>(() => generator.CreateClassProxy<TypeP12>());
+        //    Assert.ThrowsException<NotSupportedException>(() => generator.CreateClassProxy<TypeP12_B>());
+        //    Assert.ThrowsException<ArgumentException>(() => generator.CreateClassProxy<TypeP12_C>());
+        //}
 
-        [TestMethod]
-        public void Find_Protected_Empty_Base_Ctor()
-        {
-            var generator = new ProxyGenerator();
+        //[TestMethod]
+        //public void Find_Protected_Empty_Base_Ctor()
+        //{
+        //    var generator = new ProxyGenerator();
 
-            Assert.AreEqual(0, TypeP13.States.Count);
+        //    Assert.AreEqual(0, TypeP13.States.Count);
 
-            var proxy = generator.CreateClassProxy<TypeP13>(new IntForP13());
+        //    var proxy = generator.CreateClassProxy<TypeP13>(new IntForP13());
 
-            Assert.AreEqual(1, TypeP13.States.Count);
-            Assert.AreEqual(StateTypes.Ctor_IsCalled, TypeP13.States[0]);
+        //    Assert.AreEqual(1, TypeP13.States.Count);
+        //    Assert.AreEqual(StateTypes.Ctor_IsCalled, TypeP13.States[0]);
 
-            TypeP13.States.Clear();
+        //    TypeP13.States.Clear();
 
-            proxy.Method();
+        //    proxy.Method();
 
-            Assert.AreEqual(3, TypeP13.States.Count);
-            Assert.AreEqual(StateTypes.Interceptor1_IsCalledBefore, TypeP13.States[0]);
-            Assert.AreEqual(StateTypes.Class_Method, TypeP13.States[1]);
-            Assert.AreEqual(StateTypes.Interceptor1_IsCalledAfter, TypeP13.States[2]);
-        }
+        //    Assert.AreEqual(3, TypeP13.States.Count);
+        //    Assert.AreEqual(StateTypes.Interceptor1_IsCalledBefore, TypeP13.States[0]);
+        //    Assert.AreEqual(StateTypes.Class_Method, TypeP13.States[1]);
+        //    Assert.AreEqual(StateTypes.Interceptor1_IsCalledAfter, TypeP13.States[2]);
+        //}
 
         [TestMethod]
         public void Fail_With_Dependencies()
@@ -1087,6 +1087,7 @@ namespace NIntercept.Tests
             Assert.AreEqual(0, TypeP15.States.Count);
         }
     }
+
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Event)]
     public class MultiTargetAttribute : InterceptorAttributeBase,

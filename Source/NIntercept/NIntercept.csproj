@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <FileVersion>0.1.0.0</FileVersion>
-    <AssemblyVersion>0.1.0.1</AssemblyVersion>
+    <FileVersion>0.1.0.2</FileVersion>
+    <AssemblyVersion>0.1.0.2</AssemblyVersion>
     <PackageId>NIntercept</PackageId>
     <Description>Interception for NET
 
@@ -16,7 +16,7 @@ Allows to create proxies and intercept property, method, event and indexer calls
     <Authors>ROMAGNY13</Authors>
     <Company>ROMAGNY13</Company>
     <TargetFrameworks>net45;net472;netstandard2.0;netcoreapp3.1</TargetFrameworks>
-    <Version>0.1.0.1</Version>
+    <Version>0.1.0.2</Version>
     <RootNamespace>NIntercept</RootNamespace>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIcon>nintercept.png</PackageIcon>
@@ -33,7 +33,7 @@ Allows to create proxies and intercept property, method, event and indexer calls
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <DebugType>Full</DebugType>
   </PropertyGroup>
 

@@ -65,41 +65,67 @@ namespace NIntercept
 
         #region ctor
 
-        public static ConstructorBuilder AddConstructor(this TypeBuilder typeBuilder, FieldBuilder[] fields, ConstructorInfo baseCtor)
+        private static Type[] ConcatTypes(FieldBuilder[] fields, ParameterInfo[] parameters)
         {
-            return AddConstructor(typeBuilder, MethodAttributes.Public, CallingConventions.Standard, fields, baseCtor);
+            Type[] fieldTypes = fields.Select(f => f.FieldType).ToArray();
+            if (parameters == null)
+                return fieldTypes;
+
+            Type[] argsTypes = parameters.Select(p => p.ParameterType).ToArray();
+            return fieldTypes.Concat(argsTypes).ToArray();
         }
 
         public static ConstructorBuilder AddConstructor(this TypeBuilder typeBuilder, MethodAttributes attributes, CallingConventions callingConvention, FieldBuilder[] fields, ConstructorInfo baseCtor)
         {
+            // base ctor => MyClass(IService service1,...)
+            // proxy ctor => MyClass_Proxy(IInterceptor[] interceptors, MyClass target or X , Mixin1 mixin1,..., IService service1,...)
+
             if (fields is null)
                 throw new ArgumentNullException(nameof(fields));
 
-            ConstructorBuilder constructorBuilder = typeBuilder.DefineConstructor(attributes, callingConvention, fields.Select(f => f.FieldType).ToArray());
-
-            var ctorIl = constructorBuilder.GetILGenerator();
-
-            for (int i = 0; i < fields.Length; i++)
-            {
-                ctorIl.Emit(OpCodes.Ldarg_0);
-                ctorIl.EmitLdarg(i + 1);
-                ctorIl.Emit(OpCodes.Stfld, fields[i]);
-            }
+            int fieldLength = fields.Length;
+            ParameterInfo[] parameters = null;
+            if (baseCtor != null)
+                parameters = baseCtor.GetParameters();
+            Type[] parameterTypes =  ConcatTypes(fields, parameters);
+            ConstructorBuilder constructorBuilder = typeBuilder.DefineConstructor(attributes, callingConvention, parameterTypes);
 
             if (baseCtor != null)
             {
-                Type[] parameterTypes = baseCtor.GetParameters().Select(p => p.ParameterType).ToArray();
-                ctorIl.Emit(OpCodes.Ldarg_0);
-
-                for (int i = 0; i < parameterTypes.Length; i++)
-                    ctorIl.EmitLdarg(i + 1);
-
-                ctorIl.Emit(OpCodes.Call, baseCtor);
+                // name "base" ctor parameters for easy constructor injection resolution
+                for (int i = 0; i < parameters.Length; i++)
+                    constructorBuilder.DefineParameter(i + fieldLength + 1, ParameterAttributes.None, parameters[i].Name);
             }
 
-            ctorIl.Emit(OpCodes.Ret);
+            var il = constructorBuilder.GetILGenerator();
+
+            // affect current class fields
+            for (int i = 0; i < fieldLength; i++)
+            {
+                il.Emit(OpCodes.Ldarg_0);
+                il.EmitLdarg(i + 1);
+                il.Emit(OpCodes.Stfld, fields[i]);
+            }
+
+            // call base ctor 
+            if (baseCtor != null)
+            {
+                il.Emit(OpCodes.Ldarg_0);
+
+                for (int i = fieldLength; i < parameterTypes.Length; i++)
+                    il.EmitLdarg(i + 1);
+
+                il.Emit(OpCodes.Call, baseCtor);
+            }
+
+            il.Emit(OpCodes.Ret);
 
             return constructorBuilder;
+        }
+
+        public static ConstructorBuilder AddConstructor(this TypeBuilder typeBuilder, FieldBuilder[] fields, ConstructorInfo baseCtor)
+        {
+            return AddConstructor(typeBuilder, MethodAttributes.Public, CallingConventions.Standard, fields, baseCtor);
         }
 
         public static ConstructorBuilder AddConstructor(this TypeBuilder typeBuilder, FieldBuilder[] fields)
@@ -109,19 +135,22 @@ namespace NIntercept
 
         public static ConstructorBuilder AddConstructor(this TypeBuilder typeBuilder, MethodAttributes attributes, CallingConventions callingConvention, Type[] parameterTypes, ConstructorInfo baseCtor)
         {
-            ConstructorBuilder constructorBuilder = typeBuilder.DefineConstructor(attributes, callingConvention, parameterTypes);
-            var ctorIl = constructorBuilder.GetILGenerator();
+            if (parameterTypes is null)
+                throw new ArgumentNullException(nameof(parameterTypes));
 
-            ctorIl.Emit(OpCodes.Ldarg_0);
+            ConstructorBuilder constructorBuilder = typeBuilder.DefineConstructor(attributes, callingConvention, parameterTypes);
+
+            var il = constructorBuilder.GetILGenerator();
+
+            il.Emit(OpCodes.Ldarg_0);
 
             for (int i = 0; i < parameterTypes.Length; i++)
-                ctorIl.EmitLdarg(i + 1);
-
+                il.EmitLdarg(i + 1);
 
             if (baseCtor != null)
-                ctorIl.Emit(OpCodes.Call, baseCtor);
+                il.Emit(OpCodes.Call, baseCtor);
 
-            ctorIl.Emit(OpCodes.Ret);
+            il.Emit(OpCodes.Ret);
 
             return constructorBuilder;
         }
@@ -174,11 +203,11 @@ namespace NIntercept
 
             MethodBuilder setMethodBuilder = typeBuilder.DefineMethod($"set_{propertyName}", methodAttributes, null, parameterTypes);
 
-            ILGenerator ilL = setMethodBuilder.GetILGenerator();
-            ilL.Emit(OpCodes.Ldarg_0);
-            ilL.Emit(OpCodes.Ldarg_1);
-            ilL.Emit(OpCodes.Stfld, field);
-            ilL.Emit(OpCodes.Ret);
+            ILGenerator il = setMethodBuilder.GetILGenerator();
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldarg_1);
+            il.Emit(OpCodes.Stfld, field);
+            il.Emit(OpCodes.Ret);
 
             return setMethodBuilder;
         }

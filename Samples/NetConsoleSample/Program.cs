@@ -3,11 +3,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Reflection;
 using System.Threading.Tasks;
+using Unity;
 
 namespace NetConsoleSample
 {
-
 
     class Program
     {
@@ -19,6 +20,7 @@ namespace NetConsoleSample
             RunInterfaceProxyWithoutTargetSample(generator);
             RunMultiTargetAttributeSample(generator);
             RunMixinsSample(generator);
+            RunConstructorInjectionSample(generator);
             RunIndexerSamples(generator);
             RunAsyncMethodsSample(generator);
 
@@ -27,6 +29,19 @@ namespace NetConsoleSample
             Console.ReadKey();
         }
 
+        private static void RunConstructorInjectionSample(ProxyGenerator generator)
+        {
+            Console.WriteLine("---------------------- Constructor injection ----------------------");
+
+            IUnityContainer container = new UnityContainer();
+            container.RegisterType<IMyService, MyService>();
+
+            var options = new ProxyGeneratorOptions();
+            options.ConstructorInjectionResolver = new UnityConstructorInjectionResolver(container);
+
+            var proxy = generator.CreateClassProxy<MyClassWithInjections>(options);
+            proxy.Method();
+        }
         private static void RunCompleteSample(ProxyGenerator generator)
         {
             Console.WriteLine("---------------------- Property, method, event ----------------------");
@@ -454,5 +469,55 @@ namespace NetConsoleSample
         }
     }
 
+    #endregion
+
+    #region Constructor Injection
+
+    public class MyService : IMyService
+    {
+        public string GetMessage(string name)
+        {
+            return $"Hello {name}!";
+        }
+    }
+
+    public class MyClassWithInjections
+    {
+        private readonly IMyService myService;
+
+        public MyClassWithInjections(IMyService myService)
+        {
+            this.myService = myService;
+        }
+
+        public void Method()
+        {
+            Console.WriteLine($"{myService.GetMessage("World")}");
+        }
+    }
+
+    public class UnityConstructorInjectionResolver : IConstructorInjectionResolver
+    {
+        private readonly IUnityContainer container;
+
+        public UnityConstructorInjectionResolver(IUnityContainer container)
+        {
+            if (container is null)
+                throw new ArgumentNullException(nameof(container));
+
+            this.container = container;
+        }
+
+        public object Resolve(ParameterInfo parameter)
+        {
+            if (parameter.Name == "p1")
+                return "Ok";
+
+            if (parameter.Name == "p2")
+                return 10;
+
+            return container.Resolve(parameter.ParameterType);
+        }
+    }
     #endregion
 }

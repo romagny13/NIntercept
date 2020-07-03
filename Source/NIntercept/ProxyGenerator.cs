@@ -1,6 +1,7 @@
 ﻿using NIntercept.Definition;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Reflection.Emit;
 
 namespace NIntercept
@@ -8,7 +9,8 @@ namespace NIntercept
 
     public class ProxyGenerator : IProxyGenerator
     {
-        private readonly ModuleDefinition DefaultModuleDefinition;
+        private readonly ModuleDefinition defaultModuleDefinition;        
+        private readonly IConstructorInjectionResolver defaultConstructorInjectionResolver;
         private IProxyBuilder proxyBuilder;
         private ModuleDefinition moduleDefinition;
 
@@ -17,7 +19,8 @@ namespace NIntercept
             if (proxyBuilder is null)
                 throw new ArgumentNullException(nameof(proxyBuilder));
 
-            this.DefaultModuleDefinition = new ModuleDefinition();
+            this.defaultModuleDefinition = new ModuleDefinition();
+            this.defaultConstructorInjectionResolver = new DefaultConstructorInjectionResolver();
             this.proxyBuilder = proxyBuilder;
         }
 
@@ -32,9 +35,10 @@ namespace NIntercept
 
         public virtual ModuleDefinition ModuleDefinition
         {
-            get { return moduleDefinition ?? DefaultModuleDefinition; }
+            get { return moduleDefinition ?? defaultModuleDefinition; }
             set { moduleDefinition = value; }
         }
+
 
         #region CreateClassProxy
 
@@ -182,19 +186,35 @@ namespace NIntercept
 
             object target = typeDefinition.Target;
 
-            List<object> parameters = new List<object>();
-            parameters.Add(interceptors);
+            List<object> args = new List<object>();
+            args.Add(interceptors);
             if (target != null)
-                parameters.Add(target);
+                args.Add(target);
 
             if (options != null && options.MixinInstances.Count > 0)
-                parameters.AddRange(options.MixinInstances);
+                args.AddRange(options.MixinInstances);
 
-            //#if NET45 || NET472
-            //            ProxyBuilder.ModuleScope.Save();
-            //#endif
+            // base ctor dependencies
+            ConstructorInfo constructor = proxyType.GetConstructors()[0];
+            var parameters = constructor.GetParameters();
+            int length = parameters.Length;
+            if (length > args.Count)
+            {
+                IConstructorInjectionResolver constructorInjectionResolver;
+                if (options != null && options.ConstructorInjectionResolver != null)
+                    constructorInjectionResolver = options.ConstructorInjectionResolver;
+                else
+                    constructorInjectionResolver = defaultConstructorInjectionResolver;
 
-            return CreateProxyInstance(proxyType, parameters.ToArray());
+                for (int i = args.Count; i < length; i++)
+                    args.Add(constructorInjectionResolver.Resolve(parameters[i]));
+            }
+
+//#if NET45 || NET472
+//            ProxyBuilder.ModuleScope.Save();
+//#endif
+
+            return CreateProxyInstance(proxyType, args.ToArray());
         }
 
         protected virtual Type CreateProxyType(ProxyTypeDefinition typeDefinition, ProxyGeneratorOptions options, IInterceptor[] interceptors)
@@ -219,14 +239,14 @@ namespace NIntercept
             return ModuleDefinition.GetOrAdd(type, target, options);
         }
 
-        protected virtual object CreateProxyInstance(Type proxyType, object[] parameters)
+        protected virtual object CreateProxyInstance(Type proxyType, object[] args)
         {
             if (proxyType is null)
                 throw new ArgumentNullException(nameof(proxyType));
 
             try
             {
-                return Activator.CreateInstance(proxyType, parameters);
+                return Activator.CreateInstance(proxyType, args);
             }
             catch (Exception ex)
             {

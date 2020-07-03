@@ -141,14 +141,7 @@ namespace NIntercept
             if (typeDefinition.IsInterface)
                 typeBuilder.AddConstructor(fields);
             else
-            {
-                ConstructorInfo baseCtor = typeDefinition.Type
-                    .GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, Type.EmptyTypes, null);
-                if (baseCtor == null || baseCtor.IsPrivate)
-                    throw new NotSupportedException($"No parameterless constructor found for '{typeDefinition.Type.Name}'");
-
-                typeBuilder.AddConstructor(fields, baseCtor);
-            }
+                typeBuilder.AddConstructor(fields, (typeDefinition as ClassProxyDefinition).Constructor);
         }
 
         protected void DefineProperties(TypeBuilder typeBuilder, TypeDefinition typeDefinition, FieldBuilder[] fields)

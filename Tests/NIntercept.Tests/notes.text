@@ -37,3 +37,12 @@
     //{
 
     //}
+
+
+     code generation
+
+     properties => before/after instruction get / set methods
+     methods => before/after instruction methods
+     events ??
+
+     proxy extension

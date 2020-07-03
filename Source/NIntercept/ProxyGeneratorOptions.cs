@@ -10,11 +10,25 @@ namespace NIntercept
         private List<object> mixinInstances;
         private IClassProxyMemberSelector classProxyMemberSelector;
         private List<CustomAttributeBuilder> additionalTypeAttributes;
-    
+        private IConstructorSelector constructorSelector;
+        private IConstructorInjectionResolver constructorInjectionResolver;
+
         public ProxyGeneratorOptions()
         {
             mixinInstances = new List<object>();
             additionalTypeAttributes = new List<CustomAttributeBuilder>();
+        }
+
+        public IConstructorSelector ConstructorSelector
+        {
+            get { return constructorSelector; }
+            set { constructorSelector = value; }
+        }
+
+        public IConstructorInjectionResolver ConstructorInjectionResolver
+        {
+            get { return constructorInjectionResolver ; }
+            set { constructorInjectionResolver = value; }
         }
 
         protected internal List<object> MixinInstances

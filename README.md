@@ -234,6 +234,78 @@ var message = proxy.GetMessage("World");
 Console.WriteLine(message); // write "Hello World!"
 ```
 
+## Constructor Injection
+
+Sample use Unity Container to resolve injection parameters
+
+```cs
+public interface IMyService
+{
+    string GetMessage(string name);
+}
+
+public class MyService : IMyService
+{
+    public string GetMessage(string name)
+    {
+        return $"Hello {name}!";
+    }
+}
+
+public class MyClass
+{
+    private readonly IMyService myService;
+
+    public MyClass(IMyService myService)
+    {
+        this.myService = myService;
+    }
+
+    public void Method()
+    {
+        Console.WriteLine($"{myService.GetMessage("World")}");
+    }
+}
+```
+
+Create the Resolver
+
+```cs
+public class UnityConstructorInjectionResolver : IConstructorInjectionResolver
+{
+    private readonly IUnityContainer container;
+
+    public UnityConstructorInjectionResolver(IUnityContainer container)
+    {
+        if (container is null)
+            throw new ArgumentNullException(nameof(container));
+
+        this.container = container;
+    }
+
+    public object Resolve(ParameterInfo parameter)
+    {
+        return container.Resolve(parameter.ParameterType);
+    }
+}
+```
+
+Define options and create the proxy
+
+```cs
+IUnityContainer container = new UnityContainer();
+container.RegisterType<IMyService, MyService>();
+
+var options = new ProxyGeneratorOptions();
+options.ConstructorInjectionResolver = new UnityConstructorInjectionResolver(container);
+
+var proxy = generator.CreateClassProxy<MyClass>(options);
+
+proxy.Method();
+```
+
+_Note: By default the first constructor of the proxied class is selected. Create a custom ConstructorSelector (and set the option) to change this behavior._
+
 ## Interceptors
 
 Create a class that implements **IInterceptor** interface or use **Interceptor** / **AsyncInterceptor** base classes.
@@ -287,7 +359,7 @@ public class MyClass
 }
 ```
 
-Note: for interfaces, add the the attributes on interface members.
+_Note: for interfaces, add the the attributes on interface members._
 
 ## Async interception 
 

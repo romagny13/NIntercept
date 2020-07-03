@@ -8,11 +8,15 @@ namespace NIntercept.Definition
     public class ClassProxyDefinition : ProxyTypeDefinition
     {
         private static readonly IClassProxyMemberSelector DefaultMemberSelector;
+        private static readonly IConstructorSelector DefaultConstructorSelector;
         private IClassProxyMemberSelector memberSelector;
+        private IConstructorSelector constructorSelector;
+        private ConstructorInfo constructor;
 
         static ClassProxyDefinition()
         {
             DefaultMemberSelector = new ClassProxyMemberSelector();
+            DefaultConstructorSelector = new DefaultConstructorSelector();
         }
 
         public ClassProxyDefinition(ModuleDefinition moduleDefinition, Type type, object target, ProxyGeneratorOptions options)
@@ -37,6 +41,32 @@ namespace NIntercept.Definition
                         memberSelector = DefaultMemberSelector;
                 }
                 return memberSelector;
+            }
+        }
+
+        public IConstructorSelector ConstructorSelector
+        {
+            get
+            {
+                if (constructorSelector == null)
+                {
+                    if (Options != null && Options.ConstructorSelector != null)
+                        constructorSelector = Options.ConstructorSelector;
+                    else
+                        constructorSelector = DefaultConstructorSelector;
+                }
+                return constructorSelector;
+            }
+        }
+
+
+        public ConstructorInfo Constructor
+        {
+            get
+            {
+                if (constructor == null)
+                    constructor = ConstructorSelector.Select(Type);
+                return constructor;
             }
         }
 
