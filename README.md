@@ -15,8 +15,8 @@ Options:
 * **CodeGenerator** : allows to add code to TypeBuilder.
 * **ClassProxyMemberSelector**: allows to **filter members to include** for **Class Proxy**. For example create an attribute and include only virtual members decorated with the attribute.
 * **AdditionalTypeAttributes**: allows to add custom attributes on proxy generated.
-* **constructorInjectionResolver**: allows to resolve parameter injections.
-* **constructorSelector**: allows to select the base constructor to call.
+* **ConstructorInjectionResolver**: allows to resolve parameter injections.
+* **ConstructorSelector**: allows to select the base constructor to call.
 
 Supported:
 
