@@ -12,8 +12,11 @@ Proxies
 Options:
 
 * **Mixins**: allows to **add features** to **proxy** created. For example add INotifyPropertyChanged implementation.
+* **CodeGenerator** : allows to add code to TypeBuilder.
 * **ClassProxyMemberSelector**: allows to **filter members to include** for **Class Proxy**. For example create an attribute and include only virtual members decorated with the attribute.
 * **AdditionalTypeAttributes**: allows to add custom attributes on proxy generated.
+* **constructorInjectionResolver**: allows to resolve parameter injections.
+* **constructorSelector**: allows to select the base constructor to call.
 
 Supported:
 
@@ -501,6 +504,50 @@ generator.CreateClassProxy<MainWindowViewModel>(options);
 ```
 
 _Note: **caution** with **proxies** that have a **target**. After calling a target member, we are out of the proxy (For example a method that updates a target property)_
+
+## Code Generation
+
+For example allows to implement INotifyPropertyChanged or create the commands for the ViewModel.
+
+```cs
+var options = new ProxyGeneratorOptions();
+options.CodeGenerator = new ViewModelCodeGenerator();
+var proxy = generator.CreateClassProxy<MainWindowViewModel>(options);
+```
+
+Methods 
+
+* Define: called just after the TypeBuilder for the Proxy is defined.
+* BeforeInvoke: called before invoke the method on the target or the base class.
+* AfterInvoke: called after invoke the method
+
+```cs
+public class ViewModelCodeGenerator : CodeGenerator
+{
+    private NotifyPropertyChangedFeature notifyPropertyChangedFeature;
+    private DelegateCommandBuilderFeature delegateCommandBuilderFeature;
+
+    public ViewModelCodeGenerator()
+    {
+        notifyPropertyChangedFeature = new NotifyPropertyChangedFeature();
+        delegateCommandBuilderFeature = new DelegateCommandBuilderFeature();
+    }
+
+    public override void Define(TypeBuilder typeBuilder, ProxyTypeDefinition typeDefinition)
+    {
+        notifyPropertyChangedFeature.ImplementFeature(typeBuilder, typeDefinition);
+        delegateCommandBuilderFeature.ImplementFeature(typeBuilder, typeDefinition);
+    }
+
+    public override void AfterInvoke(ILGenerator il, TypeBuilder typeBuilder, CallbackMethodDefinition callbackMethodDefinition, FieldBuilder[] fields)
+    {
+        string methodName = callbackMethodDefinition.Method.Name;
+        notifyPropertyChangedFeature.InvokeOnPropertyChanged(il, methodName);
+    }
+}
+```
+
+_Take a look to the **CodeGenerationSample**_
 
 ## ObjectFactory
 

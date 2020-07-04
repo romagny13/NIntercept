@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NIntercept.Tests", "Tests\N
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MvvmSample", "Samples\MvvmSample\MvvmSample.csproj", "{B101EACD-88DF-47C9-B518-2FA079C10818}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeGenerationSample", "Samples\CodeGenerationSample\CodeGenerationSample.csproj", "{90253358-126B-42FC-857C-F0CF497FF649}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{B101EACD-88DF-47C9-B518-2FA079C10818}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B101EACD-88DF-47C9-B518-2FA079C10818}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B101EACD-88DF-47C9-B518-2FA079C10818}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90253358-126B-42FC-857C-F0CF497FF649}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90253358-126B-42FC-857C-F0CF497FF649}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90253358-126B-42FC-857C-F0CF497FF649}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90253358-126B-42FC-857C-F0CF497FF649}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -48,6 +54,7 @@ Global
 		{31F4FB2B-7786-468F-A88F-1612B47E8043} = {ECEBAC47-F739-4A3C-B6C8-BFB03B1A4C06}
 		{BFD1B18D-A8F1-4A49-8F93-2520E137EBAB} = {8C091FFB-CF2D-4458-9C38-CDF738D23215}
 		{B101EACD-88DF-47C9-B518-2FA079C10818} = {ECEBAC47-F739-4A3C-B6C8-BFB03B1A4C06}
+		{90253358-126B-42FC-857C-F0CF497FF649} = {ECEBAC47-F739-4A3C-B6C8-BFB03B1A4C06}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8416B145-A73B-489E-900A-D1D3E2AB8A0F}

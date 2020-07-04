@@ -17,19 +17,5 @@ namespace NIntercept.Helpers
             foreach (var customAttribute in attributes)
                 methodBuilder.AddCustomAttribute(customAttribute.AttributeData);
         }
-
-        //public static void AddCustomAttribute(TypeBuilder typeBuilder, CustomAttributeBuilder customAttributeBuilder)
-        //{
-        //    typeBuilder.SetCustomAttribute(customAttributeBuilder);
-        //}
-
-        //private static CustomAttributeBuilder GetCustomAttributeBuilder(CustomAttributeBuilderInfo customAttributeBuilderInfo)
-        //{
-        //    if (customAttributeBuilderInfo is null)
-        //        throw new ArgumentNullException(nameof(customAttributeBuilderInfo));
-
-        //    CustomAttributeBuilder customAttributeBuilder = new CustomAttributeBuilder(customAttributeBuilderInfo.Constructor, customAttributeBuilderInfo.Args);
-        //    return customAttributeBuilder;
-        //}
     }
 }

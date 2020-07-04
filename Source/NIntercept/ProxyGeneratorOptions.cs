@@ -12,6 +12,7 @@ namespace NIntercept
         private List<CustomAttributeBuilder> additionalTypeAttributes;
         private IConstructorSelector constructorSelector;
         private IConstructorInjectionResolver constructorInjectionResolver;
+        private CodeGenerator codeGenerator;
 
         public ProxyGeneratorOptions()
         {
@@ -29,6 +30,12 @@ namespace NIntercept
         {
             get { return constructorInjectionResolver ; }
             set { constructorInjectionResolver = value; }
+        }
+
+        public CodeGenerator CodeGenerator
+        {
+            get { return codeGenerator; }
+            set { codeGenerator = value; }
         }
 
         protected internal List<object> MixinInstances
@@ -53,6 +60,24 @@ namespace NIntercept
                 throw new ArgumentNullException(nameof(instance));
 
             this.mixinInstances.Add(instance);
+        }
+    }
+
+    public class CodeGenerator
+    {
+        public virtual void Define(TypeBuilder typeBuilder, ProxyTypeDefinition typeDefinition)
+        {
+
+        }
+
+        public virtual void BeforeInvoke(ILGenerator il, TypeBuilder typeBuilder, CallbackMethodDefinition callbackMethodDefinition, FieldBuilder[] fields)
+        {
+
+        }
+
+        public virtual void AfterInvoke(ILGenerator il, TypeBuilder typeBuilder, CallbackMethodDefinition callbackMethodDefinition, FieldBuilder[] fields)
+        {
+
         }
     }
 }

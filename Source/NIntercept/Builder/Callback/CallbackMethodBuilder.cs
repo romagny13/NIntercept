@@ -7,10 +7,13 @@ using System.Reflection.Emit;
 
 namespace NIntercept
 {
+
     public class CallbackMethodBuilder : ICallbackMethodBuilder
     {
         public virtual MethodBuilder CreateMethod(ModuleBuilder moduleBuilder, TypeBuilder typeBuilder, CallbackMethodDefinition callbackMethodDefinition, FieldBuilder[] fields)
         {
+            ProxyGeneratorOptions options = (callbackMethodDefinition.TypeDefinition as ProxyTypeDefinition)?.Options;
+
             MethodBuilder methodBuilder = DefineMethod(typeBuilder, callbackMethodDefinition);
 
             GenericTypeParameterBuilder[] genericTypeParameters = methodBuilder.DefineGenericParameters(callbackMethodDefinition.GenericArguments);
@@ -18,6 +21,10 @@ namespace NIntercept
                 DefineParameters(methodBuilder, callbackMethodDefinition);
 
             var il = methodBuilder.GetILGenerator();
+
+            // before
+            if (options != null && options.CodeGenerator != null)
+                options.CodeGenerator.BeforeInvoke(il, typeBuilder, callbackMethodDefinition, fields);
 
             il.Emit(OpCodes.Nop);
 
@@ -55,6 +62,10 @@ namespace NIntercept
             else
             {
                 CallMethodOnTarget(il, callbackMethodDefinition, genericTypeParameters);
+
+                // after
+                if (options != null && options.CodeGenerator != null)
+                    options.CodeGenerator.AfterInvoke(il, typeBuilder, callbackMethodDefinition, fields);
 
                 if (returnType != typeof(void))
                 {

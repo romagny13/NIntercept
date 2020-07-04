@@ -50,6 +50,8 @@ namespace NIntercept
 
             TypeBuilder typeBuilder = DefineType(typeDefinition);
 
+            DefineAdditionalCode(typeBuilder, typeDefinition);
+
             FieldBuilder[] fields = DefineFields(typeBuilder, typeDefinition);
             FieldBuilder[] mixinFields = DefineMixinFields(typeBuilder, typeDefinition.MixinDefinitions);
             FieldBuilder[] allFields = mixinFields.Length > 0 ? fields.Concat(mixinFields).ToArray() : fields;
@@ -61,6 +63,13 @@ namespace NIntercept
             DefineMixins(typeBuilder, typeDefinition.MixinDefinitions, mixinFields, fields[0]);
 
             return typeBuilder;
+        }
+
+        protected void DefineAdditionalCode(TypeBuilder typeBuilder, ProxyTypeDefinition typeDefinition)
+        {
+            var options = typeDefinition.Options;
+            if (options != null && options.CodeGenerator != null)
+                options.CodeGenerator.Define(typeBuilder, typeDefinition);
         }
 
         protected TypeBuilder DefineType(ProxyTypeDefinition typeDefinition)
@@ -88,9 +97,7 @@ namespace NIntercept
             }
 
             if (typeDefinition.TypeDefinitionType == TypeDefinitionType.InterfaceProxy)
-            {
                 AttributeHelper.AddInterceptorAttributes(typeBuilder, typeDefinition.InterceptorAttributes);
-            }
         }
 
         protected void DefineInterfaces(TypeBuilder typeBuilder, ProxyTypeDefinition typeDefinition)
