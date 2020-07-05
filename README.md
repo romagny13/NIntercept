@@ -620,7 +620,7 @@ _Note: **caution** with **proxies** that have a **target**. After calling a targ
 
 ## Additional Code
 
-> Allows to `customize the code generated`. It's an "alternative" of Mixins.
+> Allows to **customize the code generated**. It's an "alternative" to Mixins. Require to write **il code** with [System.Reflection.Emit](https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit?view=netcore-3.1).
 
 
 For example allows to implement INotifyPropertyChanged or create the commands for the ViewModel.
