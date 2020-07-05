@@ -572,7 +572,6 @@ public interface IPropertyChangedMixin : INotifyPropertyChanged
     void OnPropertyChanged(object target, string propertyName);
 }
 
-[Serializable]
 public class PropertyChangedMixin : IPropertyChangedMixin
 {
     public void OnPropertyChanged(object target, string propertyName)
