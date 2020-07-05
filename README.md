@@ -1,6 +1,6 @@
 # NIntercept
 
-> Allows to create `proxies` for class and interface, `intercept` properties, methods, events and `customize the code generated`.
+> Allows to create **proxies** for class and interface, **intercept** properties, methods, events and **customize the code generated**.
 
 
 Proxies
@@ -42,7 +42,7 @@ Install-Package NIntercept
 
 ## Class Proxy
 
-> A `Proxy` that inherits from the `class` is created. `Virtual` members (properties, methods end events) are `overridden`. `Interceptors` allow to intercept these members. The `base class members` are `invoked` after interception.
+> A **Proxy** that inherits from the **class** is created. **Virtual** members (properties, methods end events) are **overridden**. **Interceptors** allow to intercept these members. The **base class members** are **invoked** after interception.
 
 **Sample 1** with global interceptor
 
@@ -243,7 +243,7 @@ public class MyInterceptor : Interceptor
 
 ## Class Proxy with target
 
-> A `Proxy` that inherits from the `class` is created. `Virtual` members (properties, methods end events) are `overridden`. `Interceptors` allow to intercept these members. The `target members` are `invoked` after interception.
+> A **Proxy** that inherits from the **class** is created. **Virtual** members (properties, methods end events) are **overridden**. **Interceptors** allow to intercept these members. The **target members** are **invoked** after interception.
 
 ```cs
 var target = new MyClass();
@@ -253,7 +253,7 @@ proxy.Method();
 
 ## Interface Proxy with target
 
-> A `Proxy` that implements the `interface` is created. `Interceptors` allow to intercept these members. The `target members` are `invoked` after interception.
+> A **Proxy** that implements the **interface** is created. **Interceptors** allow to intercept these members. The **target members** are **invoked** after interception.
 > 
 ```cs
 var target = new MyService();
@@ -263,7 +263,7 @@ proxy.Method();
 
 ## Interface Proxy without target
 
-> A `Proxy` that implements the `interface` is created. The `interceptors` are used to get and set the **return value**.
+> A **Proxy** that implements the **interface** is created. The **interceptors** are used to get and set the **return value**.
 
 ```cs
 public interface IMyService
@@ -351,7 +351,7 @@ public class MyAsyncInterceptor : AsyncInterceptor
 
 ## Constructor Injection Resolver
 
-> Allows to resolve `constructor parameters` of the class for a `Class Proxy`.
+> Allows to resolve **constructor parameters** of the class for a **Class Proxy**.
 
 **Sample** use **Unity Container** to resolve injection parameters
 
