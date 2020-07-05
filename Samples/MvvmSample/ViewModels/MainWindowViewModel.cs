@@ -65,13 +65,9 @@ namespace MvvmSample.ViewModels
         public void Intercept(IInvocation invocation)
         {
             if (MessageBox.Show("Can Execute?", $"Execute '{invocation.Member.Name}'", MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
-            {
                 invocation.Proceed();
-            }
             else
-            {
                 MessageBox.Show("Cancelled.", $"Execute '{invocation.Member.Name}'", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-            }
         }
     }
 
@@ -81,13 +77,13 @@ namespace MvvmSample.ViewModels
         public Type InterceptorType => typeof(PropertyChangedInterceptor);
     }
 
-    public interface IPropertyChangedNotifier : INotifyPropertyChanged
+    public interface IPropertyChangedMixin : INotifyPropertyChanged
     {
         void OnPropertyChanged(object target, string propertyName);
     }
 
     [Serializable]
-    public class PropertyChangedNotifier : IPropertyChangedNotifier
+    public class PropertyChangedMixin : IPropertyChangedMixin
     {
         public void OnPropertyChanged(object target, string propertyName)
         {
@@ -107,7 +103,7 @@ namespace MvvmSample.ViewModels
 
         protected override void OnExit(IInvocation invocation)
         {
-            IPropertyChangedNotifier propertyChangedNotifier = invocation.Proxy as IPropertyChangedNotifier;
+            IPropertyChangedMixin propertyChangedNotifier = invocation.Proxy as IPropertyChangedMixin;
             if (propertyChangedNotifier != null)
             {
                 string propertyName = invocation.Member.Name;

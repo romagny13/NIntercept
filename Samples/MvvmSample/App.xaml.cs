@@ -190,7 +190,7 @@ namespace MvvmSample
         protected virtual void Initialize()
         {
             var options = new ProxyGeneratorOptions();
-            options.AddMixinInstance(new PropertyChangedNotifier());
+            options.AddMixinInstance(new PropertyChangedMixin());
             proxies.Add(typeof(MainWindowViewModel), generator.CreateClassProxy<MainWindowViewModel>(options));
         }
 

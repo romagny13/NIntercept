@@ -99,7 +99,7 @@ namespace CodeGenerationSample
             }
         }
 
-        public bool IsMethodSet(string methodName)
+        public bool IsSetMethod(string methodName)
         {
             return methodName.StartsWith(SetConstant);
         }
@@ -111,7 +111,7 @@ namespace CodeGenerationSample
 
         public bool CheckEquals(ProxyScope proxyScope, ILGenerator il, MethodInfo method)
         {
-            if (!IsMethodSet(method.Name))
+            if (!IsSetMethod(method.Name))
                 return false;
 
             string propertyName = GetPropertyName(method.Name);
@@ -135,7 +135,7 @@ namespace CodeGenerationSample
 
         public bool InvokeOnPropertyChanged(ProxyScope proxyScope, ILGenerator il, MethodInfo method)
         {
-            if (!IsMethodSet(method.Name))
+            if (!IsSetMethod(method.Name))
                 return false;
 
             string propertyName = GetPropertyName(method.Name);
