@@ -1,0 +1,1 @@
+﻿// Optimize Get property and event without Bindings flags for public in EmitHelper StoreMemberToLocal

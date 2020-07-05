@@ -15,9 +15,13 @@ namespace NIntercept
 
         public static readonly MethodInfo GetTypeFromHandle = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static, null, new Type[] { typeof(RuntimeTypeHandle) }, null);
 
-        public static readonly MethodInfo GetProperty = typeof(Type).GetMethod("GetProperty", new Type[] { typeof(string), typeof(BindingFlags) });
+        public static readonly MethodInfo GetProperty = typeof(Type).GetMethod("GetProperty", new Type[] { typeof(string) });
 
-        public static readonly MethodInfo GetEvent = typeof(Type).GetMethod("GetEvent", new Type[] { typeof(string), typeof(BindingFlags) });
+        public static readonly MethodInfo GetPropertyWithBindingFlags = typeof(Type).GetMethod("GetProperty", new Type[] { typeof(string), typeof(BindingFlags) });
+
+        public static readonly MethodInfo GetEvent = typeof(Type).GetMethod("GetEvent", new Type[] { typeof(string) });
+
+        public static readonly MethodInfo GetEventWithBindingFlags = typeof(Type).GetMethod("GetEvent", new Type[] { typeof(string), typeof(BindingFlags) });
 
     }
 }

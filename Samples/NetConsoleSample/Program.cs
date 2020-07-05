@@ -9,7 +9,6 @@ using Unity;
 
 namespace NetConsoleSample
 {
-
     class Program
     {
         static void Main(string[] args)
@@ -17,6 +16,7 @@ namespace NetConsoleSample
             var generator = new ProxyGenerator(new ModuleScope(true));
 
             RunCompleteSample(generator);
+            RunProtectedMembersSample(generator);
             RunInterfaceProxyWithoutTargetSample(generator);
             RunMultiTargetAttributeSample(generator);
             RunMixinsSample(generator);
@@ -27,20 +27,6 @@ namespace NetConsoleSample
             generator.ModuleScope.Save();
 
             Console.ReadKey();
-        }
-
-        private static void RunConstructorInjectionSample(ProxyGenerator generator)
-        {
-            Console.WriteLine("---------------------- Constructor injection ----------------------");
-
-            IUnityContainer container = new UnityContainer();
-            container.RegisterType<IMyService, MyService>();
-
-            generator.ConstructorInjectionResolver = new UnityConstructorInjectionResolver(container);
-            var proxy = generator.CreateClassProxy<MyClassWithInjections>();
-            proxy.Method();
-
-            generator.ConstructorInjectionResolver = null;
         }
 
         private static void RunCompleteSample(ProxyGenerator generator)
@@ -66,6 +52,15 @@ namespace NetConsoleSample
             proxy.MyEvent -= handler;
         }
 
+        private static void RunProtectedMembersSample(ProxyGenerator generator)
+        {
+            Console.WriteLine("---------------------- Protected Members ----------------------");
+
+            var proxy = generator.CreateClassProxy<ProtectedMembers>();
+
+            proxy.Execute();
+        }
+
         private static void RunMultiTargetAttributeSample(ProxyGenerator generator)
         {
             Console.WriteLine("---------------------- Multi targets attribute ----------------------");
@@ -89,6 +84,20 @@ namespace NetConsoleSample
             proxyB.Add("Item 1");
             Console.WriteLine($"Item value at index 0: '{proxyB[0]}'");
             proxyB[0] = "New Item value";
+        }
+
+        private static void RunConstructorInjectionSample(ProxyGenerator generator)
+        {
+            Console.WriteLine("---------------------- Constructor injection ----------------------");
+
+            IUnityContainer container = new UnityContainer();
+            container.RegisterType<IMyService, MyService>();
+
+            generator.ConstructorInjectionResolver = new UnityConstructorInjectionResolver(container);
+            var proxy = generator.CreateClassProxy<MyClassWithInjections>();
+            proxy.Method();
+
+            generator.ConstructorInjectionResolver = null;
         }
 
         // caution with async void, only for demo
@@ -237,6 +246,45 @@ namespace NetConsoleSample
         {
             Console.WriteLine($"[EventInterceptor] Exit add new subscriber '{invocation.Member.Name}'");
         }
+    }
+
+    #endregion
+
+    #region Protected Members
+
+    [AllInterceptor(typeof(LogInterceptor))]
+    public class ProtectedMembers
+    {
+        private string myVar;
+
+        protected virtual string MyProperty
+        {
+            get { return myVar; }
+            set { myVar = value; }
+        }
+
+        public void Execute()
+        {
+            MyProperty = "New Value";
+            Console.WriteLine($"MyProperty:{MyProperty}");
+
+            Method();
+
+            MyEvent += PrivateMembers_MyEvent;
+            MyEvent -= PrivateMembers_MyEvent;
+        }
+
+        private void PrivateMembers_MyEvent(object sender, EventArgs e)
+        {
+
+        }
+
+        protected virtual void Method()
+        {
+            Console.WriteLine("In method");
+        }
+
+        protected virtual event EventHandler MyEvent;
     }
 
     #endregion
