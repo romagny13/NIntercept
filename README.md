@@ -16,6 +16,20 @@ Interception:
 * **global interceptor**
 * Implement **IInterceptor** or use **Interceptor** and **AsyncInterceptor** base classes
 
+
+Invocation Members:
+
+* **CallerMethod**: the method of the proxy
+* **InterceptorProviderType**: IGetterInterceptorProvider, ISetterInterceptorProvider,IMethodInterceptorProvider ,IAddOnInterceptorProvider, IRemoveOnInterceptorProvider
+* **Member** : property, method, event of the class to invoke after interception
+* **Parameters*: the method parameters
+* **Proxy**: the class or interface proxy
+* **ReturnValue**: the result value
+* **Target**: the target or null
+* **GetAwaitableContext**: allows to wait before calling Proceed
+* **GetParameter** allows to get typed parameter value
+* **Proceed**: call next interceptor or invoke member
+
 Options:
 
 * **Mixins**: allows to **add features** to **proxy** created.
@@ -153,11 +167,11 @@ var proxy = generator.CreateClassProxy<MyClass>();
 | Interface | Target | Attribute |
 | --- | --- | --- |
 | IInterceptorProvider | class / interface | AllInterceptorAttribute
-| IPropertyGetInterceptorProvider | Property getter | PropertyGetInterceptorAttribute
-| IPropertySetInterceptorProvider | Property setter | PropertySetInterceptorAttribute
+| IGetterInterceptorProvider | Property getter | GetterInterceptorAttribute
+| ISetterInterceptorProvider | Property setter | SetterInterceptorAttribute
 | IMethodInterceptorProvider | Method | MethodInterceptorAttribute
-| IAddEventInterceptorProvider | Add event | AddEventInterceptorAttribute
-| IRemoveEventInterceptorProvider | Remove event |RemoveEventInterceptorAttribute
+| IAddOnInterceptorProvider | Add event | AddOnInterceptorAttribute
+| IRemoveOnInterceptorProvider | Remove event | RemoveOnInterceptorAttribute
 
 **Sample 3**: Create a **custom interceptor attribute**
 
