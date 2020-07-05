@@ -703,7 +703,7 @@ generator.ModuleScope.Save();
 Recommendations: 
 
 * Use this feature only for Debug
-* Decompiler : [ILSpy](https://github.com/icsharpcode/ILSpy) (IL with C# comments, not fail to decompile like JustDecompile)
+* Decompiler : [ILSpy](https://github.com/icsharpcode/ILSpy) (IL with C# comments, not fail to decompile unlike JustDecompile)
 
 ## Reflection 
 
