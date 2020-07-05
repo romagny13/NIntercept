@@ -628,7 +628,7 @@ _For example allows to implement INotifyPropertyChanged or create the commands f
 ```cs
 var options = new ProxyGeneratorOptions();
 options.AdditionalCode = new ViewModelAdditionalCode();
-proxies.Add(typeof(MainWindowViewModel), generator.CreateClassProxy<MainWindowViewModel>(options));
+var proxy generator.CreateClassProxy<MainWindowViewModel>(options);
 ```
 
 Methods 
