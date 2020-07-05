@@ -2,6 +2,7 @@
 
 > Allows to create **proxies** for class and interface, **intercept** properties, methods, events and **customize the code generated**.
 
+
 Proxies
 
 * **Class Proxy**: a **Proxy** that inherits from the **class** is created. **Virtual** members (properties, methods end events) are **overridden**. The **base class members** are **invoked** after interception.
@@ -51,6 +52,8 @@ Supported:
 ## Install
 
 [NuGet Package](https://www.nuget.org/packages/NIntercept/)
+
+![Nuget](https://img.shields.io/nuget/v/nintercept.svg?style=for-the-badge)
 
 ```
 Install-Package NIntercept
@@ -623,7 +626,7 @@ options.AddMixinInstance(new PropertyChangedMixin());
 var proxy = generator.CreateClassProxy<MainWindowViewModel>(options);
 ```
 
-_Note: **caution** with **proxies** that have a **target**. After calling a target member, we are out of the proxy (For example a method that updates a target property)_
+_Note: **caution** for **proxies** with **target**. We leave the proxy after calling a target member_
 
 
 ## Additional Code 
