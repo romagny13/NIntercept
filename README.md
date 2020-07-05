@@ -272,7 +272,10 @@ proxy.Method();
 ### Interface Proxy with target
 
 > A **Proxy** that implements the **interface** is created. **Interceptors** allow to intercept these members. The **target members** are **invoked** after interception.
-> 
+
+
+_Note: for Interface Proxy, add interceptor attributes on interface members_
+
 ```cs
 var target = new MyService();
 var proxy = generator.CreateInterfaceProxyWithTarget<IMyService>(target, new MyInterceptor());
