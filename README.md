@@ -622,15 +622,6 @@ _Note: **caution** with **proxies** that have a **target**. After calling a targ
 
 > Allows to **customize the code generated**. It's an "alternative" to Mixins. Require to write **il code** with [System.Reflection.Emit](https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit?view=netcore-3.1).
 
-
-_For example allows to implement INotifyPropertyChanged or create the commands for the ViewModel Proxy generated. Take a look to the **CodeGenerationSample**_
-
-```cs
-var options = new ProxyGeneratorOptions();
-options.AdditionalCode = new ViewModelAdditionalCode();
-var proxy generator.CreateClassProxy<MainWindowViewModel>(options);
-```
-
 Methods 
 
 * **BeforeDefine**: called just after the TypeBuilder for the Proxy is defined.
@@ -639,6 +630,11 @@ Methods
 * **AfterInvoke**: called after invoke the method
 
 _Note: the **ProxyScope** allows to find field, property, method, event builders._
+
+_For example allows to implement INotifyPropertyChanged or create the commands for the ViewModel Proxy generated. Take a look to the **CodeGenerationSample**_
+
+
+Create a class that **inherits** from **AdditionalCode**
 
 ```cs
 public class ViewModelAdditionalCode : AdditionalCode
@@ -676,6 +672,14 @@ public class ViewModelAdditionalCode : AdditionalCode
         }
     }
 }
+```
+
+.. And define the **options**
+
+```cs
+var options = new ProxyGeneratorOptions();
+options.AdditionalCode = new ViewModelAdditionalCode();
+var proxy generator.CreateClassProxy<MainWindowViewModel>(options);
 ```
 
 
