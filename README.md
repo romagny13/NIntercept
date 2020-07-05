@@ -5,25 +5,28 @@
 
 Proxies
 
-* For classes: **Class Proxy**, **Class proxy with target**
-* For interfaces: **Interface Proxy without target**, **Interface Proxy with target**
+* **Class Proxy**: a **Proxy** that inherits from the **class** is created. **Virtual** members (properties, methods end events) are **overridden**. The **base class members** are **invoked** after interception.
+* **Class Proxy with target**: The **target members** are **invoked** after interception.
+* **Interface Proxy with target**: a **Proxy** that implements the **interface** is created. The **target members** are **invoked** after interception.
+* **Interface Proxy without target**: interceptors are used to get and set the **return value**
 
 Interception:
 
-* **by attribute**
+* **by attribute** (built-in or custom)
 * **global interceptor**
+* Implement **IInterceptor** or use **Interceptor** and **AsyncInterceptor** base classes
 
 Options:
 
 * **Mixins**: allows to **add features** to **proxy** created.
-* **AdditionalCode** : allows to customize the code generated.
+* **AdditionalCode** : allows to **customize the code generated**.
 * **ClassProxyMemberSelector**: allows to **filter members to include** for **Class Proxy**. For example create an attribute and include only virtual members decorated with the attribute.
-* **AdditionalTypeAttributes**: allows to add custom attributes on proxy generated.
-* **ConstructorSelector**: allows to select the base constructor to call.
+* **AdditionalTypeAttributes**: allows to add **custom attributes** on proxy generated.
+* **ConstructorSelector**: allows to **select** the **base constructor** to call.
 
 And
 
-* **ConstructorInjectionResolver**: allows to resolve constructor injections.
+* **ConstructorInjectionResolver**: allows to **resolve constructor injections**.
 
 Supported:
 
@@ -40,7 +43,9 @@ Supported:
 Install-Package NIntercept
 ```
 
-## Class Proxy
+## Samples
+
+### Class Proxy
 
 > A **Proxy** that inherits from the **class** is created. **Virtual** members (properties, methods end events) are **overridden**. **Interceptors** allow to intercept these members. The **base class members** are **invoked** after interception.
 
@@ -69,11 +74,11 @@ public class LogInterceptor : IInterceptor
 {
     public void Intercept(IInvocation invocation)
     {
-        Console.WriteLine($"[LogInterceptor] Before {invocation.Member.Name}");
+        Console.WriteLine($"[LogInterceptor] Before {invocation.CallerMethod.Name}");
 
         invocation.Proceed();
 
-        Console.WriteLine($"[LogInterceptor] After {invocation.Member.Name}");
+        Console.WriteLine($"[LogInterceptor] After {invocation.CallerMethod.Name}");
     }
 }
 ```
@@ -103,17 +108,17 @@ proxy.MyEvent -= handler; // RemoveOn
 **Output**
 
 ```
-[LogInterceptor] Before MyProperty
-[LogInterceptor] After MyProperty
-[LogInterceptor] Before MyProperty
-[LogInterceptor] After MyProperty
+[LogInterceptor] Before set_MyProperty
+[LogInterceptor] After set_MyProperty
+[LogInterceptor] Before get_MyProperty
+[LogInterceptor] After get_MyProperty
 MyProperty: New Value
 [LogInterceptor] Before MyMethod
 [LogInterceptor] After MyMethod
-[LogInterceptor] Before MyEvent
-[LogInterceptor] After MyEvent
-[LogInterceptor] Before MyEvent
-[LogInterceptor] After MyEvent
+[LogInterceptor] Before add_MyEvent
+[LogInterceptor] After add_MyEvent
+[LogInterceptor] Before remove_MyEvent
+[LogInterceptor] After remove_MyEvent
 ```
 
 **Sample 2** : **with attributes** (Create some interceptors for each attribute)
@@ -241,7 +246,7 @@ public class MyInterceptor : Interceptor
 }
 ```
 
-## Class Proxy with target
+### Class Proxy with target
 
 > A **Proxy** that inherits from the **class** is created. **Virtual** members (properties, methods end events) are **overridden**. **Interceptors** allow to intercept these members. The **target members** are **invoked** after interception.
 
@@ -251,7 +256,7 @@ var proxy = generator.CreateClassProxyWithTarget<MyClass>(target, new MyIntercep
 proxy.Method();
 ```
 
-## Interface Proxy with target
+### Interface Proxy with target
 
 > A **Proxy** that implements the **interface** is created. **Interceptors** allow to intercept these members. The **target members** are **invoked** after interception.
 > 
@@ -261,7 +266,7 @@ var proxy = generator.CreateInterfaceProxyWithTarget<IMyService>(target, new MyI
 proxy.Method();
 ```
 
-## Interface Proxy without target
+### Interface Proxy without target
 
 > A **Proxy** that implements the **interface** is created. The **interceptors** are used to get and set the **return value**.
 
