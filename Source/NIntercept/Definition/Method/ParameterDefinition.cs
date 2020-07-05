@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace NIntercept.Definition
 {
-    public class ParameterDefinition
+    public sealed class ParameterDefinition
     {
         private ParameterInfo parameter;
         private int index;

@@ -4,11 +4,11 @@ namespace NIntercept
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = true)]
     public class AllInterceptorAttribute : InterceptorAttributeBase, 
-        IPropertyGetInterceptorProvider, 
-        IPropertySetInterceptorProvider,
+        IGetterInterceptorProvider, 
+        ISetterInterceptorProvider,
         IMethodInterceptorProvider,
-        IAddEventInterceptorProvider,
-        IRemoveEventInterceptorProvider
+        IAddOnInterceptorProvider,
+        IRemoveOnInterceptorProvider
     {
         public AllInterceptorAttribute(Type interceptorType) : base(interceptorType)
         {

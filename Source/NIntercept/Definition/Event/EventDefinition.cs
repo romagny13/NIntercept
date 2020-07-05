@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace NIntercept.Definition
 {
-    public class EventDefinition
+    public sealed class EventDefinition
     {
         private TypeDefinition typeDefinition;
         private EventInfo @event;
@@ -34,7 +34,7 @@ namespace NIntercept.Definition
             get { return @event; }
         }
 
-        public virtual string Name
+        public  string Name
         {
             get { return @event.Name; }
         }
@@ -74,7 +74,7 @@ namespace NIntercept.Definition
             get
             {
                 if (addEventInterceptorAttributes == null)
-                    addEventInterceptorAttributes = AttributeDefinitionHelper.GetInterceptorDefinitions(@event, typeof(IAddEventInterceptorProvider));
+                    addEventInterceptorAttributes = AttributeDefinitionHelper.GetInterceptorDefinitions(@event, typeof(IAddOnInterceptorProvider));
                 return addEventInterceptorAttributes;
             }
         }
@@ -84,7 +84,7 @@ namespace NIntercept.Definition
             get
             {
                 if (removeEventInterceptorAttributes == null)
-                    removeEventInterceptorAttributes = AttributeDefinitionHelper.GetInterceptorDefinitions(@event, typeof(IRemoveEventInterceptorProvider));
+                    removeEventInterceptorAttributes = AttributeDefinitionHelper.GetInterceptorDefinitions(@event, typeof(IRemoveOnInterceptorProvider));
                 return removeEventInterceptorAttributes;
             }
         }

@@ -5,53 +5,41 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace NIntercept
+namespace NIntercept.Builder
 {
     public class ProxyMethodBuilder : IProxyMethodBuilder
     {
-        public virtual IInvocationTypeBuilder InvocationTypeBuilder
+        public virtual MethodBuilder CreateMethod(ProxyScope proxyScope, MethodDefinition methodDefinition, MemberInfo member)
         {
-            get { return ProxyServiceLocator.Current.InvocationTypeBuilder; }
-        }
+            MethodInfo method = methodDefinition.Method;
 
-        public virtual ICallbackMethodBuilder CallbackMethodBuilder
-        {
-            get { return ProxyServiceLocator.Current.CallbackMethodBuilder; }
-        }
+            // callback method
+            MethodBuilder callbackMethodBuilder = proxyScope.CreateCallbackMethod(methodDefinition.CallbackMethodDefinition);
 
-        public virtual MethodBuilder CreateMethod(ModuleScope moduleScope, TypeBuilder proxyTypeBuilder,
-            MethodDefinition methodDefinition, MemberInfo member, FieldBuilder[] fields)
-        {
-            ModuleBuilder moduleBuilder = moduleScope.Module;
-
-            MethodBuilder callbackMethodBuilder = CreateCallbackMethod(moduleBuilder, proxyTypeBuilder, methodDefinition, fields);
-
-            Type invocationType = GetOrCreateInvocationType(moduleScope, proxyTypeBuilder, methodDefinition, moduleBuilder, callbackMethodBuilder);
-
+            // invocation type
+            Type invocationType = proxyScope.ModuleScope.GetOrCreateInvocationType(methodDefinition.InvocationTypeDefinition, callbackMethodBuilder);
             if (invocationType.IsGenericType)
-                invocationType = MakeGenericType(invocationType, methodDefinition.Method);
+                invocationType = invocationType.MakeGenericType(method.GetGenericArguments()); 
 
-            MethodBuilder methodBuilder = DefineMethod(proxyTypeBuilder, methodDefinition);
-
-            methodBuilder.SetReturnType(methodDefinition.ReturnType);
+            // method
+            MethodBuilder methodBuilder = DefineMethod(proxyScope.TypeBuilder, methodDefinition);
 
             // parameters
             methodBuilder.DefineGenericParameters(methodDefinition.GenericArguments);
             if (methodDefinition.ParameterDefinitions.Length > 0)
                 DefineParameters(methodBuilder, methodDefinition);
 
-            if (ShouldAddInterceptionAttributes(methodDefinition))
-                AttributeHelper.AddInterceptorAttributes(methodBuilder, methodDefinition.InterceptorAttributes);
+            // attributes
+            DefineAttributes(methodBuilder, methodDefinition);
 
             // method body
             var il = methodBuilder.GetILGenerator();
 
             // locals
             var returnType = methodDefinition.ReturnType;
-            var method = methodDefinition.Method;
-            var target = methodDefinition.TypeDefinition.Target;
-            Type targetType = target != null ? target.GetType() : typeof(object);
-            LocalBuilder targetLocalBuilder = il.DeclareLocal(targetType); // target
+            Type targetType = methodDefinition.TypeDefinition.TargetType;
+            Type localBuilderTargetType = targetType != null ? targetType : typeof(object);
+            LocalBuilder targetLocalBuilder = il.DeclareLocal(localBuilderTargetType); // target
             LocalBuilder interceptorsLocalBuilder = il.DeclareLocal(typeof(IInterceptor[])); // interceptors
             LocalBuilder memberLocalBuilder = il.DeclareLocal(typeof(MemberInfo)); // MemberInfo
             LocalBuilder proxyMethodLocalBuilder = il.DeclareLocal(typeof(MethodInfo)); // proxy method
@@ -63,11 +51,15 @@ namespace NIntercept
                 returnValueLocalBuilder = il.DeclareLocal(returnType);
 
             // fields received
-            FieldBuilder interceptorsField = fields.First();
+            FieldBuilder interceptorsField = proxyScope.FieldBuilders[0];
 
             // Store fields in locals
-            if (target != null)
-                EmitHelper.StoreFieldInLocal(il, fields.ElementAt(1), targetLocalBuilder);
+            if (targetType != null)
+            {
+                string fieldName = methodDefinition.TypeDefinition.TargetFieldName;
+                FieldBuilder targetField = proxyScope.FieldBuilders.First(p => p.Name == fieldName);
+                EmitHelper.StoreFieldInLocal(il, targetField, targetLocalBuilder);
+            }
             EmitHelper.StoreFieldInLocal(il, interceptorsField, interceptorsLocalBuilder);
             EmitHelper.StoreMemberToLocal(il, member, memberLocalBuilder);
             EmitHelper.StoreProxyMethodToLocal(il, proxyMethodLocalBuilder);
@@ -82,39 +74,16 @@ namespace NIntercept
 
             EmitReturnValue(il, method, invocationLocalBuilder, returnValueLocalBuilder);
 
-            DefineMethodOverride(proxyTypeBuilder, methodBuilder, method);
+            DefineMethodOverride(proxyScope.TypeBuilder, methodBuilder, method);
 
             return methodBuilder;
         }
 
-        protected Type GetOrCreateInvocationType(ModuleScope moduleScope, TypeBuilder proxyTypeBuilder, MethodDefinition methodDefinition, ModuleBuilder moduleBuilder, MethodBuilder callbackMethodBuilder)
+        protected MethodBuilder DefineMethod(TypeBuilder typeBuilder, MethodDefinition methodDefinition)
         {
-            Type invocationType = moduleScope.InvocationTypeRegistry.GetBuildType(methodDefinition.InvocationTypeDefinition.Name);
-            if (invocationType == null)
-            {
-                invocationType = InvocationTypeBuilder.CreateType(moduleBuilder, proxyTypeBuilder, methodDefinition.InvocationTypeDefinition, callbackMethodBuilder);
-                moduleScope.InvocationTypeRegistry.Add(methodDefinition.InvocationTypeDefinition.Name, invocationType);
-            }
-            return invocationType;
-        }
-
-        protected MethodBuilder CreateCallbackMethod(ModuleBuilder moduleBuilder, TypeBuilder typeBuilder, MethodDefinition methodDefinition, FieldBuilder[] fields)
-        {
-            return CallbackMethodBuilder.CreateMethod(moduleBuilder, typeBuilder, methodDefinition.MethodCallbackDefinition, fields);
-        }
-
-        protected Type MakeGenericType(Type type, MethodInfo method)
-        {
-            return type.MakeGenericType(method.GetGenericArguments());
-        }
-
-        protected virtual MethodBuilder DefineMethod(TypeBuilder typeBuilder, MethodDefinition methodDefinition)
-        {
-            MethodInfo method = methodDefinition.Method;
-            if (methodDefinition.TypeDefinition.IsInterface)
-                return typeBuilder.DefineMethod(methodDefinition.Name, MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual);
-            else
-                return typeBuilder.DefineMethod(methodDefinition.Name, MethodInfoHelper.GetMethodAttributes(method));
+            MethodBuilder methodBuilder = typeBuilder.DefineMethod(methodDefinition.Name, methodDefinition.MethodAttributes);
+            methodBuilder.SetReturnType(methodDefinition.ReturnType);
+            return methodBuilder;
         }
 
         protected void DefineParameters(MethodBuilder methodBuilder, MethodDefinition methodDefinition)
@@ -129,6 +98,12 @@ namespace NIntercept
         protected virtual bool ShouldAddInterceptionAttributes(MethodDefinition methodDefinition)
         {
             return methodDefinition.TypeDefinition.IsInterface && methodDefinition.InterceptorAttributes.Length > 0;
+        }
+
+        protected virtual void DefineAttributes(MethodBuilder methodBuilder, MethodDefinition methodDefinition)
+        {
+            if (ShouldAddInterceptionAttributes(methodDefinition))
+                AttributeHelper.AddInterceptorAttributes(methodBuilder, methodDefinition.InterceptorAttributes);
         }
 
         protected void StoreArgsToArray(ILGenerator il, ParameterDefinition[] parameterDefinitions, LocalBuilder localBuilder)

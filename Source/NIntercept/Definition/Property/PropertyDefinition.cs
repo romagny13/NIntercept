@@ -4,13 +4,13 @@ using System.Reflection;
 
 namespace NIntercept.Definition
 {
-    public class PropertyDefinition
+    public sealed class PropertyDefinition
     {
         private TypeDefinition typeDefinition;
         private PropertyInfo property;
         private ParameterInfo[] indexParameters;
-        private PropertyGetMethodDefinition propertyGetMethodDefinition;
-        private PropertySetMethodDefinition propertySetMethodDefinition;
+        private PropertyGetMethodDefinition getMethodDefinition;
+        private PropertySetMethodDefinition setMethodDefinition;
         private InterceptorAttributeDefinition[] propertyGetInterceptorAttributes;
         private InterceptorAttributeDefinition[] propertySetInterceptorAttributes;
 
@@ -60,30 +60,30 @@ namespace NIntercept.Definition
             }
         }
 
-        public PropertyGetMethodDefinition PropertyGetMethodDefinition
+        public PropertyGetMethodDefinition GetMethodDefinition
         {
             get
             {
                 if (property.CanRead)
                 {
-                    if (propertyGetMethodDefinition == null)
-                        propertyGetMethodDefinition = new PropertyGetMethodDefinition(TypeDefinition, this, property.GetMethod);
+                    if (getMethodDefinition == null)
+                        getMethodDefinition = new PropertyGetMethodDefinition(TypeDefinition, this, property.GetMethod);
 
                 }
-                return propertyGetMethodDefinition;
+                return getMethodDefinition;
             }
         }
 
-        public PropertySetMethodDefinition PropertySetMethodDefinition
+        public PropertySetMethodDefinition SetMethodDefinition
         {
             get
             {
                 if (property.CanWrite)
                 {
-                    if (propertySetMethodDefinition == null)
-                        propertySetMethodDefinition = new PropertySetMethodDefinition(TypeDefinition, this, property.SetMethod);
+                    if (setMethodDefinition == null)
+                        setMethodDefinition = new PropertySetMethodDefinition(TypeDefinition, this, property.SetMethod);
                 }
-                return propertySetMethodDefinition;
+                return setMethodDefinition;
             }
         }
 
@@ -93,7 +93,7 @@ namespace NIntercept.Definition
             get
             {
                 if (propertyGetInterceptorAttributes == null)
-                    propertyGetInterceptorAttributes = AttributeDefinitionHelper.GetInterceptorDefinitions(property, typeof(IPropertyGetInterceptorProvider));
+                    propertyGetInterceptorAttributes = AttributeDefinitionHelper.GetInterceptorDefinitions(property, typeof(IGetterInterceptorProvider));
                 return propertyGetInterceptorAttributes;
             }
         }
@@ -103,7 +103,7 @@ namespace NIntercept.Definition
             get
             {
                 if (propertySetInterceptorAttributes == null)
-                    propertySetInterceptorAttributes = AttributeDefinitionHelper.GetInterceptorDefinitions(property, typeof(IPropertySetInterceptorProvider));
+                    propertySetInterceptorAttributes = AttributeDefinitionHelper.GetInterceptorDefinitions(property, typeof(ISetterInterceptorProvider));
                 return propertySetInterceptorAttributes;
             }
         }

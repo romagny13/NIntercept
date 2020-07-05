@@ -25,7 +25,7 @@ namespace NIntercept.Tests.Helpers
         public void Invocation_Has_Unique_Name()
         {
             var collector = new ModuleDefinition();
-            var typeDefinition = collector.GetOrAdd(typeof(MyClassN), null, null);
+            var typeDefinition = collector.GetTypeDefinition(typeof(MyClassN), null, null);
 
             Assert.AreEqual("MyClassN_Proxy_MethodA_Invocation", typeDefinition.MethodDefinitions[0].InvocationTypeDefinition.Name);
             Assert.AreEqual("MyClassN_Proxy_MethodA_1_Invocation", typeDefinition.MethodDefinitions[1].InvocationTypeDefinition.Name);
@@ -42,7 +42,7 @@ namespace NIntercept.Tests.Helpers
         public void et_InvocationType_Name_With_Interface()
         {
             var collector = new ModuleDefinition();
-            var typeDefinition = collector.GetOrAdd(typeof(IMyCol1), null, null) as InterfaceProxyDefinition;
+            var typeDefinition = collector.GetTypeDefinition(typeof(IMyCol1), null, null) as InterfaceProxyDefinition;
 
             Assert.AreEqual("GetEnumerator", typeDefinition.InterfacesToImplement[0].MethodDefinitions[0].Name);
             Assert.AreEqual("GetEnumerator", typeDefinition.InterfacesToImplement[1].MethodDefinitions[0].Name);

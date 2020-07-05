@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace NIntercept.Definition
 {
-    public class CallbackMethodDefinition
+    public sealed class CallbackMethodDefinition
     {
         private string name;
         private MethodDefinition methodDefinition;
@@ -30,7 +30,7 @@ namespace NIntercept.Definition
             get { return methodDefinition; }
         }
 
-        public virtual string Name
+        public string Name
         {
             get
             {
@@ -40,7 +40,7 @@ namespace NIntercept.Definition
             }
         }
 
-        public virtual MethodAttributes MethodAttributes
+        public MethodAttributes MethodAttributes
         {
             get { return MethodAttributes.Public | MethodAttributes.HideBySig; }
         }

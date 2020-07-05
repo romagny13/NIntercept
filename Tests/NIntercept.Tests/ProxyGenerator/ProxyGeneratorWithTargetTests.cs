@@ -1341,7 +1341,7 @@ namespace NIntercept.Tests
         public bool IsCalledAdd = false;
         public bool IsCalledRemove = false;
 
-        [AddEventInterceptor(typeof(IntForT9_b))]
+        [AddOnInterceptor(typeof(IntForT9_b))]
         public virtual event EventHandler MyEvent
         {
             add
@@ -1368,7 +1368,7 @@ namespace NIntercept.Tests
     [AllInterceptor(typeof(IntForT10))]
     public interface ITypeT10
     {
-        [AddEventInterceptor(typeof(IntForT10_b))]
+        [AddOnInterceptor(typeof(IntForT10_b))]
         event EventHandler MyEvent;
 
         void RaiseMyEvent();

@@ -1,12 +1,10 @@
 ﻿using NIntercept.Definition;
 using System.Reflection.Emit;
 
-namespace NIntercept
+namespace NIntercept.Builder
 {
     public interface IProxyPropertyBuilder
     {
-        IProxyMethodBuilder ProxyMethodBuilder { get; }
-
-        PropertyBuilder CreateProperty(ModuleScope moduleScope, TypeBuilder proxyTypeBuilder, PropertyDefinition propertyDefinition, FieldBuilder[] fields);
+        PropertyBuilder CreateProperty(ProxyScope proxyScope, PropertyDefinition propertyDefinition);
     }
 }

@@ -4,15 +4,17 @@ using System.Reflection;
 
 namespace NIntercept.Definition
 {
+
     public class MethodDefinition
     {
         private TypeDefinition typeDefinition;
         private MethodInfo method;
         private string name;
+        private MethodAttributes? methodAttributes;
         private InterceptorAttributeDefinition[] interceptorAttributes;
         private Type[] genericArguments;
         private ParameterDefinition[] parameterDefinitions;
-        private CallbackMethodDefinition methodCallbackDefinition;
+        private CallbackMethodDefinition callbackMethodDefinition;
         private InvocationTypeDefinition invocationTypeDefinition;
 
         public MethodDefinition(TypeDefinition typeDefinition, MethodInfo method)
@@ -43,6 +45,26 @@ namespace NIntercept.Definition
                 if (name == null)
                     name = Method.Name;
                 return name;
+            }
+        }
+
+        public virtual MethodDefinitionType MethodDefinitionType
+        {
+            get { return MethodDefinitionType.Method; }
+        }
+
+        public virtual MethodAttributes MethodAttributes
+        {
+            get
+            {
+                if (methodAttributes == null)
+                {
+                    if (method.DeclaringType.IsInterface)
+                        methodAttributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual;
+                    else
+                        methodAttributes = MethodAttributesHelper.GetMethodAttributes(method);
+                }
+                return methodAttributes.Value;
             }
         }
 
@@ -96,13 +118,13 @@ namespace NIntercept.Definition
             }
         }
 
-        public virtual CallbackMethodDefinition MethodCallbackDefinition
+        public virtual CallbackMethodDefinition CallbackMethodDefinition
         {
             get
             {
-                if (methodCallbackDefinition == null)
-                    methodCallbackDefinition = new CallbackMethodDefinition(typeDefinition, this);
-                return methodCallbackDefinition;
+                if (callbackMethodDefinition == null)
+                    callbackMethodDefinition = new CallbackMethodDefinition(typeDefinition, this);
+                return callbackMethodDefinition;
             }
         }
 

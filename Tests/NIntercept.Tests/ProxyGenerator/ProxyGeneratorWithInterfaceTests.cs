@@ -1283,7 +1283,7 @@ namespace NIntercept.Tests
 
     public interface IContract2
     {
-        [PropertySetInterceptor(typeof(IntForS13))]
+        [SetterInterceptor(typeof(IntForS13))]
         string MyProperty { get; set; }
     }
 
@@ -1950,7 +1950,7 @@ namespace NIntercept.Tests
     [AllInterceptor(typeof(IntForS9))]
     public interface ITypeS9
     {
-        [AddEventInterceptor(typeof(IntForS9_b))]
+        [AddOnInterceptor(typeof(IntForS9_b))]
         event EventHandler MyEvent;
 
         void RaiseMyEvent();
@@ -1991,7 +1991,7 @@ namespace NIntercept.Tests
     [AllInterceptor(typeof(IntForS10))]
     public interface ITypeS10
     {
-        [AddEventInterceptor(typeof(IntForS10_b))]
+        [AddOnInterceptor(typeof(IntForS10_b))]
         event EventHandler MyEvent;
 
         void RaiseMyEvent();

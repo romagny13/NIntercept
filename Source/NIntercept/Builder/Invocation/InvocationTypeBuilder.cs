@@ -5,17 +5,19 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace NIntercept
+namespace NIntercept.Builder
 {
     public class InvocationTypeBuilder : IInvocationTypeBuilder
     {
-        public virtual Type CreateType(ModuleBuilder moduleBuilder, TypeBuilder proxyTypeBuilder, InvocationTypeDefinition invocationTypeDefinition, MethodBuilder callbackMethodBuilder)
+        public Type CreateType(ModuleScope moduleScope, InvocationTypeDefinition invocationTypeDefinition, MethodBuilder callbackMethodBuilder)
         {
-            TypeBuilder typeBuilder = DefineType(moduleBuilder, invocationTypeDefinition);
+            ModuleBuilder moduleBuilder = moduleScope.Module;
+            TypeBuilder typeBuilder = moduleBuilder.DefineType(invocationTypeDefinition.FullName, invocationTypeDefinition.Attributes);
+            typeBuilder.SetParent(typeof(Invocation));
 
             GenericTypeParameterBuilder[] genericTypeParameters = typeBuilder.DefineGenericParameters(invocationTypeDefinition.GenericArguments);
 
-            DefineConstructors(typeBuilder, invocationTypeDefinition);
+            DefineConstructor(typeBuilder, invocationTypeDefinition);
 
             // implement InterceptorProviderType
             ImplementInterceptorProviderTypeProperty(typeBuilder, invocationTypeDefinition.MethodDefinition);
@@ -60,7 +62,7 @@ namespace NIntercept
             return typeBuilder.BuildType();
         }
 
-        protected PropertyBuilder ImplementInterceptorProviderTypeProperty(TypeBuilder typeBuilder, MethodDefinition methodDefinition)
+        private PropertyBuilder ImplementInterceptorProviderTypeProperty(TypeBuilder typeBuilder, MethodDefinition methodDefinition)
         {
             PropertyBuilder propertyBuilder = typeBuilder.DefineProperty("InterceptorProviderType",
                 PropertyAttributes.None, typeof(Type), Type.EmptyTypes);
@@ -91,38 +93,32 @@ namespace NIntercept
             return propertyBuilder;
         }
 
-        protected Type GetInterceptorProviderType(MethodDefinition methodDefinition)
+        private Type GetInterceptorProviderType(MethodDefinition methodDefinition)
         {
             switch (methodDefinition)
             {
                 case PropertyGetMethodDefinition _:
-                    return typeof(IPropertyGetInterceptorProvider);
+                    return typeof(IGetterInterceptorProvider);
                 case PropertySetMethodDefinition _:
-                    return typeof(IPropertySetInterceptorProvider);
+                    return typeof(ISetterInterceptorProvider);
                 case AddEventMethodDefinition _:
-                    return typeof(IAddEventInterceptorProvider);
+                    return typeof(IAddOnInterceptorProvider);
                 case RemoveEventMethodDefinition _:
-                    return typeof(IRemoveEventInterceptorProvider);
+                    return typeof(IRemoveOnInterceptorProvider);
                 default:
                     return typeof(IMethodInterceptorProvider);
             }
         }
 
-        protected virtual TypeBuilder DefineType(ModuleBuilder moduleBuilder, InvocationTypeDefinition invocationTypeDefinition)
+        private void DefineConstructor(TypeBuilder typeBuilder, InvocationTypeDefinition invocationTypeDefinition)
         {
-            TypeBuilder typeBuilder = moduleBuilder.DefineType(invocationTypeDefinition.FullName, invocationTypeDefinition.Attributes);
-            typeBuilder.SetParent(typeof(Invocation));
-            return typeBuilder;
-        }
-
-        protected virtual void DefineConstructors(TypeBuilder typeBuilder, InvocationTypeDefinition invocationTypeDefinition)
-        {
-            var target = invocationTypeDefinition.Target;
-            var targetType = target != null ? target.GetType() : typeof(object);
+            Type targetType = invocationTypeDefinition.TypeDefinition.TargetType;
+            if (targetType == null)
+                targetType = typeof(object);
             typeBuilder.AddConstructor(new Type[] { targetType, typeof(IInterceptor[]), typeof(MemberInfo), typeof(MethodInfo), typeof(object), typeof(object[]) }, Constructors.InvocationDefaultConstructor);
         }
 
-        protected void SetArgsWithParameters(ILGenerator il, InvokeMethodOnTargetDefinition invokeMethodOnTargetDefinition,
+        private void SetArgsWithParameters(ILGenerator il, InvokeMethodOnTargetDefinition invokeMethodOnTargetDefinition,
             GenericTypeParameterBuilder[] genericTypeParameters, Dictionary<int, LocalBuilder> refLocals)
         {
             foreach (var parameterDefinition in invokeMethodOnTargetDefinition.ParameterDefinitions)
@@ -147,7 +143,7 @@ namespace NIntercept
             }
         }
 
-        protected virtual void CallInvokeMethodOnTarget(ILGenerator il, MethodInfo method, MethodBuilder callbackMethodBuilder, GenericTypeParameterBuilder[] genericTypeParameters)
+        private void CallInvokeMethodOnTarget(ILGenerator il, MethodInfo method, MethodBuilder callbackMethodBuilder, GenericTypeParameterBuilder[] genericTypeParameters)
         {
             // invoke a call back method on proxy
             if (method.IsGenericMethod)
@@ -156,7 +152,7 @@ namespace NIntercept
                 il.EmitCall(OpCodes.Call, callbackMethodBuilder, null);
         }
 
-        protected void SetParametersWithRefs(ILGenerator il, Dictionary<int, LocalBuilder> refLocals)
+        private void SetParametersWithRefs(ILGenerator il, Dictionary<int, LocalBuilder> refLocals)
         {
             foreach (var refLocal in refLocals)
             {
@@ -170,7 +166,7 @@ namespace NIntercept
             }
         }
 
-        protected void SetInvocationReturnValue(ILGenerator il, MethodInfo method, GenericTypeParameterBuilder[] genericTypeParameters, Type returnType, LocalBuilder resultLocalBuilder)
+        private void SetInvocationReturnValue(ILGenerator il, MethodInfo method, GenericTypeParameterBuilder[] genericTypeParameters, Type returnType, LocalBuilder resultLocalBuilder)
         {
             if (returnType != typeof(void))
             {

@@ -1,8 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using NIntercept.Reflection;
 
-namespace NIntercept.Tests
+namespace NIntercept.Tests.Reflection
 {
     [TestClass]
     public class TypeAccessorInterceptionWithAttributesTests
@@ -152,8 +153,8 @@ namespace NIntercept.Tests
 
         private string myVar;
 
-        [PropertyGetInterceptor(typeof(IntForRA1))]
-        [PropertySetInterceptor(typeof(IntForRA1))]
+        [GetterInterceptor(typeof(IntForRA1))]
+        [SetterInterceptor(typeof(IntForRA1))]
         protected string MyProperty
         {
             get
@@ -170,8 +171,8 @@ namespace NIntercept.Tests
 
         private static string myVarStatic;
 
-        [PropertyGetInterceptor(typeof(IntForRA1))]
-        [PropertySetInterceptor(typeof(IntForRA1))]
+        [GetterInterceptor(typeof(IntForRA1))]
+        [SetterInterceptor(typeof(IntForRA1))]
         public static string MyPropertyStatic
         {
             get
@@ -217,8 +218,8 @@ namespace NIntercept.Tests
 
         private event EventHandler myEvent;
 
-        [AddEventInterceptor(typeof(IntForRA3))]
-        [RemoveEventInterceptor(typeof(IntForRA3))]
+        [AddOnInterceptor(typeof(IntForRA3))]
+        [RemoveOnInterceptor(typeof(IntForRA3))]
         protected event EventHandler MyEvent
         {
             add

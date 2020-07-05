@@ -1,7 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NIntercept.Reflection;
 using System;
+using System.Collections.Generic;
 
-namespace NIntercept.Tests
+namespace NIntercept.Tests.Reflection
 {
     [TestClass]
     public class TypeAccessorInterceptionTests
@@ -145,4 +147,125 @@ namespace NIntercept.Tests
         }
     }
 
+
+    public class TypeR1
+    {
+        public static List<StateTypes> States = new List<StateTypes>();
+
+        private string myVar;
+
+        protected string MyProperty
+        {
+            get
+            {
+                States.Add(StateTypes.Get_Called);
+                return myVar;
+            }
+            set
+            {
+                States.Add(StateTypes.Set_Called);
+                myVar = value;
+            }
+        }
+
+        private static string myVarStatic;
+
+        public static string MyPropertyStatic
+        {
+            get
+            {
+                States.Add(StateTypes.Get2_Called);
+                return myVarStatic;
+            }
+            set
+            {
+                States.Add(StateTypes.Set2_Called);
+                myVarStatic = value;
+            }
+        }
+    }
+
+    public class TypeR2
+    {
+        public static List<StateTypes> States = new List<StateTypes>();
+
+        public static string P1 { get; set; }
+        public static string P2 { get; set; }
+
+        private void MyMethod(string p1)
+        {
+            P1 = p1;
+
+            States.Add(StateTypes.Class_Method);
+        }
+
+        public static void MyMethodStatic(string p2)
+        {
+            P2 = p2;
+
+            States.Add(StateTypes.Class_Method_2);
+        }
+    }
+
+    public class TypeR3
+    {
+        public static List<StateTypes> States = new List<StateTypes>();
+
+        private event EventHandler myEvent;
+
+        protected event EventHandler MyEvent
+        {
+            add
+            {
+                States.Add(StateTypes.AddEvent_IsCalled);
+                myEvent += value;
+            }
+            remove
+            {
+                States.Add(StateTypes.RemoveEvent_IsCalled);
+                myEvent -= value;
+            }
+        }
+
+        public void RaiseMyEvent()
+        {
+            myEvent?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    public class IntForR1 : IInterceptor
+    {
+        public void Intercept(IInvocation invocation)
+        {
+            TypeR1.States.Add(StateTypes.Interceptor1_IsCalledBefore);
+
+            invocation.Proceed();
+
+            TypeR1.States.Add(StateTypes.Interceptor1_IsCalledAfter);
+        }
+    }
+
+    public class IntForR2 : IInterceptor
+    {
+        public void Intercept(IInvocation invocation)
+        {
+            TypeR2.States.Add(StateTypes.Interceptor1_IsCalledBefore);
+
+            invocation.Proceed();
+
+            TypeR2.States.Add(StateTypes.Interceptor1_IsCalledAfter);
+        }
+    }
+
+    public class IntForR3 : IInterceptor
+    {
+        public void Intercept(IInvocation invocation)
+        {
+            TypeR3.States.Add(StateTypes.Interceptor1_IsCalledBefore);
+
+            invocation.Proceed();
+
+            TypeR3.States.Add(StateTypes.Interceptor1_IsCalledAfter);
+        }
+    }
 }

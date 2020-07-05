@@ -2,14 +2,11 @@
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace NIntercept
+namespace NIntercept.Builder
 {
     public interface IProxyMethodBuilder
     {
-        IInvocationTypeBuilder InvocationTypeBuilder { get; }
-        ICallbackMethodBuilder CallbackMethodBuilder { get; }
-
-        MethodBuilder CreateMethod(ModuleScope moduleScope, TypeBuilder typeBuilder, MethodDefinition methodDefinition, MemberInfo member, FieldBuilder[] fields);
+        MethodBuilder CreateMethod(ProxyScope proxyScope, MethodDefinition methodDefinition, MemberInfo member);
     }
 
 }

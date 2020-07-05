@@ -1,8 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.ObjectModel;
+using NIntercept.Reflection;
 
-namespace NIntercept.Tests
+namespace NIntercept.Tests.Reflection
 {
 
     [TestClass]

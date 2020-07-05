@@ -1,20 +1,29 @@
-﻿using System;
+﻿using NIntercept.Helpers;
+using System;
 
 namespace NIntercept.Definition
 {
-    public class MixinDefinition : TypeDefinition
-    {       
+    public sealed class MixinDefinition : TypeDefinition
+    {
         private ProxyTypeDefinition proxyTypeDefinition;
+        private object mixinInstance;
         private Type[] interfaces;
         private InterfaceToImplementDefinition[] interfacesToImplement;
+        private string targetFieldName;
 
-        public MixinDefinition(ModuleDefinition moduleDefinition, ProxyTypeDefinition proxyTypeDefinition, object mixinInstance) 
-            : base(moduleDefinition, mixinInstance.GetType(), mixinInstance)
+        public MixinDefinition(ModuleDefinition moduleDefinition, ProxyTypeDefinition proxyTypeDefinition, object mixinInstance)
+            : base(moduleDefinition, mixinInstance.GetType(), mixinInstance.GetType())
         {
             if (proxyTypeDefinition is null)
                 throw new ArgumentNullException(nameof(proxyTypeDefinition));
 
             this.proxyTypeDefinition = proxyTypeDefinition;
+            this.mixinInstance = mixinInstance;
+        }
+
+        public object MixinInstance
+        {
+            get { return mixinInstance; }
         }
 
         public ProxyTypeDefinition ProxyTypeDefinition
@@ -52,20 +61,31 @@ namespace NIntercept.Definition
             }
         }
 
+        public override string TargetFieldName
+        {
+            get
+            {
+                if (targetFieldName == null)
+                    targetFieldName = $"_{NamingHelper.ToCamelCase(Name)}";
+                return targetFieldName;
+            }
+        }
+
         protected override TypeDefinition GetTypeDefinition()
         {
             return this;
         }
 
-        protected virtual InterfaceToImplementDefinition[] GetInterfacesToImplement()
+        private InterfaceToImplementDefinition[] GetInterfacesToImplement()
         {
             Type[] interfaces = Interfaces;
             int length = interfaces.Length;
             var typesToImplement = new InterfaceToImplementDefinition[length];
             for (int i = 0; i < length; i++)
-                typesToImplement[i] = new InterfaceToImplementDefinition(ModuleDefinition, interfaces[i], Target, this);
+                typesToImplement[i] = new InterfaceToImplementDefinition(ModuleDefinition, interfaces[i], TargetType, this);
             return typesToImplement;
         }
+
     }
 
 }

@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace NIntercept.Definition
 {
-    public class PropertyGetMethodDefinition : MethodDefinition
+    public sealed class PropertyGetMethodDefinition : MethodDefinition
     {
         private PropertyDefinition propertyDefinition;
         private Type[] parameterTypes;
@@ -38,6 +38,11 @@ namespace NIntercept.Definition
         public override string Name
         {
             get { return $"get_{propertyDefinition.Name}"; }
+        }
+
+        public override MethodDefinitionType MethodDefinitionType
+        {
+            get { return MethodDefinitionType.Getter; }
         }
     }
 }

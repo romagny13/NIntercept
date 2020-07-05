@@ -120,13 +120,13 @@ namespace NIntercept.Tests
         event EventHandler MyEvent;
     }
 
-    public class GetSetTitleAttribute : Attribute, IPropertyGetInterceptorProvider, IPropertySetInterceptorProvider
+    public class GetSetTitleAttribute : Attribute, IGetterInterceptorProvider, ISetterInterceptorProvider
     {
         public Type InterceptorType => typeof(IntTitle);
 
     }
 
-    public class AddRemoveMyEventAttribute : Attribute, IAddEventInterceptorProvider, IRemoveEventInterceptorProvider
+    public class AddRemoveMyEventAttribute : Attribute, IAddOnInterceptorProvider, IRemoveOnInterceptorProvider
     {
         public Type InterceptorType => typeof(IntMyEvent);
 

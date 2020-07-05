@@ -1,7 +1,6 @@
 ﻿using NIntercept.Definition;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections;
 
 namespace NIntercept.Tests
 {
@@ -10,22 +9,100 @@ namespace NIntercept.Tests
     {
 
         [TestMethod]
+        public void GetNames()
+        {
+            // return Same TypeDefinition
+            // - same type + same targetType or null (code generated diff) + same options (comparer)
+
+            var moduleDefinition = new ModuleDefinition();
+
+            Assert.AreEqual(0, moduleDefinition.TypeDefinitions.Count);
+
+            var t1 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), null, null);
+            Assert.AreEqual("TypeM1_Proxy", t1.Name);
+            Assert.AreEqual(1, moduleDefinition.TypeDefinitions.Count);
+
+            // returns same type definition for Same type 
+            var t2 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), null, null);
+            Assert.AreEqual("TypeM1_Proxy", t2.Name);
+            Assert.AreEqual(1, moduleDefinition.TypeDefinitions.Count);
+
+            // TARGET
+
+            var targetType1 = typeof(TypeM1);
+            var t3 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), targetType1, null);
+            Assert.AreEqual("TypeM1_1_Proxy", t3.Name);
+            Assert.AreEqual(2, moduleDefinition.TypeDefinitions.Count);
+
+            // returns same type definition for Same type 
+            var t4 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), targetType1, null);
+            Assert.AreEqual("TypeM1_1_Proxy", t4.Name);
+            Assert.AreEqual(2, moduleDefinition.TypeDefinitions.Count);
+
+            // not same
+            var t5 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), null, null);
+            Assert.AreEqual("TypeM1_Proxy", t5.Name);
+            Assert.AreEqual(2, moduleDefinition.TypeDefinitions.Count);
+
+            /// OPTIONS (see ProxyGeneratorOptionsComparerTests)
+            // AdditionalTypeAttributes
+            // AdditionalCode
+            // mixins
+            // ConstructorSelector
+            // ClassProxyMemberSelector
+            // ServiceProvider
+            var o = new ProxyGeneratorOptions();
+            o.AdditionalTypeAttributes.Add(new CustomAttributeDefinition(typeof(MyAttribute).GetConstructors()[0], new object[0]));
+
+            // new
+            var t6 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), null, o);
+            Assert.AreEqual("TypeM1_2_Proxy", t6.Name);
+            Assert.AreEqual(3, moduleDefinition.TypeDefinitions.Count);
+
+            // returns same type definition for Same type 
+            var o2 = new ProxyGeneratorOptions();
+            o2.AdditionalTypeAttributes.Add(new CustomAttributeDefinition(typeof(MyAttribute).GetConstructors()[0], new object[0]));
+            var t7 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), null, o2);
+            Assert.AreEqual("TypeM1_2_Proxy", t7.Name);
+            Assert.AreEqual(3, moduleDefinition.TypeDefinitions.Count);
+
+            // with target => returns new type definition
+            var o3 = new ProxyGeneratorOptions();
+            o3.AdditionalTypeAttributes.Add(new CustomAttributeDefinition(typeof(MyAttribute).GetConstructors()[0], new object[0]));
+            var t8 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), targetType1, o3);
+            Assert.AreEqual("TypeM1_3_Proxy", t8.Name);
+            Assert.AreEqual(4, moduleDefinition.TypeDefinitions.Count);
+
+            // get existing
+            var t9 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), targetType1, null);
+            Assert.AreEqual("TypeM1_1_Proxy", t9.Name);
+            Assert.AreEqual(4, moduleDefinition.TypeDefinitions.Count);
+
+            // get existing
+            var o4 = new ProxyGeneratorOptions();
+            o4.AdditionalTypeAttributes.Add(new CustomAttributeDefinition(typeof(MyAttribute).GetConstructors()[0], new object[0]));
+            var t10 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), null, o4);
+            Assert.AreEqual("TypeM1_2_Proxy", t10.Name);
+            Assert.AreEqual(4, moduleDefinition.TypeDefinitions.Count);
+        }
+
+        [TestMethod]
         public void Return_Same_TypeDefinition_With_Same_Type_And_Target_Null_And_Same_Options_Null()
         {
             var moduleDefinition = new ModuleDefinition();
-            var typeDefinition = moduleDefinition.GetOrAdd(typeof(TypeM1), null, null);
+            var typeDefinition = moduleDefinition.GetTypeDefinition(typeof(TypeM1), null, null);
 
             Assert.AreEqual(TypeDefinitionType.ClassProxy, typeDefinition.TypeDefinitionType);
             Assert.AreEqual(typeof(ClassProxyDefinition), typeDefinition.GetType());
             Assert.AreEqual(typeof(TypeM1), typeDefinition.Type);
-            Assert.AreEqual(null, typeDefinition.Target);
+            Assert.AreEqual(null, typeDefinition.TargetType);
 
             Assert.AreEqual(1, moduleDefinition.TypeDefinitions.Count);
             Assert.AreEqual(typeDefinition, moduleDefinition.TypeDefinitions[0]);
 
             // returns same type definition for same type with same target type or null and same options
 
-            var typeDefinition2 = moduleDefinition.GetOrAdd(typeof(TypeM1), null, null);
+            var typeDefinition2 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), null, null);
 
             Assert.AreEqual(typeDefinition2, typeDefinition);
             Assert.AreEqual(1, moduleDefinition.TypeDefinitions.Count);
@@ -36,26 +113,25 @@ namespace NIntercept.Tests
         public void Return_Same_TypeDefinition_With_Same_Type_And_Same_Target_Type_And_Same_Options_Null()
         {
             var moduleDefinition = new ModuleDefinition();
-            var target = new TypeM1();
-            var typeDefinition = moduleDefinition.GetOrAdd(typeof(TypeM1), target, null);
+            var targetType = typeof(TypeM1);
+            var typeDefinition = moduleDefinition.GetTypeDefinition(typeof(TypeM1), targetType, null);
 
             Assert.AreEqual(TypeDefinitionType.ClassProxy, typeDefinition.TypeDefinitionType);
             Assert.AreEqual(typeof(ClassProxyDefinition), typeDefinition.GetType());
             Assert.AreEqual(typeof(TypeM1), typeDefinition.Type);
-            Assert.AreEqual(target, typeDefinition.Target);
+            Assert.AreEqual(targetType, typeDefinition.TargetType);
             Assert.AreEqual(null, typeDefinition.Options);
 
             Assert.AreEqual(1, moduleDefinition.TypeDefinitions.Count);
             Assert.AreEqual(typeDefinition, moduleDefinition.TypeDefinitions[0]);
 
-            // returns same type definition for same type with same target type or null and same options
+            // returns same type definition for same type with same targetType type or null and same options
 
-            var target2 = new TypeM1();
-            var typeDefinition2 = moduleDefinition.GetOrAdd(typeof(TypeM1), target2, null);
+            var typeDefinition2 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), targetType, null);
             Assert.AreEqual(TypeDefinitionType.ClassProxy, typeDefinition2.TypeDefinitionType);
             Assert.AreEqual(typeof(ClassProxyDefinition), typeDefinition2.GetType());
             Assert.AreEqual(typeof(TypeM1), typeDefinition2.Type);
-            Assert.AreEqual(target2, typeDefinition2.Target);
+            Assert.AreEqual(targetType, typeDefinition2.TargetType);
             Assert.AreEqual(null, typeDefinition2.Options);
 
             Assert.AreEqual(typeDefinition2, typeDefinition);
@@ -71,12 +147,12 @@ namespace NIntercept.Tests
             var o = new ProxyGeneratorOptions();
             o.AddMixinInstance(new MyItem());
 
-            var typeDefinition = moduleDefinition.GetOrAdd(typeof(TypeM1), null, o);
+            var typeDefinition = moduleDefinition.GetTypeDefinition(typeof(TypeM1), null, o);
 
             Assert.AreEqual(TypeDefinitionType.ClassProxy, typeDefinition.TypeDefinitionType);
             Assert.AreEqual(typeof(ClassProxyDefinition), typeDefinition.GetType());
             Assert.AreEqual(typeof(TypeM1), typeDefinition.Type);
-            Assert.AreEqual(null, typeDefinition.Target);
+            Assert.AreEqual(null, typeDefinition.TargetType);
             Assert.AreEqual(o, typeDefinition.Options);
 
             Assert.AreEqual(1, moduleDefinition.TypeDefinitions.Count);
@@ -87,12 +163,14 @@ namespace NIntercept.Tests
             var o2 = new ProxyGeneratorOptions();
             o2.AddMixinInstance(new MyItem());
 
-            var typeDefinition2 = moduleDefinition.GetOrAdd(typeof(TypeM1), null, o2);
+            var typeDefinition2 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), null, o2);
             Assert.AreEqual(TypeDefinitionType.ClassProxy, typeDefinition2.TypeDefinitionType);
             Assert.AreEqual(typeof(ClassProxyDefinition), typeDefinition2.GetType());
             Assert.AreEqual(typeof(TypeM1), typeDefinition2.Type);
-            Assert.AreEqual(null, typeDefinition2.Target);
-            Assert.AreEqual(o2, typeDefinition2.Options);
+            Assert.AreEqual(null, typeDefinition2.TargetType);
+
+            var comparer = new ProxyGeneratorOptionsComparer();
+            Assert.AreEqual(true, comparer.Equals(o2, typeDefinition2.Options));
 
             Assert.AreEqual(typeDefinition2, typeDefinition);
             Assert.AreEqual(1, moduleDefinition.TypeDefinitions.Count);
@@ -104,32 +182,35 @@ namespace NIntercept.Tests
         {
             var moduleDefinition = new ModuleDefinition();
 
-            var target = new TypeM1();
+            var target = typeof(TypeM1);
             var o = new ProxyGeneratorOptions();
             o.AddMixinInstance(new MyItem());
 
-            var typeDefinition = moduleDefinition.GetOrAdd(typeof(TypeM1), target, o);
+            var typeDefinition = moduleDefinition.GetTypeDefinition(typeof(TypeM1), target, o);
 
             Assert.AreEqual(TypeDefinitionType.ClassProxy, typeDefinition.TypeDefinitionType);
             Assert.AreEqual(typeof(ClassProxyDefinition), typeDefinition.GetType());
             Assert.AreEqual(typeof(TypeM1), typeDefinition.Type);
-            Assert.AreEqual(target, typeDefinition.Target);
+            Assert.AreEqual(target, typeDefinition.TargetType);
 
             Assert.AreEqual(1, moduleDefinition.TypeDefinitions.Count);
             Assert.AreEqual(typeDefinition, moduleDefinition.TypeDefinitions[0]);
 
             // returns same type definition for same type with same target type or null and same options
 
-            var target2 = new TypeM1();
+            var target2 = typeof(TypeM1);
             var o2 = new ProxyGeneratorOptions();
             o2.AddMixinInstance(new MyItem());
 
-            var typeDefinition2 = moduleDefinition.GetOrAdd(typeof(TypeM1), target2, o2);
+            var typeDefinition2 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), target2, o2);
             Assert.AreEqual(TypeDefinitionType.ClassProxy, typeDefinition2.TypeDefinitionType);
             Assert.AreEqual(typeof(ClassProxyDefinition), typeDefinition2.GetType());
             Assert.AreEqual(typeof(TypeM1), typeDefinition2.Type);
-            Assert.AreEqual(target2, typeDefinition2.Target);
-            Assert.AreEqual(o2, typeDefinition2.Options);
+            Assert.AreEqual(target2, typeDefinition2.TargetType);
+
+            var comparer = new ProxyGeneratorOptionsComparer();
+            Assert.AreEqual(true, comparer.Equals(o2, typeDefinition2.Options));
+
 
             Assert.AreEqual(typeDefinition2, typeDefinition);
             Assert.AreEqual(1, moduleDefinition.TypeDefinitions.Count);
@@ -140,19 +221,19 @@ namespace NIntercept.Tests
         public void Return_Not_Same_TypeDefinition_With_Not_Same_Type()
         {
             var moduleDefinition = new ModuleDefinition();
-            var typeDefinition = moduleDefinition.GetOrAdd(typeof(TypeM1), null, null);
+            var typeDefinition = moduleDefinition.GetTypeDefinition(typeof(TypeM1), null, null);
 
             Assert.AreEqual(TypeDefinitionType.ClassProxy, typeDefinition.TypeDefinitionType);
             Assert.AreEqual(typeof(ClassProxyDefinition), typeDefinition.GetType());
             Assert.AreEqual(typeof(TypeM1), typeDefinition.Type);
-            Assert.AreEqual(null, typeDefinition.Target);
+            Assert.AreEqual(null, typeDefinition.TargetType);
 
             Assert.AreEqual(1, moduleDefinition.TypeDefinitions.Count);
             Assert.AreEqual(typeDefinition, moduleDefinition.TypeDefinitions[0]);
 
             // returns same type definition for same type with same target type or null and same options
 
-            var typeDefinition2 = moduleDefinition.GetOrAdd(typeof(TypeM2), null, null);
+            var typeDefinition2 = moduleDefinition.GetTypeDefinition(typeof(TypeM2), null, null);
 
             Assert.AreNotEqual(typeDefinition2, typeDefinition);
             Assert.AreEqual(2, moduleDefinition.TypeDefinitions.Count);
@@ -160,18 +241,17 @@ namespace NIntercept.Tests
             Assert.AreEqual(typeDefinition2, moduleDefinition.TypeDefinitions[1]);
         }
 
-
         [TestMethod]
-        public void Return_Same_TypeDefinition_With_Same_Interface_And_Not_Same_Target_Type_And_Same_Options_Null()
+        public void Return_Not_Same_TypeDefinition_With_Same_Interface_And_Not_Same_Target_Type_And_Same_Options_Null()
         {
             var moduleDefinition = new ModuleDefinition();
-            var target = new TypeM1();
-            var typeDefinition = moduleDefinition.GetOrAdd(typeof(ITypeM1), target, null);
+            var target = typeof(TypeM1);
+            var typeDefinition = moduleDefinition.GetTypeDefinition(typeof(ITypeM1), target, null);
 
             Assert.AreEqual(TypeDefinitionType.InterfaceProxy, typeDefinition.TypeDefinitionType);
             Assert.AreEqual(typeof(InterfaceProxyDefinition), typeDefinition.GetType());
             Assert.AreEqual(typeof(ITypeM1), typeDefinition.Type);
-            Assert.AreEqual(target, typeDefinition.Target);
+            Assert.AreEqual(target, typeDefinition.TargetType);
             Assert.AreEqual(null, typeDefinition.Options);
 
             Assert.AreEqual(1, moduleDefinition.TypeDefinitions.Count);
@@ -179,17 +259,18 @@ namespace NIntercept.Tests
 
             // returns same type definition for same type with same target type or null and same options
 
-            var target2 = new TypeM1_b();
-            var typeDefinition2 = moduleDefinition.GetOrAdd(typeof(ITypeM1), target2, null);
+            var target2 = typeof(TypeM1_b);
+            var typeDefinition2 = moduleDefinition.GetTypeDefinition(typeof(ITypeM1), target2, null);
             Assert.AreEqual(TypeDefinitionType.InterfaceProxy, typeDefinition2.TypeDefinitionType);
             Assert.AreEqual(typeof(InterfaceProxyDefinition), typeDefinition2.GetType());
             Assert.AreEqual(typeof(ITypeM1), typeDefinition2.Type);
-            Assert.AreEqual(target2, typeDefinition2.Target);
+            Assert.AreEqual(target2, typeDefinition2.TargetType);
             Assert.AreEqual(null, typeDefinition2.Options);
 
-            Assert.AreEqual(typeDefinition2, typeDefinition);
-            Assert.AreEqual(1, moduleDefinition.TypeDefinitions.Count);
+            Assert.AreNotEqual(typeDefinition2, typeDefinition);
+            Assert.AreEqual(2, moduleDefinition.TypeDefinitions.Count);
             Assert.AreEqual(typeDefinition, moduleDefinition.TypeDefinitions[0]);
+            Assert.AreEqual(typeDefinition2, moduleDefinition.TypeDefinitions[1]);
         }
 
         [TestMethod]
@@ -197,18 +278,18 @@ namespace NIntercept.Tests
         {
             var moduleDefinition = new ModuleDefinition();
 
-            var typeDefinition = moduleDefinition.GetOrAdd(typeof(TypeM1), null, null);
+            var typeDefinition = moduleDefinition.GetTypeDefinition(typeof(TypeM1), null, null);
 
-            var target = new TypeM1();
-            var typeDefinition2 = moduleDefinition.GetOrAdd(typeof(TypeM1), target, null);
+            var target = typeof(TypeM1);
+            var typeDefinition2 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), target, null);
 
             var o = new ProxyGeneratorOptions();
             o.AddMixinInstance(new MyItem());
-            var typeDefinition3 = moduleDefinition.GetOrAdd(typeof(TypeM1), null, o);
+            var typeDefinition3 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), null, o);
 
-            var typeDefinition4 = moduleDefinition.GetOrAdd(typeof(ITypeM1), target, null);
+            var typeDefinition4 = moduleDefinition.GetTypeDefinition(typeof(ITypeM1), target, null);
 
-            var typeDefinition5 = moduleDefinition.GetOrAdd(typeof(ITypeM1), target, o);
+            var typeDefinition5 = moduleDefinition.GetTypeDefinition(typeof(ITypeM1), target, o);
 
             Assert.AreEqual(5, moduleDefinition.TypeDefinitions.Count);
 
@@ -224,18 +305,18 @@ namespace NIntercept.Tests
         {
             var moduleDefinition = new ModuleDefinition();
 
-            var typeDefinition = moduleDefinition.GetOrAdd(typeof(TypeM1), null, null);
+            var typeDefinition = moduleDefinition.GetTypeDefinition(typeof(TypeM1), null, null);
 
-            var target = new TypeM1();
-            var typeDefinition2 = moduleDefinition.GetOrAdd(typeof(TypeM1), target, null);
+            var target = typeof(TypeM1);
+            var typeDefinition2 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), target, null);
 
             var o = new ProxyGeneratorOptions();
             o.AddMixinInstance(new MyItem());
-            var typeDefinition3 = moduleDefinition.GetOrAdd(typeof(TypeM1), null, o);
+            var typeDefinition3 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), null, o);
 
-            var typeDefinition4 = moduleDefinition.GetOrAdd(typeof(ITypeM1), target, null);
+            var typeDefinition4 = moduleDefinition.GetTypeDefinition(typeof(ITypeM1), target, null);
 
-            var typeDefinition5 = moduleDefinition.GetOrAdd(typeof(ITypeM1), target, o);
+            var typeDefinition5 = moduleDefinition.GetTypeDefinition(typeof(ITypeM1), target, o);
 
             Assert.AreEqual(5, moduleDefinition.TypeDefinitions.Count);
 
@@ -254,22 +335,19 @@ namespace NIntercept.Tests
         #region Properties
 
         [TestMethod]
-        public void Get_Update_Type_Names()
+        public void Get_Full_Name()
         {
             var moduleDefinition = new ModuleDefinition();
-            var typeDef = moduleDefinition.GetOrAdd(typeof(Type1), null, null);
+            var typeDef = moduleDefinition.GetTypeDefinition(typeof(Type1), null, null);
             Assert.AreEqual("Type1_Proxy", typeDef.Name);
             Assert.AreEqual("NIntercept.Proxies.Type1_Proxy", typeDef.FullName);
-
-            typeDef.Namespace = null;
-            Assert.AreEqual("Type1_Proxy", typeDef.FullName);
         }
 
         [TestMethod]
         public void Find_Virtual_Props()
         {
             var moduleDefinition = new ModuleDefinition();
-            var typeDef = moduleDefinition.GetOrAdd(typeof(Type1), null, null);
+            var typeDef = moduleDefinition.GetTypeDefinition(typeof(Type1), null, null);
             Assert.AreEqual(false, typeDef.IsInterface);
             Assert.AreEqual(typeof(Type1), typeDef.Type);
             Assert.AreEqual(3, typeDef.PropertyDefinitions.Length);
@@ -285,41 +363,41 @@ namespace NIntercept.Tests
         public void Create_Methods_For_Read_Write()
         {
             var moduleDefinition = new ModuleDefinition();
-            var typeDef = moduleDefinition.GetOrAdd(typeof(Type1), null, null);
+            var typeDef = moduleDefinition.GetTypeDefinition(typeof(Type1), null, null);
             Assert.AreEqual(3, typeDef.PropertyDefinitions.Length);
 
             var p1 = typeDef.PropertyDefinitions[0];
             Assert.AreEqual("MyProperty", p1.Name);
             Assert.AreEqual(typeof(string), p1.PropertyType);
-            Assert.IsNotNull(p1.PropertyGetMethodDefinition);
-            Assert.IsNotNull(p1.PropertySetMethodDefinition);
+            Assert.IsNotNull(p1.GetMethodDefinition);
+            Assert.IsNotNull(p1.SetMethodDefinition);
 
             var p2 = typeDef.PropertyDefinitions[1];
             Assert.AreEqual("MyPropertyReadOnly", p2.Name);
             Assert.AreEqual(typeof(int), p2.PropertyType);
-            Assert.IsNotNull(p2.PropertyGetMethodDefinition);
-            Assert.IsNull(p2.PropertySetMethodDefinition);
+            Assert.IsNotNull(p2.GetMethodDefinition);
+            Assert.IsNull(p2.SetMethodDefinition);
 
             var p3 = typeDef.PropertyDefinitions[2];
             Assert.AreEqual("MyPropertyWriteOnly", p3.Name);
             Assert.AreEqual(typeof(double), p3.PropertyType);
-            Assert.IsNull(p3.PropertyGetMethodDefinition);
-            Assert.IsNotNull(p3.PropertySetMethodDefinition);
+            Assert.IsNull(p3.GetMethodDefinition);
+            Assert.IsNotNull(p3.SetMethodDefinition);
         }
 
         [TestMethod]
         public void Get_And_Set_Methods_Details()
         {
             var moduleDefinition = new ModuleDefinition();
-            var typeDef = moduleDefinition.GetOrAdd(typeof(Type1), null, null);
+            var typeDef = moduleDefinition.GetTypeDefinition(typeof(Type1), null, null);
             Assert.AreEqual(3, typeDef.PropertyDefinitions.Length);
 
-            var p1 = typeDef.PropertyDefinitions[0].PropertyGetMethodDefinition;
+            var p1 = typeDef.PropertyDefinitions[0].GetMethodDefinition;
             Assert.AreEqual("get_MyProperty", p1.Name);
             Assert.AreEqual(typeof(string), p1.ReturnType);
             Assert.AreEqual(typeof(Type1).GetMethod("get_MyProperty"), p1.Method);
 
-            var p2 = typeDef.PropertyDefinitions[0].PropertySetMethodDefinition;
+            var p2 = typeDef.PropertyDefinitions[0].SetMethodDefinition;
             Assert.AreEqual("set_MyProperty", p2.Name);
             Assert.AreEqual(typeof(void), p2.ReturnType);
             Assert.AreEqual(typeof(Type1).GetMethod("set_MyProperty"), p2.Method);
@@ -329,34 +407,34 @@ namespace NIntercept.Tests
         public void Find_Props_Of_Interface()
         {
             var moduleDefinition = new ModuleDefinition();
-            var typeDef = moduleDefinition.GetOrAdd(typeof(Interface1), null, null);
+            var typeDef = moduleDefinition.GetTypeDefinition(typeof(Interface1), null, null);
             Assert.AreEqual(true, typeDef.IsInterface);
             Assert.AreEqual(typeof(Interface1), typeDef.Type);
 
             var p1 = typeDef.PropertyDefinitions[0];
             Assert.AreEqual("MyProperty", p1.Name);
             Assert.AreEqual(typeof(string), p1.PropertyType);
-            Assert.IsNotNull(p1.PropertyGetMethodDefinition);
-            Assert.IsNotNull(p1.PropertySetMethodDefinition);
+            Assert.IsNotNull(p1.GetMethodDefinition);
+            Assert.IsNotNull(p1.SetMethodDefinition);
 
             var p2 = typeDef.PropertyDefinitions[1];
             Assert.AreEqual("MyPropertyReadOnly", p2.Name);
             Assert.AreEqual(typeof(int), p2.PropertyType);
-            Assert.IsNotNull(p2.PropertyGetMethodDefinition);
-            Assert.IsNull(p2.PropertySetMethodDefinition);
+            Assert.IsNotNull(p2.GetMethodDefinition);
+            Assert.IsNull(p2.SetMethodDefinition);
 
             var p3 = typeDef.PropertyDefinitions[2];
             Assert.AreEqual("MyPropertyWriteOnly", p3.Name);
             Assert.AreEqual(typeof(double), p3.PropertyType);
-            Assert.IsNull(p3.PropertyGetMethodDefinition);
-            Assert.IsNotNull(p3.PropertySetMethodDefinition);
+            Assert.IsNull(p3.GetMethodDefinition);
+            Assert.IsNotNull(p3.SetMethodDefinition);
         }
 
         [TestMethod]
         public void Find_Attributes_On_Properties()
         {
             var moduleDefinition = new ModuleDefinition();
-            var typeDef = moduleDefinition.GetOrAdd(typeof(Type2), null, null);
+            var typeDef = moduleDefinition.GetTypeDefinition(typeof(Type2), null, null);
             Assert.AreEqual(3, typeDef.PropertyDefinitions.Length);
 
             var p1 = typeDef.PropertyDefinitions[0];
@@ -374,8 +452,8 @@ namespace NIntercept.Tests
             Assert.AreEqual(typeof(Int1), p2.PropertyGetInterceptorAttributes[0].InterceptorType);
             Assert.AreEqual(0, p2.PropertySetInterceptorAttributes.Length);
 
-            Assert.AreEqual(1, p2.PropertySetMethodDefinition.InterceptorAttributes.Length);
-            Assert.AreEqual(typeof(Int3), p2.PropertySetMethodDefinition.InterceptorAttributes[0].InterceptorType);
+            Assert.AreEqual(1, p2.SetMethodDefinition.InterceptorAttributes.Length);
+            Assert.AreEqual(typeof(Int3), p2.SetMethodDefinition.InterceptorAttributes[0].InterceptorType);
 
             var p3 = typeDef.PropertyDefinitions[2];
             Assert.AreEqual("ReadOnlyProp", p3.Name);
@@ -388,7 +466,7 @@ namespace NIntercept.Tests
         public void IgnoreCustom_Attributes_On_Properties()
         {
             var moduleDefinition = new ModuleDefinition();
-            var typeDef = moduleDefinition.GetOrAdd(typeof(Type3), null, null);
+            var typeDef = moduleDefinition.GetTypeDefinition(typeof(Type3), null, null);
             Assert.AreEqual(2, typeDef.PropertyDefinitions.Length);
 
             var p1 = typeDef.PropertyDefinitions[0];
@@ -402,7 +480,7 @@ namespace NIntercept.Tests
         public void FindCustom_InterceptionAttribute_On_Properties()
         {
             var moduleDefinition = new ModuleDefinition();
-            var typeDef = moduleDefinition.GetOrAdd(typeof(Type3), null, null);
+            var typeDef = moduleDefinition.GetTypeDefinition(typeof(Type3), null, null);
             Assert.AreEqual(2, typeDef.PropertyDefinitions.Length);
 
             var p1 = typeDef.PropertyDefinitions[1];
@@ -418,7 +496,7 @@ namespace NIntercept.Tests
         public void Find_Attributes_On_Properties_Of_Interface()
         {
             var moduleDefinition = new ModuleDefinition();
-            var typeDef = moduleDefinition.GetOrAdd(typeof(Interface2), null, null);
+            var typeDef = moduleDefinition.GetTypeDefinition(typeof(Interface2), null, null);
 
             Assert.AreEqual(2, typeDef.PropertyDefinitions.Length);
 
@@ -441,16 +519,16 @@ namespace NIntercept.Tests
         public void Invocation_And_Callback_For_Properties()
         {
             var moduleDefinition = new ModuleDefinition();
-            var typeDef = moduleDefinition.GetOrAdd(typeof(Type1), null, null);
+            var typeDef = moduleDefinition.GetTypeDefinition(typeof(Type1), null, null);
 
             var p1 = typeDef.PropertyDefinitions[0];
             Assert.AreEqual("MyProperty", p1.Name);
-            Assert.IsNotNull(p1.PropertyGetMethodDefinition.InvocationTypeDefinition);
-            Assert.AreEqual("Type1_Proxy_get_MyProperty_Invocation", p1.PropertyGetMethodDefinition.InvocationTypeDefinition.Name);
-            Assert.AreEqual("get_MyProperty_Callback", p1.PropertyGetMethodDefinition.MethodCallbackDefinition.Name);
-            Assert.IsNotNull(p1.PropertyGetMethodDefinition.MethodCallbackDefinition);
-            Assert.AreEqual("Type1_Proxy_set_MyProperty_Invocation", p1.PropertySetMethodDefinition.InvocationTypeDefinition.Name);
-            Assert.AreEqual("set_MyProperty_Callback", p1.PropertySetMethodDefinition.MethodCallbackDefinition.Name);
+            Assert.IsNotNull(p1.GetMethodDefinition.InvocationTypeDefinition);
+            Assert.AreEqual("Type1_Proxy_get_MyProperty_Invocation", p1.GetMethodDefinition.InvocationTypeDefinition.Name);
+            Assert.AreEqual("get_MyProperty_Callback", p1.GetMethodDefinition.CallbackMethodDefinition.Name);
+            Assert.IsNotNull(p1.GetMethodDefinition.CallbackMethodDefinition);
+            Assert.AreEqual("Type1_Proxy_set_MyProperty_Invocation", p1.SetMethodDefinition.InvocationTypeDefinition.Name);
+            Assert.AreEqual("set_MyProperty_Callback", p1.SetMethodDefinition.CallbackMethodDefinition.Name);
         }
 
         #endregion // Properties
@@ -461,7 +539,7 @@ namespace NIntercept.Tests
         public void Find_Methods()
         {
             var moduleDefinition = new ModuleDefinition();
-            var typeDef = moduleDefinition.GetOrAdd(typeof(Type4), null, null);
+            var typeDef = moduleDefinition.GetTypeDefinition(typeof(Type4), null, null);
 
             Assert.AreEqual(3, typeDef.MethodDefinitions.Length);
 
@@ -506,7 +584,7 @@ namespace NIntercept.Tests
         public void Find_Methods_Generics()
         {
             var moduleDefinition = new ModuleDefinition();
-            var typeDef = moduleDefinition.GetOrAdd(typeof(Type5), null, null);
+            var typeDef = moduleDefinition.GetTypeDefinition(typeof(Type5), null, null);
 
             Assert.AreEqual(2, typeDef.MethodDefinitions.Length);
 
@@ -539,7 +617,7 @@ namespace NIntercept.Tests
         public void Find_Methods_Generics_For_Interface()
         {
             var moduleDefinition = new ModuleDefinition();
-            var typeDef = moduleDefinition.GetOrAdd(typeof(IType5), null, null);
+            var typeDef = moduleDefinition.GetTypeDefinition(typeof(IType5), null, null);
 
             Assert.AreEqual(2, typeDef.MethodDefinitions.Length);
 
@@ -572,33 +650,30 @@ namespace NIntercept.Tests
         public void Invocation_And_Callback_For_Methods()
         {
             var moduleDefinition = new ModuleDefinition();
-            var typeDef = moduleDefinition.GetOrAdd(typeof(Type4), null, null);
+            var typeDef = moduleDefinition.GetTypeDefinition(typeof(Type4), null, null);
 
             var p1 = typeDef.MethodDefinitions[0];
             Assert.AreEqual("MethodA", p1.Name);
-            Assert.IsNotNull(p1.MethodCallbackDefinition);
-            Assert.AreEqual("MethodA_Callback", p1.MethodCallbackDefinition.Name);
-            Assert.AreEqual(p1.Method, p1.MethodCallbackDefinition.Method);
+            Assert.IsNotNull(p1.CallbackMethodDefinition);
+            Assert.AreEqual("MethodA_Callback", p1.CallbackMethodDefinition.Name);
+            Assert.AreEqual(p1.Method, p1.CallbackMethodDefinition.Method);
 
             Assert.IsNotNull(p1.InvocationTypeDefinition);
             Assert.AreEqual("Type4_Proxy_MethodA_Invocation", p1.InvocationTypeDefinition.Name);
             Assert.AreEqual("NIntercept.Invocations.Type4_Proxy_MethodA_Invocation", p1.InvocationTypeDefinition.FullName);
-
-            p1.InvocationTypeDefinition.Namespace = null;
-            Assert.AreEqual("Type4_Proxy_MethodA_Invocation", p1.InvocationTypeDefinition.FullName);
         }
 
         [TestMethod]
         public void Change_Names_Only_For_Invocation_Class_With_Signatures()
         {
             var moduleDefinition = new ModuleDefinition();
-            var typeDef = moduleDefinition.GetOrAdd(typeof(Type7), null, null);
+            var typeDef = moduleDefinition.GetTypeDefinition(typeof(Type7), null, null);
 
             Assert.AreEqual("Type7_Proxy_MethodA_Invocation", typeDef.MethodDefinitions[0].InvocationTypeDefinition.Name);
-            Assert.AreEqual("MethodA_Callback", typeDef.MethodDefinitions[0].MethodCallbackDefinition.Name);
+            Assert.AreEqual("MethodA_Callback", typeDef.MethodDefinitions[0].CallbackMethodDefinition.Name);
 
             Assert.AreEqual("Type7_Proxy_MethodA_1_Invocation", typeDef.MethodDefinitions[1].InvocationTypeDefinition.Name);
-            Assert.AreEqual("MethodA_Callback", typeDef.MethodDefinitions[1].MethodCallbackDefinition.Name);
+            Assert.AreEqual("MethodA_Callback", typeDef.MethodDefinitions[1].CallbackMethodDefinition.Name);
         }
 
 
@@ -610,7 +685,7 @@ namespace NIntercept.Tests
         public void Find_Events()
         {
             var moduleDefinition = new ModuleDefinition();
-            var typeDef = moduleDefinition.GetOrAdd(typeof(Type6), null, null);
+            var typeDef = moduleDefinition.GetTypeDefinition(typeof(Type6), null, null);
 
             Assert.AreEqual(2, typeDef.EventDefinitions.Length);
             Assert.AreEqual("MyEvent", typeDef.EventDefinitions[0].Name);
@@ -629,7 +704,7 @@ namespace NIntercept.Tests
         public void Find_Events_For_Interface()
         {
             var moduleDefinition = new ModuleDefinition();
-            var typeDef = moduleDefinition.GetOrAdd(typeof(IType6), null, null);
+            var typeDef = moduleDefinition.GetTypeDefinition(typeof(IType6), null, null);
 
             Assert.AreEqual(2, typeDef.EventDefinitions.Length);
             Assert.AreEqual("MyEvent", typeDef.EventDefinitions[0].Name);
@@ -650,17 +725,17 @@ namespace NIntercept.Tests
         public void TargetIsNotNull()
         {
             var moduleDefinition = new ModuleDefinition();
-            var target = new Type1();
-            var typeDef = moduleDefinition.GetOrAdd(typeof(Type1), target, null);
-            Assert.IsNotNull(typeDef.Target);
+            var target = typeof(Type1);
+            var typeDef = moduleDefinition.GetTypeDefinition(typeof(Type1), target, null);
+            Assert.IsNotNull(typeDef.TargetType);
         }
 
         [TestMethod]
         public void Find_Attribute_On_Type()
         {
             var moduleDefinition = new ModuleDefinition();
-            var target = new Type1();
-            var typeDef = moduleDefinition.GetOrAdd(typeof(Type1), target, null);
+            var targetType = typeof(Type1);
+            var typeDef = moduleDefinition.GetTypeDefinition(typeof(Type1), targetType, null);
             Assert.AreEqual(1, typeDef.InterceptorAttributes.Length);
             Assert.AreEqual(typeof(Int1), typeDef.InterceptorAttributes[0].InterceptorType);
         }
@@ -670,7 +745,7 @@ namespace NIntercept.Tests
         {
             var moduleDefinition = new ModuleDefinition();
 
-            var typeDefinition = moduleDefinition.GetOrAdd(typeof(Type8), null, null);
+            var typeDefinition = moduleDefinition.GetTypeDefinition(typeof(Type8), null, null);
 
             Assert.AreEqual(1, typeDefinition.InterceptorAttributes.Length);
             Assert.AreEqual(typeof(AllInterceptorAttribute), typeDefinition.InterceptorAttributes[0].AttributeData.AttributeType);
@@ -682,7 +757,7 @@ namespace NIntercept.Tests
         {
             var moduleDefinition = new ModuleDefinition();
 
-            var typeDefinition = moduleDefinition.GetOrAdd(typeof(Type8_b), null, null);
+            var typeDefinition = moduleDefinition.GetTypeDefinition(typeof(Type8_b), null, null);
 
             Assert.AreEqual(1, typeDefinition.InterceptorAttributes.Length);
             Assert.AreEqual(typeof(MyCustomInterceptorAttribute), typeDefinition.InterceptorAttributes[0].AttributeData.AttributeType);
@@ -694,7 +769,7 @@ namespace NIntercept.Tests
         {
             var moduleDefinition = new ModuleDefinition();
 
-            var typeDefinition = moduleDefinition.GetOrAdd(typeof(IType9), null, null);
+            var typeDefinition = moduleDefinition.GetTypeDefinition(typeof(IType9), null, null);
 
             Assert.AreEqual(1, typeDefinition.InterceptorAttributes.Length);
             Assert.AreEqual(typeof(AllInterceptorAttribute), typeDefinition.InterceptorAttributes[0].AttributeData.AttributeType);
@@ -706,7 +781,7 @@ namespace NIntercept.Tests
         {
             var moduleDefinition = new ModuleDefinition();
 
-            var typeDefinition = moduleDefinition.GetOrAdd(typeof(IType9_b), null, null);
+            var typeDefinition = moduleDefinition.GetTypeDefinition(typeof(IType9_b), null, null);
 
             Assert.AreEqual(1, typeDefinition.InterceptorAttributes.Length);
             Assert.AreEqual(typeof(MyCustomInterceptorAttribute), typeDefinition.InterceptorAttributes[0].AttributeData.AttributeType);
@@ -718,7 +793,7 @@ namespace NIntercept.Tests
         {
             var moduleDefinition = new ModuleDefinition();
 
-            var parentTypeDefinition = moduleDefinition.GetOrAdd(typeof(IType10_3), null, null);
+            var parentTypeDefinition = moduleDefinition.GetTypeDefinition(typeof(IType10_3), null, null);
 
             Assert.AreEqual(2, parentTypeDefinition.InterceptorAttributes.Length);
             Assert.AreEqual(typeof(AllInterceptorAttribute), parentTypeDefinition.InterceptorAttributes[0].AttributeData.AttributeType);
@@ -757,14 +832,14 @@ namespace NIntercept.Tests
 
     public class Type2
     {
-        [PropertyGetInterceptor(typeof(Int1))]
-        [PropertySetInterceptor(typeof(Int2))]
-        [PropertySetInterceptor(typeof(Int3))]
+        [GetterInterceptor(typeof(Int1))]
+        [SetterInterceptor(typeof(Int2))]
+        [SetterInterceptor(typeof(Int3))]
         public virtual string MyProperty { get; set; }
 
         private int fulleProperty;
 
-        [PropertyGetInterceptor(typeof(Int1))]
+        [GetterInterceptor(typeof(Int1))]
         public virtual int FullProperty
         {
             get { return fulleProperty; }
@@ -774,7 +849,7 @@ namespace NIntercept.Tests
 
         private string readOnlyProp;
 
-        [PropertyGetInterceptor(typeof(Int1))]
+        [GetterInterceptor(typeof(Int1))]
         public virtual string ReadOnlyProp
         {
             get { return readOnlyProp; }
@@ -829,9 +904,9 @@ namespace NIntercept.Tests
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = true)]
     public class MyCustomInterceptorAttribute : InterceptorAttributeBase,
-        IPropertySetInterceptorProvider,
+        ISetterInterceptorProvider,
         IMethodInterceptorProvider,
-        IAddEventInterceptorProvider
+        IAddOnInterceptorProvider
     {
         public MyCustomInterceptorAttribute(Type interceptorType) : base(interceptorType)
         {
@@ -991,7 +1066,7 @@ namespace NIntercept.Tests
         }
     }
 
-    public class MySetAtt : PropertySetInterceptorAttribute
+    public class MySetAtt : SetterInterceptor
     {
         public MySetAtt()
             : base(typeof(Int1))
@@ -1007,7 +1082,7 @@ namespace NIntercept.Tests
         }
     }
 
-    public class MyEventAtt : AddEventInterceptorAttribute
+    public class MyEventAtt : AddOnInterceptorAttribute
     {
         public MyEventAtt()
             : base(typeof(Int1))
@@ -1023,11 +1098,11 @@ namespace NIntercept.Tests
 
     public interface Interface2
     {
-        [PropertyGetInterceptor(typeof(Int1))]
-        [PropertySetInterceptor(typeof(Int2))]
+        [GetterInterceptor(typeof(Int1))]
+        [SetterInterceptor(typeof(Int2))]
         string MyProperty { get; set; }
 
-        [PropertyGetInterceptor(typeof(Int1))]
+        [GetterInterceptor(typeof(Int1))]
         string ReadOnlyProp { get; }
     }
 
@@ -1054,4 +1129,7 @@ namespace NIntercept.Tests
             invocation.Proceed();
         }
     }
+
+    public class MyAttribute : Attribute { }
+    public class MyAttribute2 : Attribute { }
 }

@@ -5,7 +5,6 @@ using System.Linq;
 
 namespace NIntercept.Definition
 {
-
     public class TypeDefinitionCollection : IEnumerable<ProxyTypeDefinition>
     {
         private List<ProxyTypeDefinition> items;
@@ -27,43 +26,55 @@ namespace NIntercept.Definition
             get { return items.Count; }
         }
 
-        public ProxyTypeDefinition GetByType(Type type, object target, ProxyGeneratorOptions options)
+        private bool Equals(ProxyTypeDefinition typeDefinition, Type type, Type targetType, ProxyGeneratorOptions options)
+        {
+            if (typeDefinition.Type != type)
+                return false;
+
+            if (typeDefinition.TargetType != targetType)
+                return false;
+
+            return comparer.Equals(typeDefinition.Options, options);
+        }
+
+        public ProxyTypeDefinition GetByType(Type type, Type targetType, ProxyGeneratorOptions options)
         {
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
 
-            if (type.IsInterface)
-                return this.FirstOrDefault(p => p.Type == type && comparer.Equals(p.Options, options));
-            else
-                // same type, same target type or null, same options or null
-                return this.FirstOrDefault(p => p.Type == type && p.Target?.GetType() == target?.GetType() && comparer.Equals(p.Options, options));
+            foreach (var item in items)
+            {
+                if (Equals(item, type, targetType, options))
+                    return item;
+            }
+            return null;
         }
 
-        public bool ContainsByType(Type type, object target, ProxyGeneratorOptions options)
+        public bool ContainsByType(Type type, Type targetType, ProxyGeneratorOptions options)
         {
-            return GetByType(type, target, options) != null;
+            return GetByType(type, targetType, options) != null;
         }
 
-        protected internal void Add(ProxyTypeDefinition typeDefinition)
+        internal void Add(ProxyTypeDefinition typeDefinition)
         {
             if (typeDefinition is null)
                 throw new ArgumentNullException(nameof(typeDefinition));
-            if (ContainsByType(typeDefinition.Type, typeDefinition.Target, typeDefinition.Options))
+            if (ContainsByType(typeDefinition.Type, typeDefinition.TargetType, typeDefinition.Options))
                 throw new InvalidOperationException($"A type '{typeDefinition.Type.Name}' and options provided is already registered.");
 
             this.items.Add(typeDefinition);
         }
 
-        protected internal int IndexOf(ProxyTypeDefinition typeDefinition)
+        internal int IndexOf(ProxyTypeDefinition typeDefinition)
         {
             bool isInterface = typeDefinition.IsInterface;
+            // filter by type
             var candidates = items.Where(p => p.Type == typeDefinition.Type).ToArray();
 
             for (int i = 0; i < candidates.Length; i++)
             {
                 var candidate = candidates[i];
-
-                if (!isInterface && candidate.Target?.GetType() != typeDefinition.Target?.GetType())
+                if (candidate.TargetType != typeDefinition.TargetType)
                     continue;
 
                 if (comparer.Equals(candidate.Options, typeDefinition.Options))
@@ -72,7 +83,7 @@ namespace NIntercept.Definition
             return -1;
         }
 
-        protected internal void Clear()
+        internal void Clear()
         {
             items.Clear();
         }
@@ -87,74 +98,4 @@ namespace NIntercept.Definition
             return GetEnumerator();
         }
     }
-
-    //public class TypeDefinitionCollection : IEnumerable<ProxyTypeDefinition>
-    //{
-    //    private List<ProxyTypeDefinition> items;
-    //    private ProxyGeneratorOptionsComparer comparer;
-
-    //    public TypeDefinitionCollection()
-    //    {
-    //        items = new List<ProxyTypeDefinition>();
-    //        comparer = new ProxyGeneratorOptionsComparer();
-    //    }
-
-    //    public ProxyTypeDefinition this[int index]
-    //    {
-    //        get { return items[index]; }
-    //    }
-
-    //    public int Count
-    //    {
-    //        get { return items.Count; }
-    //    }
-
-    //    public ProxyTypeDefinition GetByType(Type type, object target, ProxyGeneratorOptions options)
-    //    {
-    //        if (type is null)
-    //            throw new ArgumentNullException(nameof(type));
-
-    //        if (type.IsInterface)
-    //            return this.FirstOrDefault(p => p.Type == type && p.Target?.GetType() == target?.GetType() && comparer.Equals(p.Options, options));
-    //        else
-    //        {
-    //            return this.FirstOrDefault(p => p.Type == type && comparer.Equals(p.Options, options));
-    //        }
-    //    }
-
-    //    public bool ContainsByType(Type type, object target, ProxyGeneratorOptions options)
-    //    {
-    //        return GetByType(type, target, options) != null;
-    //    }
-
-    //    protected internal void Add(ProxyTypeDefinition typeDefinition)
-    //    {
-    //        if (typeDefinition is null)
-    //            throw new ArgumentNullException(nameof(typeDefinition));
-    //        if (ContainsByType(typeDefinition.Type, typeDefinition.Target, typeDefinition.Options))
-    //            throw new InvalidOperationException($"A type '{typeDefinition.Type.Name}' and options provided is already registered.");
-
-    //        this.items.Add(typeDefinition);
-    //    }
-
-    //    protected internal int IndexOf(ProxyTypeDefinition typeDefinition)
-    //    {
-    //        return items.IndexOf(typeDefinition);
-    //    }
-
-    //    protected internal void Clear()
-    //    {
-    //        items.Clear();
-    //    }
-
-    //    public IEnumerator<ProxyTypeDefinition> GetEnumerator()
-    //    {
-    //        return items.GetEnumerator();
-    //    }
-
-    //    IEnumerator IEnumerable.GetEnumerator()
-    //    {
-    //        return GetEnumerator();
-    //    }
-    //}
 }

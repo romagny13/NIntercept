@@ -4,7 +4,8 @@ using System.Reflection;
 
 namespace NIntercept.Definition
 {
-    public class InterceptorAttributeDefinition
+
+    public sealed class InterceptorAttributeDefinition
     {
         private CustomAttributeData attributeData;
         private MemberInfo member;

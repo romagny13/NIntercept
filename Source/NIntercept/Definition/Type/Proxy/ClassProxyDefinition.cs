@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace NIntercept.Definition
 {
-    public class ClassProxyDefinition : ProxyTypeDefinition
+    public sealed class ClassProxyDefinition : ProxyTypeDefinition
     {
         private static readonly IClassProxyMemberSelector DefaultMemberSelector;
         private static readonly IConstructorSelector DefaultConstructorSelector;
@@ -15,12 +15,12 @@ namespace NIntercept.Definition
 
         static ClassProxyDefinition()
         {
-            DefaultMemberSelector = new ClassProxyMemberSelector();
+            DefaultMemberSelector = new DefaultClassProxyMemberSelector();
             DefaultConstructorSelector = new DefaultConstructorSelector();
         }
 
-        public ClassProxyDefinition(ModuleDefinition moduleDefinition, Type type, object target, ProxyGeneratorOptions options)
-            : base(moduleDefinition, type, target, options)
+        public ClassProxyDefinition(ModuleDefinition moduleDefinition, Type type, Type targetType, ProxyGeneratorOptions options)
+            : base(moduleDefinition, type, targetType, options)
         {
         }
 
@@ -58,7 +58,6 @@ namespace NIntercept.Definition
                 return constructorSelector;
             }
         }
-
 
         public ConstructorInfo Constructor
         {

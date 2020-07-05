@@ -5,32 +5,28 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace NIntercept
+namespace NIntercept.Builder
 {
 
     public class CallbackMethodBuilder : ICallbackMethodBuilder
     {
-        public virtual MethodBuilder CreateMethod(ModuleBuilder moduleBuilder, TypeBuilder typeBuilder, CallbackMethodDefinition callbackMethodDefinition, FieldBuilder[] fields)
+        public virtual MethodBuilder CreateMethod(ProxyScope proxyScope, CallbackMethodDefinition callbackMethodDefinition)
         {
-            ProxyGeneratorOptions options = (callbackMethodDefinition.TypeDefinition as ProxyTypeDefinition)?.Options;
+            // method
+            MethodBuilder methodBuilder = DefineMethod(proxyScope.TypeBuilder, callbackMethodDefinition);
 
-            MethodBuilder methodBuilder = DefineMethod(typeBuilder, callbackMethodDefinition);
-
+            // parameters
             GenericTypeParameterBuilder[] genericTypeParameters = methodBuilder.DefineGenericParameters(callbackMethodDefinition.GenericArguments);
             if (callbackMethodDefinition.ParameterDefinitions.Length > 0)
                 DefineParameters(methodBuilder, callbackMethodDefinition);
 
+            // body
             var il = methodBuilder.GetILGenerator();
 
-            // before
-            if (options != null && options.CodeGenerator != null)
-                options.CodeGenerator.BeforeInvoke(il, typeBuilder, callbackMethodDefinition, fields);
-
-            il.Emit(OpCodes.Nop);
-
-            Type returnType = callbackMethodDefinition.ReturnType;
             // locals
             LocalBuilder resultLocalBuilder = null;
+            LocalBuilder targetLocalBuilder = null;
+            Type returnType = callbackMethodDefinition.ReturnType;
             if (returnType != typeof(void))
             {
                 if (returnType.ContainsGenericParameters)
@@ -38,13 +34,19 @@ namespace NIntercept
                 else
                     resultLocalBuilder = il.DeclareLocal(returnType);
             }
+            Type targetType = callbackMethodDefinition.TypeDefinition.TargetType;
+            if (targetType != null)
+                targetLocalBuilder = il.DeclareLocal(targetType);
 
-            object target = callbackMethodDefinition.TypeDefinition.Target;
-            if (target != null)
+            il.Emit(OpCodes.Nop);
+
+            BeforeInvoke(proxyScope, il, callbackMethodDefinition);
+
+            if (targetType != null)
             {
                 // return ((TargetType)target).Method(p1, p2 ...);
-                LocalBuilder targetLocalBuilder = il.DeclareLocal(target.GetType());
-                EmitHelper.StoreFieldInLocal(il, fields.ElementAt(1), targetLocalBuilder);
+                string fieldName = callbackMethodDefinition.TypeDefinition.TargetFieldName;
+                EmitHelper.StoreFieldInLocal(il, proxyScope.FieldBuilders.First(p => p.Name == fieldName), targetLocalBuilder);
                 il.Emit(OpCodes.Ldloc, targetLocalBuilder);
             }
             else
@@ -57,21 +59,19 @@ namespace NIntercept
             for (int i = 0; i < parameterDefinitions.Length; i++)
                 il.EmitLdarg(i + 1);
 
-            if (callbackMethodDefinition.TypeDefinition.TypeDefinitionType == TypeDefinitionType.InterfaceProxy && target == null)
+            if (callbackMethodDefinition.TypeDefinition.TypeDefinitionType == TypeDefinitionType.InterfaceProxy && targetType == null)
                 ThrowInterfaceProxyWithoutTargetException(il, callbackMethodDefinition);
             else
             {
                 CallMethodOnTarget(il, callbackMethodDefinition, genericTypeParameters);
 
-                // after
-                if (options != null && options.CodeGenerator != null)
-                    options.CodeGenerator.AfterInvoke(il, typeBuilder, callbackMethodDefinition, fields);
+                if (returnType != typeof(void))
+                    il.Emit(OpCodes.Stloc, resultLocalBuilder);
+
+                AfterInvoke(proxyScope, il, callbackMethodDefinition);
 
                 if (returnType != typeof(void))
-                {
-                    il.Emit(OpCodes.Stloc, resultLocalBuilder);
                     il.Emit(OpCodes.Ldloc, resultLocalBuilder);
-                }
 
                 il.Emit(OpCodes.Nop);
                 il.Emit(OpCodes.Ret);
@@ -80,18 +80,10 @@ namespace NIntercept
             return methodBuilder;
         }
 
-        protected void ThrowInterfaceProxyWithoutTargetException(ILGenerator il, CallbackMethodDefinition callbackMethodDefinition)
+        protected MethodBuilder DefineMethod(TypeBuilder typeBuilder, CallbackMethodDefinition callbackMethodDefinition)
         {
-            il.Emit(OpCodes.Nop);
-            il.Emit(OpCodes.Ldstr, $"InterfaceProxy without target '{callbackMethodDefinition.TypeDefinition.Name}', member '{callbackMethodDefinition.Method.Name}' . Use an interceptor to define the behavior and the return value. But do not call Proceed method with the interceptor.");
-            il.Emit(OpCodes.Newobj, typeof(InvalidOperationException).GetConstructor(new Type[] { typeof(string) }));
-            il.Emit(OpCodes.Throw);
-        }
-
-        protected virtual MethodBuilder DefineMethod(TypeBuilder typeBuilder, CallbackMethodDefinition methodCallbackDefinition)
-        {
-            MethodBuilder methodBuilder = typeBuilder.DefineMethod(methodCallbackDefinition.Name, methodCallbackDefinition.MethodAttributes);
-            methodBuilder.SetReturnType(methodCallbackDefinition.ReturnType);
+            MethodBuilder methodBuilder = typeBuilder.DefineMethod(callbackMethodDefinition.Name, callbackMethodDefinition.MethodAttributes);
+            methodBuilder.SetReturnType(callbackMethodDefinition.ReturnType);
             return methodBuilder;
         }
 
@@ -102,6 +94,28 @@ namespace NIntercept
             int index = 1;
             foreach (var parameterDefinition in methodCallbackDefinition.ParameterDefinitions)
                 methodBuilder.DefineParameter(index++, parameterDefinition.Attributes, parameterDefinition.Name);
+        }
+
+        protected virtual void BeforeInvoke(ProxyScope proxyScope, ILGenerator il, CallbackMethodDefinition callbackMethodDefinition)
+        {
+            AdditionalCode additionalCode = (callbackMethodDefinition.TypeDefinition as ProxyTypeDefinition)?.Options?.AdditionalCode;
+            if (additionalCode != null)
+                additionalCode.BeforeInvoke(proxyScope, il, callbackMethodDefinition);
+        }
+
+        protected virtual void AfterInvoke(ProxyScope proxyScope, ILGenerator il, CallbackMethodDefinition callbackMethodDefinition)
+        {
+            AdditionalCode additionalCode = (callbackMethodDefinition.TypeDefinition as ProxyTypeDefinition)?.Options?.AdditionalCode;
+            if (additionalCode != null)
+                additionalCode.AfterInvoke(proxyScope, il, callbackMethodDefinition);
+        }
+
+        protected void ThrowInterfaceProxyWithoutTargetException(ILGenerator il, CallbackMethodDefinition callbackMethodDefinition)
+        {
+            il.Emit(OpCodes.Nop);
+            il.Emit(OpCodes.Ldstr, $"InterfaceProxy without target '{callbackMethodDefinition.TypeDefinition.Name}', member '{callbackMethodDefinition.Method.Name}' . Use an interceptor to define the behavior and the return value. But do not call Proceed method with the interceptor.");
+            il.Emit(OpCodes.Newobj, typeof(InvalidOperationException).GetConstructor(new Type[] { typeof(string) }));
+            il.Emit(OpCodes.Throw);
         }
 
         protected virtual void CallMethodOnTarget(ILGenerator il, CallbackMethodDefinition methodCallbackDefinition, GenericTypeParameterBuilder[] genericTypeParameters)

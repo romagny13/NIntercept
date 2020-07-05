@@ -3,7 +3,7 @@
 namespace NIntercept.Definition
 {
 
-    public class ModuleDefinition
+    public sealed class ModuleDefinition
     {
         private static object locker = new object();
         private TypeDefinitionCollection typeDefinitions;
@@ -18,27 +18,21 @@ namespace NIntercept.Definition
             get { return typeDefinitions; }
         }
 
-        public virtual ProxyTypeDefinition GetOrAdd(Type type, object target, ProxyGeneratorOptions options)
+        public ProxyTypeDefinition GetTypeDefinition(Type type, Type targetType, ProxyGeneratorOptions options)
         {
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
 
             lock (locker)
             {
-                ProxyTypeDefinition typeDefinition = typeDefinitions.GetByType(type, target, options);
+                ProxyTypeDefinition typeDefinition = typeDefinitions.GetByType(type, targetType, options);
                 if (typeDefinition != null)
-                {
-                    if (target != null)
-                        typeDefinition.Target = target;
-                    if (options != null)
-                        typeDefinition.Options = options;
                     return typeDefinition;
-                }
 
                 if (type.IsInterface)
-                    typeDefinition = new InterfaceProxyDefinition(this, type, target, options);
+                    typeDefinition = new InterfaceProxyDefinition(this, type, targetType, options);
                 else
-                    typeDefinition = new ClassProxyDefinition(this, type, target, options);
+                    typeDefinition = new ClassProxyDefinition(this, type, targetType, options);
 
                 SetMixinDefinitions(typeDefinition, options);
 
@@ -48,7 +42,7 @@ namespace NIntercept.Definition
             }
         }
 
-        protected virtual void SetMixinDefinitions(ProxyTypeDefinition typeDefinition, ProxyGeneratorOptions options)
+        private void SetMixinDefinitions(ProxyTypeDefinition typeDefinition, ProxyGeneratorOptions options)
         {
             if (options != null)
             {

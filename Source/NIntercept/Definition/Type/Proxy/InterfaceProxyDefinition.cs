@@ -3,13 +3,13 @@ using System.Reflection;
 
 namespace NIntercept.Definition
 {
-    public class InterfaceProxyDefinition : ProxyTypeDefinition
+    public sealed class InterfaceProxyDefinition : ProxyTypeDefinition
     {
         private Type[] interfaces;
         private InterfaceToImplementDefinition[] interfacesToImplement;
 
-        public InterfaceProxyDefinition(ModuleDefinition moduleDefinition, Type type, object target, ProxyGeneratorOptions options) 
-            : base(moduleDefinition, type, target, options)
+        public InterfaceProxyDefinition(ModuleDefinition moduleDefinition, Type type, Type targetType, ProxyGeneratorOptions options) 
+            : base(moduleDefinition, type, targetType, options)
         {
         }
 
@@ -53,13 +53,13 @@ namespace NIntercept.Definition
             return BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
         }
 
-        protected virtual InterfaceToImplementDefinition[] GetInterfacesToImplement()
+        private InterfaceToImplementDefinition[] GetInterfacesToImplement()
         {
             Type[] interfaces = Interfaces;
             int length = interfaces.Length;
             var typesToImplement = new InterfaceToImplementDefinition[length];
             for (int i = 0; i < length; i++)
-                typesToImplement[i] = new InterfaceToImplementDefinition(ModuleDefinition, interfaces[i], Target, this);
+                typesToImplement[i] = new InterfaceToImplementDefinition(ModuleDefinition, interfaces[i], TargetType, this);
             return typesToImplement;
         }
     }

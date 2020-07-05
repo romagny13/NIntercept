@@ -6,20 +6,17 @@ namespace NIntercept.Definition
     {
         private const string DefaultProxiesNamespace = "NIntercept.Proxies";
         private MixinDefinition[] mixinDefinitions;
-        private string @namespace;
         private ProxyGeneratorOptions options;
 
-        public ProxyTypeDefinition(ModuleDefinition moduleDefinition, Type type, object target, ProxyGeneratorOptions options) 
-            : base(moduleDefinition, type, target)
+        public ProxyTypeDefinition(ModuleDefinition moduleDefinition, Type type, Type targetType, ProxyGeneratorOptions options) 
+            : base(moduleDefinition, type, targetType)
         {
-            this.@namespace = DefaultProxiesNamespace;
             this.options = options;
         }
 
-        public virtual string Namespace
+        public string Namespace
         {
-            get { return @namespace; }
-            set { @namespace = value; }
+            get { return DefaultProxiesNamespace; }
         }
 
         public MixinDefinition[] MixinDefinitions

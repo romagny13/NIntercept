@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace NIntercept
+namespace NIntercept.Reflection
 {
     public class TypeAccessor
     {

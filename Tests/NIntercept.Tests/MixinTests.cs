@@ -149,7 +149,7 @@ namespace NIntercept.Tests
 
         public static List<StateTypes> States = new List<StateTypes>();
 
-        [PropertySetInterceptor(typeof(PropertyChangedNotifierInterceptor))]
+        [SetterInterceptor(typeof(PropertyChangedNotifierInterceptor))]
         public virtual string Title { get => title; set => title = value; }
 
         public MyClass()
@@ -165,7 +165,7 @@ namespace NIntercept.Tests
 
     public interface IMyClass_b
     {
-        [PropertySetInterceptor(typeof(PropertyChangedNotifierInterceptor_b))]
+        [SetterInterceptor(typeof(PropertyChangedNotifierInterceptor_b))]
         string Title { get; set; }
 
         void UpdateTitle();

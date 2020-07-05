@@ -8,16 +8,17 @@ namespace NIntercept.Definition
 {
     public abstract class TypeDefinition
     {
+        private const string DefaultTargetFieldName = "_target";
         private Type type;
+        private Type targetType;
         private ModuleDefinition moduleDefinition;
         private PropertyDefinition[] propertyDefinitions;
         private MethodDefinition[] methodDefinitions;
         private EventDefinition[] eventDefinitions;
         private InterceptorAttributeDefinition[] interceptorAttributes;
         private string name;
-        private object target;
 
-        public TypeDefinition(ModuleDefinition moduleDefinition, Type type, object target)
+        public TypeDefinition(ModuleDefinition moduleDefinition, Type type, Type targetType)
         {
             if (moduleDefinition is null)
                 throw new ArgumentNullException(nameof(moduleDefinition));
@@ -26,7 +27,7 @@ namespace NIntercept.Definition
 
             this.moduleDefinition = moduleDefinition;
             this.type = type;
-            this.target = target;
+            this.targetType = targetType;
         }
 
         public ModuleDefinition ModuleDefinition
@@ -39,15 +40,14 @@ namespace NIntercept.Definition
             get { return type; }
         }
 
-        public object Target
+        public virtual string TargetFieldName
         {
-            get { return target; }
-            protected internal set { target = value; }
+            get { return DefaultTargetFieldName; }
         }
 
         public Type TargetType
         {
-            get { return target?.GetType(); }
+            get { return targetType; }
         }
 
         public bool IsInterface

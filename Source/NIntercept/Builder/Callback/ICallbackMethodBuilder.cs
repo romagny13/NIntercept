@@ -1,10 +1,10 @@
 ﻿using System.Reflection.Emit;
 using NIntercept.Definition;
 
-namespace NIntercept
+namespace NIntercept.Builder
 {
     public interface ICallbackMethodBuilder
     {
-        MethodBuilder CreateMethod(ModuleBuilder moduleBuilder, TypeBuilder typeBuilder, CallbackMethodDefinition callbackMethodDefinition, FieldBuilder[] fields);
+        MethodBuilder CreateMethod(ProxyScope proxyScope, CallbackMethodDefinition callbackMethodDefinition);
     }
 }

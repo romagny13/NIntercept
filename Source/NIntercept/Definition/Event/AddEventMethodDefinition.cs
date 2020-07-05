@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace NIntercept.Definition
 {
-    public class AddEventMethodDefinition : MethodDefinition
+    public sealed class AddEventMethodDefinition : MethodDefinition
     {
         private EventDefinition eventDefinition;
 
@@ -23,6 +23,11 @@ namespace NIntercept.Definition
         public override string Name
         {
             get { return $"add_{eventDefinition.Name}"; }
+        }
+
+        public override MethodDefinitionType MethodDefinitionType
+        {
+            get { return MethodDefinitionType.AddOn; }
         }
     }
 }

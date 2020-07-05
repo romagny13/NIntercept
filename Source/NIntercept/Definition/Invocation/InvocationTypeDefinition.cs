@@ -4,12 +4,11 @@ using System.Reflection;
 
 namespace NIntercept.Definition
 {
-    public class InvocationTypeDefinition
+    public sealed class InvocationTypeDefinition
     {
-        private const string DefaultInvocationsNamespace = "NIntercept.Invocations";
+        private const string InvocationNamespace = "NIntercept.Invocations";
         private TypeDefinition typeDefinition;
         private MethodDefinition methodDefinition;
-        private string @namespace;
         private string name;
         private InvokeMethodOnTargetDefinition methodOnTargetDefinition;
 
@@ -21,7 +20,6 @@ namespace NIntercept.Definition
                 throw new ArgumentNullException(nameof(methodDefinition));
             this.typeDefinition = typeDefinition;
             this.methodDefinition = methodDefinition;
-            this.@namespace = DefaultInvocationsNamespace;
         }
 
         public TypeDefinition TypeDefinition
@@ -34,12 +32,7 @@ namespace NIntercept.Definition
             get { return methodDefinition; }
         }
 
-        public object Target
-        {
-            get { return typeDefinition.Target; }
-        }
-
-        public virtual string Name
+        public string Name
         {
             get
             {
@@ -49,20 +42,14 @@ namespace NIntercept.Definition
             }
         }
 
-        public virtual TypeAttributes Attributes
+        public TypeAttributes Attributes
         {
             get { return TypeAttributes.Public; }
         }
 
-        public string Namespace
+        public string FullName
         {
-            get { return @namespace; }
-            set { @namespace = value; }
-        }
-
-        public virtual string FullName
-        {
-            get { return !string.IsNullOrWhiteSpace(Namespace) ? $"{Namespace}.{Name}" : Name; }
+            get { return $"{InvocationNamespace}.{Name}"; }
         }
 
         public Type[] GenericArguments
@@ -80,7 +67,7 @@ namespace NIntercept.Definition
             }
         }
 
-        protected virtual string GetInvocationTypeName()
+        private string GetInvocationTypeName()
         {
             MethodInfo method = methodDefinition.Method;
             TypeDefinition typeDefinition = methodDefinition.TypeDefinition;

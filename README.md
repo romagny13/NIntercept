@@ -1,22 +1,29 @@
 # NIntercept
- 
->  Interception for NET. Allows to create proxies and intercept property, indexer, method and event calls. 
+
+> Allows to create `proxies` for class and interface, `intercept` properties, methods, events and `customize the code generated`.
+
 
 Proxies
 
-* **Class Proxy**: creates a class that inherits from the **base class**, overrides **virtual** members and call base methods
-* **Class Proxy with target**: call target methods
-* **Interface Proxy with target**: creates a class that implements the **interface** and calls target methods
-* **Interface Proxy without target**: interceptors are used to get and set the **return value**
+* For classes: **Class Proxy**, **Class proxy with target**
+* For interfaces: **Interface Proxy without target**, **Interface Proxy with target**
+
+Interception:
+
+* **by attribute**
+* **global interceptor**
 
 Options:
 
-* **Mixins**: allows to **add features** to **proxy** created. For example add INotifyPropertyChanged implementation.
-* **CodeGenerator** : allows to add code to TypeBuilder.
+* **Mixins**: allows to **add features** to **proxy** created.
+* **AdditionalCode** : allows to customize the code generated.
 * **ClassProxyMemberSelector**: allows to **filter members to include** for **Class Proxy**. For example create an attribute and include only virtual members decorated with the attribute.
 * **AdditionalTypeAttributes**: allows to add custom attributes on proxy generated.
-* **ConstructorInjectionResolver**: allows to resolve parameter injections.
 * **ConstructorSelector**: allows to select the base constructor to call.
+
+And
+
+* **ConstructorInjectionResolver**: allows to resolve constructor injections.
 
 Supported:
 
@@ -33,180 +40,230 @@ Supported:
 Install-Package NIntercept
 ```
 
-## Samples
+## Class Proxy
 
-### Class Proxy
+> A `Proxy` that inherits from the `class` is created. `Virtual` members (properties, methods end events) are `overridden`. `Interceptors` allow to intercept these members. The `base class members` are `invoked` after interception.
+
+**Sample 1** with global interceptor
+
+Create a **class** with **virtual** members
 
 ```cs
-class Program
+public class MyClass
 {
-    static void Main(string[] args)
-    {
-        var generator = new ProxyGenerator();
-
-        var proxy = generator.CreateClassProxy<MyClass>();
-
-        // property
-        proxy.MyProperty = "New value";
-        Console.WriteLine($"Property: '{proxy.MyProperty}'");
-
-        // method
-        proxy.MyMethod("A");
-        Console.WriteLine($"Property: '{proxy.MyProperty}'");
-
-        // event
-        EventHandler handler = null;
-        handler = (s, e) =>
-        {
-            Console.WriteLine("Event raised");
-        };
-        proxy.MyEvent += handler;
-
-        proxy.MyEvent -= handler;
-
-        Console.ReadKey();
-    }
-}
-
-public class MyClass : INotifyPropertyChangedAware
-{
-    [PropertySetInterceptor(typeof(PropertyChangedInterceptor))]
     public virtual string MyProperty { get; set; }
 
-    [MethodInterceptor(typeof(MyMethodInterceptor))]
-    public virtual void MyMethod(string value)
+    public virtual void MyMethod()
     {
-        this.myProperty = value;
+
     }
 
-    public void OnPropertyChanged(string propertyName)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    [AddEventInterceptor(typeof(EventInterceptor))]
     public virtual event EventHandler MyEvent;
-
-    public event PropertyChangedEventHandler PropertyChanged;
 }
+```
 
-public interface INotifyPropertyChangedAware : INotifyPropertyChanged
-{
-    void OnPropertyChanged(string propertyName);
-}
+Create an **interceptor**
 
-public class PropertyChangedInterceptor : Interceptor
-{
-    protected override void OnEnter(IInvocation invocation)
-    {
-
-    }
-
-    protected override void OnException(IInvocation invocation, Exception exception)
-    {
-
-    }
-
-    protected override void OnExit(IInvocation invocation)
-    {
-        var inpc = invocation.Proxy as INotifyPropertyChangedAware;
-        if (inpc != null)
-        {
-            string propertyName = invocation.Member.Name;
-            Console.WriteLine($"[PropertyChangedInterceptor] Notify property changed '{propertyName}'");
-            inpc.OnPropertyChanged(propertyName);
-        }
-    }
-}
-
-public class MyMethodInterceptor : IInterceptor
+```cs
+public class LogInterceptor : IInterceptor
 {
     public void Intercept(IInvocation invocation)
     {
-        var value = invocation.GetParameter<string>(0);
-        if (value == "A")
-            invocation.Parameters[0] = "B";
+        Console.WriteLine($"[LogInterceptor] Before {invocation.Member.Name}");
 
         invocation.Proceed();
+
+        Console.WriteLine($"[LogInterceptor] After {invocation.Member.Name}");
     }
 }
+```
 
-public class LogInterceptor : Interceptor
+Create and use the **proxy**
+
+```cs
+var generator = new ProxyGenerator();
+var proxy = generator.CreateClassProxy<MyClass>(new LogInterceptor());
+
+proxy.MyProperty = "New Value"; // Setter
+
+Console.WriteLine($"MyProperty: {proxy.MyProperty}"); // Getter
+
+proxy.MyMethod(); // Method
+
+EventHandler handler = null;
+handler = (s, e) =>
+{
+
+};
+proxy.MyEvent += handler; // AddOn
+
+proxy.MyEvent -= handler; // RemoveOn
+```
+
+**Output**
+
+```
+[LogInterceptor] Before MyProperty
+[LogInterceptor] After MyProperty
+[LogInterceptor] Before MyProperty
+[LogInterceptor] After MyProperty
+MyProperty: New Value
+[LogInterceptor] Before MyMethod
+[LogInterceptor] After MyMethod
+[LogInterceptor] Before MyEvent
+[LogInterceptor] After MyEvent
+[LogInterceptor] Before MyEvent
+[LogInterceptor] After MyEvent
+```
+
+**Sample 2** : **with attributes** (Create some interceptors for each attribute)
+
+```cs
+[AllInterceptor(typeof(LogInterceptor))]
+public class MyClass
+{
+    [GetterInterceptor(typeof(MyGetterInterceptor))]
+    [SetterInterceptor(typeof(MySetterInterceptor))]
+    public virtual string MyProperty { get; set; }
+
+    [MethodInterceptor(typeof(MyMethodInterceptor))]
+    public virtual void MyMethod()
+    {
+
+    }
+
+    [AddOnInterceptor(typeof(MyAddOnInterceptor))]
+    [AddOnInterceptor(typeof(MyRemoveOnInterceptor))]
+    public virtual event EventHandler MyEvent;
+}
+```
+
+```cs
+var generator = new ProxyGenerator();
+var proxy = generator.CreateClassProxy<MyClass>();
+
+// etc.
+```
+
+| Interface | Target | Attribute |
+| --- | --- | --- |
+| IInterceptorProvider | class / interface | AllInterceptorAttribute
+| IPropertyGetInterceptorProvider | Property getter | PropertyGetInterceptorAttribute
+| IPropertySetInterceptorProvider | Property setter | PropertySetInterceptorAttribute
+| IMethodInterceptorProvider | Method | MethodInterceptorAttribute
+| IAddEventInterceptorProvider | Add event | AddEventInterceptorAttribute
+| IRemoveEventInterceptorProvider | Remove event |RemoveEventInterceptorAttribute
+
+**Sample 3**: Create a **custom interceptor attribute**
+
+
+```cs
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Property)]
+public class MyGetSetInterceptorAttribute : Attribute,
+    IGetterInterceptorProvider,
+    ISetterInterceptorProvider
+{
+    public Type InterceptorType => typeof(MyGetSetInterceptor);
+}
+
+public class MyGetSetInterceptor : IInterceptor
+{
+    public void Intercept(IInvocation invocation)
+    {
+        Console.WriteLine($"[MyGetSetInterceptor] Before {invocation.CallerMethod.Name}");
+
+        invocation.Proceed();
+
+        Console.WriteLine($"[MyGetSetInterceptor] After {invocation.CallerMethod.Name}");
+    }
+}
+```
+
+**Decorate** the property
+
+```cs
+public class MyClass
+{
+    [MyGetSetInterceptor]
+    public virtual string MyProperty { get; set; }
+}
+```
+
+**Output**
+
+```
+[MyGetSetInterceptor] Before set_MyProperty
+[MyGetSetInterceptor] After set_MyProperty
+[MyGetSetInterceptor] Before get_MyProperty
+[MyGetSetInterceptor] After get_MyProperty
+MyProperty: New Value
+```
+
+_Notes:_
+
+* The interceptor allows to update parameters, the return value
+
+**Sample**
+
+```cs
+public class MyInterceptor : IInterceptor
+{
+    public void Intercept(IInvocation invocation)
+    {
+        invocation.Parameters[0] = "New value";
+
+        invocation.Proceed();
+
+        invocation.ReturnValue = "New result";
+    }
+}
+```
+
+* We can use the `Interceptor` class (`Proceed` is automatically invoked)
+
+```cs
+public class MyInterceptor : Interceptor
 {
     protected override void OnEnter(IInvocation invocation)
     {
-        Console.WriteLine($"[LogInterceptor] Enter '{invocation.Member.Name}'");
+        
     }
 
     protected override void OnException(IInvocation invocation, Exception exception)
     {
-        Console.WriteLine($"[LogInterceptor] Exception '{invocation.Member.Name}', Result: '{invocation.ReturnValue}'");
+        
     }
 
     protected override void OnExit(IInvocation invocation)
     {
-        Console.WriteLine($"[LogInterceptor] Exit '{invocation.Member.Name}', Result: '{invocation.ReturnValue}'");
-    }
-}
-
-public class EventInterceptor : Interceptor
-{
-    protected override void OnEnter(IInvocation invocation)
-    {
-        Console.WriteLine($"[EventInterceptor] Enter add new subscriber '{invocation.Member.Name}'");
-    }
-
-    protected override void OnException(IInvocation invocation, Exception exception)
-    {
-
-    }
-
-    protected override void OnExit(IInvocation invocation)
-    {
-        Console.WriteLine($"[EventInterceptor] Exit add new subscriber '{invocation.Member.Name}'");
+        
     }
 }
 ```
 
-Output
+## Class Proxy with target
 
-```
-[LogInterceptor] Enter 'MyProperty'
-[PropertyChangedInterceptor] Notify property changed 'MyProperty'
-[LogInterceptor] Exit 'MyProperty', Result: ''
-[LogInterceptor] Enter 'MyProperty'
-[LogInterceptor] Exit 'MyProperty', Result: 'New value'
-Property: 'New value'
-[LogInterceptor] Enter 'MyMethod'
-[LogInterceptor] Exit 'MyMethod', Result: ''
-[LogInterceptor] Enter 'MyProperty'
-[LogInterceptor] Exit 'MyProperty', Result: 'B'
-Property: 'B'
-[LogInterceptor] Enter 'MyEvent'
-[EventInterceptor] Enter add new subscriber 'MyEvent'
-[EventInterceptor] Exit add new subscriber 'MyEvent'
-[LogInterceptor] Exit 'MyEvent', Result: ''
-[LogInterceptor] Enter 'MyEvent'
-[LogInterceptor] Exit 'MyEvent', Result: ''
-```
-
-### Class Proxy with target
+> A `Proxy` that inherits from the `class` is created. `Virtual` members (properties, methods end events) are `overridden`. `Interceptors` allow to intercept these members. The `target members` are `invoked` after interception.
 
 ```cs
 var target = new MyClass();
 var proxy = generator.CreateClassProxyWithTarget<MyClass>(target, new MyInterceptor());
-proxy.MethodA("My value");
+proxy.Method();
 ```
 
-### Interface Proxy with target
+## Interface Proxy with target
 
+> A `Proxy` that implements the `interface` is created. `Interceptors` allow to intercept these members. The `target members` are `invoked` after interception.
+> 
 ```cs
 var target = new MyService();
 var proxy = generator.CreateInterfaceProxyWithTarget<IMyService>(target, new MyInterceptor());
-proxy.MethodA("My value");
+proxy.Method();
 ```
 
-### Interface Proxy without target
+## Interface Proxy without target
+
+> A `Proxy` that implements the `interface` is created. The `interceptors` are used to get and set the **return value**.
 
 ```cs
 public interface IMyService
@@ -219,7 +276,7 @@ public class GetMessageInterceptor : IInterceptor
 {
     public void Intercept(IInvocation invocation)
     {
-        // invocation.Proceed(); do not call Proceed
+        // invocation.Proceed(); DO NOT CALL Proceed
 
         invocation.ReturnValue = $"Hello {invocation.Parameters[0]}!";
     }
@@ -232,134 +289,9 @@ var message = proxy.GetMessage("World");
 Console.WriteLine(message); // write "Hello World!"
 ```
 
-### Constructor Injection
-
-Example: use Unity Container to resolve injection parameters
-
-```cs
-public interface IMyService
-{
-    string GetMessage(string name);
-}
-
-public class MyService : IMyService
-{
-    public string GetMessage(string name)
-    {
-        return $"Hello {name}!";
-    }
-}
-
-public class MyClass
-{
-    private readonly IMyService myService;
-
-    public MyClass(IMyService myService)
-    {
-        this.myService = myService;
-    }
-
-    public void Method()
-    {
-        Console.WriteLine($"{myService.GetMessage("World")}");
-    }
-}
-```
-
-Create the Resolver
-
-```cs
-public class UnityConstructorInjectionResolver : IConstructorInjectionResolver
-{
-    private readonly IUnityContainer container;
-
-    public UnityConstructorInjectionResolver(IUnityContainer container)
-    {
-        if (container is null)
-            throw new ArgumentNullException(nameof(container));
-
-        this.container = container;
-    }
-
-    public object Resolve(ParameterInfo parameter)
-    {
-        return container.Resolve(parameter.ParameterType);
-    }
-}
-```
-
-Define options and create the proxy
-
-```cs
-IUnityContainer container = new UnityContainer();
-container.RegisterType<IMyService, MyService>();
-
-var options = new ProxyGeneratorOptions();
-options.ConstructorInjectionResolver = new UnityConstructorInjectionResolver(container);
-
-var proxy = generator.CreateClassProxy<MyClass>(options);
-
-proxy.Method();
-```
-
-_Note: By default the first constructor of the proxied class is selected. Create a custom ConstructorSelector (and set the option) to change this behavior._
-
-## Interceptors
-
-Create a class that implements **IInterceptor** interface or use **Interceptor** / **AsyncInterceptor** base classes.
-
-
-## Attributes
-
-2 ways to define interceptors 
-
-```cs
-// global for type
-var proxy = generator.CreateClassProxy<MyClass>(new MyInterceptor(), new MyInterceptor2());
-```
-
-... Or with **attributes**
-
-| Interface | Target | Attribute |
-| --- | --- | --- |
-| IInterceptorProvider | class / interface | AllInterceptorAttribute
-| IPropertyGetInterceptorProvider | Property getter | PropertyGetInterceptorAttribute
-| IPropertySetInterceptorProvider | Property setter | PropertySetInterceptorAttribute
-| IMethodInterceptorProvider | Method | MethodInterceptorAttribute
-| IAddEventInterceptorProvider | Add event | AddEventInterceptorAttribute
-| IRemoveEventInterceptorProvider | Remove event |RemoveEventInterceptorAttribute
-
-_Create a custom attribute for multiple targets_
-
-```cs
-[AttributeUsage(AttributeTargets.Property | AttributeTargets.Method, AllowMultiple = true)]
-public class MultiTargetInterceptorAttribute : Attribute, 
-    IPropertyGetInterceptorProvider, 
-    IPropertySetInterceptorProvider,
-    IMethodInterceptorProvider
-{
-    public Type InterceptorType
-    {
-        get { return typeof(LogInterceptor); }
-    }
-}
-
-public class MyClass
-{
-    [MultiTargetInterceptor]
-    public virtual string MyProperty {get; set;}
-
-    [MultiTargetInterceptor]
-    public virtual void MyMethod(string value)
-    {
-
-    }
-}
-```
-
-_Note: for interfaces, add the the attributes on interface members._
-
 ## Async interception 
+
+**Sample 1** with `GetAwaitableContext`
 
 ```cs
 public class MyAsyncInterceptor : IInterceptor
@@ -385,7 +317,7 @@ public class MyAsyncInterceptor : IInterceptor
 }
 ```
 
-With async method, use **AsyncInterceptor**
+**Sample 2** With `AsyncInterceptor` for async Method
 
 ```cs
 public class MyClass
@@ -417,137 +349,80 @@ public class MyAsyncInterceptor : AsyncInterceptor
 }
 ```
 
-## Mixins
+## Constructor Injection Resolver
 
-> Allows to add features to proxy generated
+> Allows to resolve `constructor parameters` of the class for a `Class Proxy`.
 
-Example add INotifyPropertyChanged to Proxy created
+**Sample** use **Unity Container** to resolve injection parameters
 
 ```cs
-public class MainWindowViewModel
+public interface IMyService
 {
-    private DelegateCommand updateTitleCommand;
+    string GetMessage(string name);
+}
 
-    public MainWindowViewModel()
+public class MyService : IMyService
+{
+    public string GetMessage(string name)
     {
-        Title = "Main title";
+        return $"Hello {name}!";
+    }
+}
+
+public class MyClass
+{
+    private readonly IMyService myService;
+
+    public MyClass(IMyService myService)
+    {
+        this.myService = myService;
     }
 
-    [PropertyChanged]
-    public virtual string Title { get; set; }
-
-    public DelegateCommand UpdateTitleCommand
+    public void Method()
     {
-        get
-        {
-            if (updateTitleCommand == null)
-                updateTitleCommand = new DelegateCommand(ExecuteUpdateTitleCommand);
-            return updateTitleCommand;
-        }
-    }
-
-    protected virtual void ExecuteUpdateTitleCommand()
-    {
-        Title += "!";
+        Console.WriteLine($"{myService.GetMessage("World")}");
     }
 }
 ```
 
+Create the `Constructor Injection Resolver`
+
 ```cs
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Property)]
-public class PropertyChangedAttribute : Attribute, IPropertySetInterceptorProvider
+public class UnityConstructorInjectionResolver : IConstructorInjectionResolver
 {
-    public Type InterceptorType => typeof(PropertyChangedInterceptor);
-}
+    private readonly IUnityContainer container;
 
-public interface IPropertyChangedNotifier : INotifyPropertyChanged
-{
-    void OnPropertyChanged(object target, string propertyName);
-}
-
-public class PropertyChangedNotifier : IPropertyChangedNotifier
-{
-    public void OnPropertyChanged(object target, string propertyName)
+    public UnityConstructorInjectionResolver(IUnityContainer container)
     {
-        PropertyChanged?.Invoke(target, new PropertyChangedEventArgs(propertyName));
+        if (container is null)
+            throw new ArgumentNullException(nameof(container));
+
+        this.container = container;
     }
 
-    public event PropertyChangedEventHandler PropertyChanged;
-}
-
-public class PropertyChangedInterceptor : Interceptor
-{
-    protected override void OnEnter(IInvocation invocation) { }
-    protected override void OnException(IInvocation invocation, Exception exception)
+    public object Resolve(ParameterInfo parameter)
     {
-        Console.WriteLine($"Error: {exception.Message}");
-    }
-
-    protected override void OnExit(IInvocation invocation)
-    {
-        IPropertyChangedNotifier propertyChangedNotifier = invocation.Proxy as IPropertyChangedNotifier;
-        if (propertyChangedNotifier != null)
-        {
-            string propertyName = invocation.Member.Name;
-            propertyChangedNotifier.OnPropertyChanged(invocation.Proxy, propertyName);
-        }
+        return container.Resolve(parameter.ParameterType);
     }
 }
 ```
 
-Define the options
+Define the `options` and create the proxy
 
 ```cs
+IUnityContainer container = new UnityContainer();
+container.RegisterType<IMyService, MyService>();
+
 var options = new ProxyGeneratorOptions();
-options.AddMixinInstance(new PropertyChangedNotifier());
-generator.CreateClassProxy<MainWindowViewModel>(options);
+options.ConstructorInjectionResolver = new UnityConstructorInjectionResolver(container);
+
+var proxy = generator.CreateClassProxy<MyClass>(options);
+
+proxy.Method();
 ```
 
-_Note: **caution** with **proxies** that have a **target**. After calling a target member, we are out of the proxy (For example a method that updates a target property)_
+_Note: By default the first constructor of the proxied class is selected. Create a custom ConstructorSelector (and set the option) to change this behavior._
 
-## Code Generation
-
-For example allows to implement INotifyPropertyChanged or create the commands for the ViewModel.
-
-```cs
-var options = new ProxyGeneratorOptions();
-options.CodeGenerator = new ViewModelCodeGenerator();
-var proxy = generator.CreateClassProxy<MainWindowViewModel>(options);
-```
-
-Methods 
-
-* Define: called just after the TypeBuilder for the Proxy is defined.
-* BeforeInvoke: called before invoke the method on the target or the base class.
-* AfterInvoke: called after invoke the method
-
-```cs
-public class ViewModelCodeGenerator : CodeGenerator
-{
-    private NotifyPropertyChangedFeature notifyPropertyChangedFeature;
-    private DelegateCommandBuilderFeature delegateCommandBuilderFeature;
-
-    public ViewModelCodeGenerator()
-    {
-        notifyPropertyChangedFeature = new NotifyPropertyChangedFeature();
-        delegateCommandBuilderFeature = new DelegateCommandBuilderFeature();
-    }
-
-    public override void Define(TypeBuilder typeBuilder, ProxyTypeDefinition typeDefinition)
-    {
-        notifyPropertyChangedFeature.ImplementFeature(typeBuilder, typeDefinition);
-        delegateCommandBuilderFeature.ImplementFeature(typeBuilder, typeDefinition);
-    }
-
-    public override void AfterInvoke(ILGenerator il, TypeBuilder typeBuilder, CallbackMethodDefinition callbackMethodDefinition, FieldBuilder[] fields)
-    {
-        string methodName = callbackMethodDefinition.Method.Name;
-        notifyPropertyChangedFeature.InvokeOnPropertyChanged(il, methodName);
-    }
-}
-```
-
-_Take a look to the **CodeGenerationSample**_
 
 ## ObjectFactory
 
@@ -635,85 +510,183 @@ public class GetSetTitleAttribute : Attribute,
 }
 ```
 
+## Mixins
+
+> Allows to add features to proxy generated.
+
+**Sample** add **INotifyPropertyChanged** to Proxy created
+
+```cs
+public class MainWindowViewModel
+{
+    private DelegateCommand updateTitleCommand;
+
+    public MainWindowViewModel()
+    {
+        Title = "Main title";
+    }
+
+    [PropertyChanged]
+    public virtual string Title { get; set; }
+
+    public DelegateCommand UpdateTitleCommand
+    {
+        get
+        {
+            if (updateTitleCommand == null)
+                updateTitleCommand = new DelegateCommand(ExecuteUpdateTitleCommand);
+            return updateTitleCommand;
+        }
+    }
+
+    protected virtual void ExecuteUpdateTitleCommand()
+    {
+        Title += "!";
+    }
+}
+```
+
+```cs
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Property)]
+public class PropertyChangedAttribute : Attribute, IPropertySetInterceptorProvider
+{
+    public Type InterceptorType => typeof(PropertyChangedInterceptor);
+}
+
+public interface IPropertyChangedNotifier : INotifyPropertyChanged
+{
+    void OnPropertyChanged(object target, string propertyName);
+}
+
+public class PropertyChangedNotifier : IPropertyChangedNotifier
+{
+    public void OnPropertyChanged(object target, string propertyName)
+    {
+        PropertyChanged?.Invoke(target, new PropertyChangedEventArgs(propertyName));
+    }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+}
+
+public class PropertyChangedInterceptor : Interceptor
+{
+    protected override void OnEnter(IInvocation invocation) { }
+    protected override void OnException(IInvocation invocation, Exception exception)
+    {
+        Console.WriteLine($"Error: {exception.Message}");
+    }
+
+    protected override void OnExit(IInvocation invocation)
+    {
+        IPropertyChangedNotifier propertyChangedNotifier = invocation.Proxy as IPropertyChangedNotifier;
+        if (propertyChangedNotifier != null)
+        {
+            string propertyName = invocation.Member.Name;
+            propertyChangedNotifier.OnPropertyChanged(invocation.Proxy, propertyName);
+        }
+    }
+}
+```
+
+Define the options
+
+```cs
+var options = new ProxyGeneratorOptions();
+options.AddMixinInstance(new PropertyChangedNotifier());
+generator.CreateClassProxy<MainWindowViewModel>(options);
+```
+
+_Note: **caution** with **proxies** that have a **target**. After calling a target member, we are out of the proxy (For example a method that updates a target property)_
+
+
+## Additional Code
+
+> Allows to `customize the code generated`. It's an "alternative" of Mixins.
+
+
+For example allows to implement INotifyPropertyChanged or create the commands for the ViewModel.
+
+```cs
+var options = new ProxyGeneratorOptions();
+options.AdditionalCode = new ViewModelAdditionalCode();
+proxies.Add(typeof(MainWindowViewModel), generator.CreateClassProxy<MainWindowViewModel>(options));
+```
+
+Methods 
+
+* **BeforeDefine**: called just after the TypeBuilder for the Proxy is defined.
+* **AfterDefine**: called after all members defined.
+* **BeforeInvoke**: called before invoke the method on the target or the base class.
+* **AfterInvoke**: called after invoke the method
+
+_Note: the **ProxyScope** allows to find field, property, method, event builders._
+
+```cs
+public class ViewModelAdditionalCode : AdditionalCode
+{
+    private NotifyPropertyChangedFeature notifyPropertyChangedFeature;
+    private DelegateCommandBuilderFeature delegateCommandBuilderFeature;
+
+    public ViewModelAdditionalCode()
+    {
+        notifyPropertyChangedFeature = new NotifyPropertyChangedFeature();
+        delegateCommandBuilderFeature = new DelegateCommandBuilderFeature();
+    }
+
+    public override void BeforeDefine(ProxyScope proxyScope)
+    {
+        notifyPropertyChangedFeature.ImplementFeature(proxyScope);
+        delegateCommandBuilderFeature.ImplementFeature(proxyScope);
+    }
+
+    public override void BeforeInvoke(ProxyScope proxyScope, ILGenerator il, CallbackMethodDefinition callbackMethodDefinition)
+    {
+        if (callbackMethodDefinition.MethodDefinition.MethodDefinitionType == MethodDefinitionType.Setter)
+        {
+            // never called with clean proxy method builder
+            notifyPropertyChangedFeature.CheckEquals(proxyScope, il, callbackMethodDefinition.Method);
+        }
+    }
+
+    public override void AfterInvoke(ProxyScope proxyScope, ILGenerator il, CallbackMethodDefinition callbackMethodDefinition)
+    {
+        if (callbackMethodDefinition.MethodDefinition.MethodDefinitionType == MethodDefinitionType.Setter)
+        {
+            // never called with clean proxy method builder
+            notifyPropertyChangedFeature.InvokeOnPropertyChanged(proxyScope, il, callbackMethodDefinition.Method);
+        }
+    }
+}
+```
+
+_Take a look to the **CodeGenerationSample**_
+
 
 ## Save The Assembly (.NET Framework Only)
 
-_Use it only for Debug_
-
 ```cs
-var generator = new ProxyGenerator(new PersistentProxyBuilder());
+var generator = new ProxyGenerator(new ModuleScope(true)); // save
+// with strong name
+// var generator = new ProxyGenerator(new ModuleScope(true, true)); // save, strong name
+// Or change the assembly and module names
+// var generator = new ProxyGenerator(new ModuleScope("MyAssembly","MyModule",true, true)); 
 
-// or with Default ProxyBuilder
-// var generator = new ProxyGenerator(new ProxyBuilder(new ModuleScope(true)));
-// Or
-// var generator = new ProxyGenerator(new ProxyBuilder(new ModuleScope("MyAssembly","MyModule",true))); 
-// with strong name key
-// var generator = new ProxyGenerator(new ProxyBuilder(new ModuleScope("MyAssembly","MyModule",true, true))); 
-var proxy = generator.CreateClassProxy<MyClass>(new MyInterceptor());
+var proxy = generator.CreateClassProxy<MyClass>();
 
-generator.ProxyBuilder.ModuleScope.Save();
+// save the assembly
+generator.ModuleScope.Save();
 ```
 
-_Note: I recommend [ILSpy](https://github.com/icsharpcode/ILSpy)_ (IL with C# comments, not fail to decompile like JustDecompile)
+Recommendations: 
+
+* Use this feature only for Debug
+* Decompiler : [ILSpy](https://github.com/icsharpcode/ILSpy) (IL with C# comments, not fail to decompile like JustDecompile)
 
 ## Reflection 
 
-> Extension methods for PropertyInfo, EventInfo and MethodInfo.
-
-To use extension methods:
-
-```cs
-using System.Reflection.Interception;
-```
-
-Property
-
-```cs
-// private, static property
-var target = new MyClass();
-var property = typeof(MyClass).GetProperty("MyProperty", BindingFlags.NonPublic | BindingFlags.Instance);
-property.InterceptSet(target, new object[] { "A" }, new LogInterceptor());
-var value = property.InterceptGet<string>(target, new object[0], new LogInterceptor());
-```
-
-Indexer
-
-```cs
-var collection = new MyCollection(); // Collection of strings
-var property = typeof(MyCollection).GetProperty("Item");
-// set
-property.InterceptSet(collection, new object[] { 0, "A" }, new LogInterceptor()); // index 0 => set value "A"
-// get
-var result = property.InterceptGet(collection, new object[] { 0 }, new LogInterceptor()); // get value at index 0
-```
-
-Method
-
-```cs
-// private, static method
-var target = new MyClass();
-var method = typeof(MyClass).GetMethod("MyMethod", BindingFlags.NonPublic | BindingFlags.Instance);
-method.Intercept(target, new object[] { "A" }, new LogInterceptor());
-```
-
-Event
-
-```cs
-// private, static event
-var target = new MyClass();
-var @event = typeof(MyClass).GetEvent("MyEvent", BindingFlags.NonPublic | BindingFlags.Instance);
-EventHandler ev = (s, e) =>
-{
-   // ...
-};
-@event.InterceptAdd(target, new object[] { ev }, new LogInterceptor());
-@event.InterceptRemove(target, new object[] { ev }, new LogInterceptor());
-```
-
-Can be used with **TypeAccessor** 
-
 * allows to access to private/public/static members (fields, properties, methods, constructors, events accessors)
 * invoke usefull methods
+* intercept get, set, add, remove and methods
 
 Sample:
 
@@ -728,3 +701,6 @@ accessor.Properties["MyProperty"].InterceptSet(new object[] { "New Value" }, new
 * .NET Framework 4.5 and 4.7.2
 * .NET Core 3.1
 * .NET Standard 2.0
+
+
+

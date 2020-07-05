@@ -76,7 +76,7 @@ namespace MvvmSample.ViewModels
     }
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Property)]
-    public class PropertyChangedAttribute : Attribute, IPropertySetInterceptorProvider
+    public class PropertyChangedAttribute : Attribute, ISetterInterceptorProvider
     {
         public Type InterceptorType => typeof(PropertyChangedInterceptor);
     }

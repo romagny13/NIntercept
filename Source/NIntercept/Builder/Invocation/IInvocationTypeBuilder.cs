@@ -2,11 +2,11 @@
 using System;
 using System.Reflection.Emit;
 
-namespace NIntercept
+namespace NIntercept.Builder
 {
     public interface IInvocationTypeBuilder
     {
-        Type CreateType(ModuleBuilder moduleBuilder, TypeBuilder proxyTypeBuilder, InvocationTypeDefinition invocationTypeDefinition, MethodBuilder callbackMethodBuilder);
+        Type CreateType(ModuleScope moduleScope, InvocationTypeDefinition invocationTypeDefinition, MethodBuilder callbackMethodBuilder);
     }
 
 }

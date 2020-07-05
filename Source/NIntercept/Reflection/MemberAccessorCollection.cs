@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NIntercept
+namespace NIntercept.Reflection
 {
     public class MemberAccessorCollection<T> : IEnumerable<T> where T : IMemberAccessor
     {

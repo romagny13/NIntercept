@@ -33,14 +33,10 @@ namespace NIntercept.Tests
         {
             var generator = new ProxyGenerator();
 
-            Assert.IsNotNull(generator.ProxyBuilder);
             Assert.IsNotNull(generator.ModuleDefinition);
-            Assert.IsNotNull(generator.ProxyBuilder.ModuleScope);
-            Assert.IsNotNull(generator.ProxyBuilder.ProxyEventBuilder);
-            Assert.IsNotNull(generator.ProxyBuilder.ProxyMethodBuilder);
-            Assert.IsNotNull(generator.ProxyBuilder.ProxyPropertyBuilder);
+            Assert.IsNotNull(generator.ModuleScope);
 
-            var scope = generator.ProxyBuilder.ModuleScope;
+            var scope = generator.ModuleScope;
             Assert.AreEqual("NIntercept.DynamicAssembly", scope.AssemblyName);
             Assert.AreEqual("NIntercept.DynamicModule", scope.ModuleName);
         }
@@ -50,35 +46,27 @@ namespace NIntercept.Tests
         {
             var generator = new ProxyGenerator();
 
-            var m1 = new TypeDefintionCollectorMock();
-            var m2 = new ProxyPropertyBuilderMock();
-            var m3 = new ProxyMethodBuilderMock();
-            var m4 = new ProxyEventBuilderMock();
-            var m5 = new CallbackMethodBuilderMock();
-            var m6 = new InvocationTypeBuilderMock();
+            var m1 = new ProxyPropertyBuilderMock();
+            var m2 = new ProxyMethodBuilderMock();
+            var m3 = new ProxyEventBuilderMock();
+            var m4 = new CallbackMethodBuilderMock();
 
             var mock = new ServiceLocatorMock();
 
-            ProxyServiceLocator.SetLocatorProvider(() => mock);
+            var options = new ProxyGeneratorOptions();
+            options.ServiceProvider = mock;
 
-            generator.ModuleDefinition = m1;
-            mock.ProxyPropertyBuilder = m2;
-            mock.ProxyMethodBuilder = m3;
-            mock.ProxyEventBuilder = m4;
-            mock.CallbackMethodBuilder = m5;
-            mock.InvocationTypeBuilder = m6;
+            mock.ProxyPropertyBuilder = m1;
+            mock.ProxyMethodBuilder = m2;
+            mock.ProxyEventBuilder = m3;
+            mock.CallbackMethodBuilder = m4;
 
-
-            generator.CreateClassProxy<TypeP2>();
+            generator.CreateClassProxy<TypeP2>(options);
 
             Assert.IsTrue(m1.IsUsed);
             Assert.IsTrue(m2.IsUsed);
             Assert.IsTrue(m3.IsUsed);
             Assert.IsTrue(m4.IsUsed);
-            Assert.IsTrue(m5.IsUsed);
-            Assert.IsTrue(m6.IsUsed);
-
-            ProxyServiceLocator.SetLocatorProvider(() => new DefaultServiceProvider());
         }
 
         #region Methods
@@ -1091,9 +1079,9 @@ namespace NIntercept.Tests
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Event)]
     public class MultiTargetAttribute : InterceptorAttributeBase,
-        IPropertySetInterceptorProvider,
+        ISetterInterceptorProvider,
         IMethodInterceptorProvider,
-        IAddEventInterceptorProvider
+        IAddOnInterceptorProvider
     {
         public MultiTargetAttribute(Type interceptorType) : base(interceptorType)
         {
@@ -1733,7 +1721,7 @@ namespace NIntercept.Tests
         public bool IsCalledAdd = false;
         public bool IsCalledRemove = false;
 
-        [AddEventInterceptor(typeof(IntForP9_b))]
+        [AddOnInterceptor(typeof(IntForP9_b))]
         public virtual event EventHandler MyEvent
         {
             add
@@ -1760,7 +1748,7 @@ namespace NIntercept.Tests
     [AllInterceptor(typeof(IntForP10))]
     public interface ITypeP10
     {
-        [AddEventInterceptor(typeof(IntPFor10_b))]
+        [AddOnInterceptor(typeof(IntPFor10_b))]
         event EventHandler MyEvent;
 
         void RaiseMyEvent();
@@ -1803,8 +1791,8 @@ namespace NIntercept.Tests
 
         private string myVar;
 
-        [PropertyGetInterceptor(typeof(IntForP11_c))]
-        [PropertySetInterceptor(typeof(IntForP11_d))]
+        [GetterInterceptor(typeof(IntForP11_c))]
+        [SetterInterceptor(typeof(IntForP11_d))]
         protected virtual string MyProperty
         {
             get
@@ -1863,7 +1851,7 @@ namespace NIntercept.Tests
 
         }
 
-        [AddEventInterceptor(typeof(IntForP11))]
+        [AddOnInterceptor(typeof(IntForP11))]
         protected virtual event EventHandler MyEvent;
     }
 
@@ -1979,7 +1967,23 @@ namespace NIntercept.Tests
         Enter_Interceptor,
         Exit_Interceptor,
         Exception_Interceptor,
-        Notify
+        Notify,
+        Interceptor_Get_Called_Before,
+        Interceptor_Get_Called_After,
+        Interceptor_Set_Called_Before,
+        Interceptor_Set_Called_After,
+        Interceptor2_Get_Called_Before,
+        Interceptor2_Get_Called_After,
+        Interceptor2_Set_Called_Before,
+        Interceptor2_Set_Called_After,
+        Interceptor1_Add_Called_Before,
+        Interceptor1_Add_Called_After,
+        Interceptor1_Remove_Called_Before,
+        Interceptor1_Remove_Called_After,
+        Interceptor2_Add_Called_Before,
+        Interceptor2_Add_Called_After,
+        Interceptor2_Remove_Called_Before,
+        Interceptor2_Remove_Called_After
     }
 
     public class IntForP1 : IInterceptor

@@ -5,7 +5,7 @@ namespace CodeGenerationSample.ViewModels
 {
     public class MainWindowViewModel
     {
-        //private DelegateCommand updateTitleCommand;
+       // private DelegateCommand updateTitleCommand;
 
         public virtual bool IsBusy { get; set; }
 

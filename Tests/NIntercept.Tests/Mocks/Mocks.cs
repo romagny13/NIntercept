@@ -1,4 +1,5 @@
-﻿using NIntercept.Definition;
+﻿using NIntercept.Builder;
+using NIntercept.Definition;
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -22,32 +23,22 @@ namespace NIntercept.Tests
     {
         public bool IsUsed { get; set; }
 
-        public override MethodBuilder CreateMethod(ModuleBuilder moduleBuilder, TypeBuilder typeBuilder, CallbackMethodDefinition callbackMethodDefinition, FieldBuilder[] fields)
+        public override MethodBuilder CreateMethod(ProxyScope proxyScope, CallbackMethodDefinition callbackMethodDefinition)
         {
             IsUsed = true;
-            return base.CreateMethod(moduleBuilder, typeBuilder, callbackMethodDefinition, fields);
+            return base.CreateMethod(proxyScope, callbackMethodDefinition);
         }
-    }
 
-    public class InvocationTypeBuilderMock : InvocationTypeBuilder
-    {
-        public bool IsUsed { get; set; }
-
-        public override Type CreateType(ModuleBuilder moduleBuilder, TypeBuilder proxyTypeBuilder, InvocationTypeDefinition invocationTypeDefinition, MethodBuilder callbackMethodBuilder)
-        {
-            IsUsed = true;
-            return base.CreateType(moduleBuilder, proxyTypeBuilder, invocationTypeDefinition, callbackMethodBuilder);
-        }
     }
 
     public class ProxyEventBuilderMock : ProxyEventBuilder
     {
         public bool IsUsed { get; set; }
 
-        public override EventBuilder CreateEvent(ModuleScope moduleScope, TypeBuilder typeBuilder, EventDefinition eventDefinition, FieldBuilder[] fields)
+        public override EventBuilder CreateEvent(ProxyScope proxyScope, EventDefinition eventDefinition)
         {
             IsUsed = true;
-            return base.CreateEvent(moduleScope, typeBuilder, eventDefinition, fields);
+            return base.CreateEvent(proxyScope, eventDefinition);
         }
     }
 
@@ -56,10 +47,10 @@ namespace NIntercept.Tests
 
         public bool IsUsed { get; set; }
 
-        public override PropertyBuilder CreateProperty(ModuleScope moduleScope, TypeBuilder typeBuilder, PropertyDefinition propertyDefinition, FieldBuilder[] fields)
+        public override PropertyBuilder CreateProperty(ProxyScope proxyScope, PropertyDefinition propertyDefinition)
         {
             IsUsed = true;
-            return base.CreateProperty(moduleScope, typeBuilder, propertyDefinition, fields);
+            return base.CreateProperty(proxyScope, propertyDefinition);
         }
     }
 
@@ -67,22 +58,10 @@ namespace NIntercept.Tests
     {
         public bool IsUsed { get; set; }
 
-
-        public override MethodBuilder CreateMethod(ModuleScope moduleScope, TypeBuilder typeBuilder, MethodDefinition methodDefinition, MemberInfo member, FieldBuilder[] fields)
+        public override MethodBuilder CreateMethod(ProxyScope proxyScope, MethodDefinition methodDefinition, MemberInfo member)
         {
             IsUsed = true;
-            return base.CreateMethod(moduleScope, typeBuilder, methodDefinition, member, fields);
-        }
-    }
-
-    public class TypeDefintionCollectorMock : ModuleDefinition
-    {
-        public bool IsUsed { get; set; }
-
-        public override ProxyTypeDefinition GetOrAdd(Type type, object target, ProxyGeneratorOptions options)
-        {
-            IsUsed = true;
-            return base.GetOrAdd(type, target, options);
+            return base.CreateMethod(proxyScope, methodDefinition, member);
         }
     }
 
@@ -102,7 +81,7 @@ namespace NIntercept.Tests
 
     public class ProxyTypeDefinitionMock : ProxyTypeDefinition
     {
-        public ProxyTypeDefinitionMock(ModuleDefinition moduleDefinition, Type type, object target, ProxyGeneratorOptions options) : base(moduleDefinition, type, target, options)
+        public ProxyTypeDefinitionMock(ModuleDefinition moduleDefinition, Type type, Type targetType, ProxyGeneratorOptions options) : base(moduleDefinition, type, targetType, options)
         {
         }
 

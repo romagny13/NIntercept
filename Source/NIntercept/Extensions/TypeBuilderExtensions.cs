@@ -10,6 +10,7 @@ namespace NIntercept
     {
         private const CallingConventions DefaultEventCallingConvention = CallingConventions.Standard | CallingConventions.HasThis;
         private const MethodAttributes DefaultEventMethodAttributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.SpecialName | MethodAttributes.Virtual;
+        private static readonly FieldInfo listMethodsField = typeof(TypeBuilder).GetField("m_listMethods", BindingFlags.NonPublic | BindingFlags.Instance);
 
         public static void AddInterfacesToImplement(this TypeBuilder typeBuilder, Type[] interfaces)
         {
@@ -63,6 +64,30 @@ namespace NIntercept
             return customAttributeBuilder;
         }
 
+        private static Type GetInterface(TypeBuilder typeBuilder, Type interfaceType)
+        {
+            if (typeBuilder is null)
+                throw new ArgumentNullException(nameof(typeBuilder));
+            if (interfaceType is null)
+                throw new ArgumentNullException(nameof(interfaceType));
+
+#if NET45 || NET472
+            return typeBuilder.ImplementedInterfaces.FirstOrDefault(@interface => @interface.UnderlyingSystemType == interfaceType);
+#else
+            return typeBuilder.GetInterfaces().FirstOrDefault(@interface => @interface.UnderlyingSystemType == interfaceType);
+#endif
+        }
+
+        public static bool HasImplementedInterface(this TypeBuilder typeBuilder, Type interfaceType)
+        {
+            return GetInterface(typeBuilder, interfaceType) != null;
+        }
+
+        public static List<MethodBuilder> GetMethodBuilders(this TypeBuilder typeBuilder)
+        {
+            return listMethodsField.GetValue(typeBuilder) as List<MethodBuilder>;
+        }
+
         #region ctor
 
         private static Type[] ConcatTypes(FieldBuilder[] fields, ParameterInfo[] parameters)
@@ -87,7 +112,7 @@ namespace NIntercept
             ParameterInfo[] parameters = null;
             if (baseCtor != null)
                 parameters = baseCtor.GetParameters();
-            Type[] parameterTypes =  ConcatTypes(fields, parameters);
+            Type[] parameterTypes = ConcatTypes(fields, parameters);
             ConstructorBuilder constructorBuilder = typeBuilder.DefineConstructor(attributes, callingConvention, parameterTypes);
 
             if (baseCtor != null)

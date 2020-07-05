@@ -1,4 +1,5 @@
-﻿using NIntercept.Definition;
+﻿using NIntercept;
+using NIntercept.Definition;
 using NIntercept.Helpers;
 using Prism.Commands;
 using System;
@@ -28,8 +29,11 @@ namespace CodeGenerationSample
 
     public class DelegateCommandBuilderFeature
     {
-        public void ImplementFeature(TypeBuilder typeBuilder, ProxyTypeDefinition typeDefinition)
+        public void ImplementFeature(ProxyScope proxyScope)
         {
+            TypeBuilder typeBuilder = proxyScope.TypeBuilder;
+            ProxyTypeDefinition typeDefinition = proxyScope.TypeDefinition;
+
             Dictionary<string, MethodInfo> commands = GetCommandsToCreate(typeDefinition);
             foreach (var kv in commands)
             {

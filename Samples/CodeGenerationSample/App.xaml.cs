@@ -1,6 +1,7 @@
 ﻿using CodeGenerationSample.ViewModels;
 using CodeGenerationSample.Views;
 using NIntercept;
+using NIntercept.Builder;
 using NIntercept.Helpers;
 using System;
 using System.Collections.Generic;
@@ -170,6 +171,13 @@ namespace CodeGenerationSample
         }
     }
 
+    public class CustomServiceProvider : DefaultServiceProvider
+    {
+        IProxyMethodBuilder proxyMethodBuilder = new CleanProxyMethodBuilder();
+
+        public override IProxyMethodBuilder ProxyMethodBuilder => proxyMethodBuilder;
+    }
+
     public class DefaultLocator : IContainerLocator
     {
         private IUnityContainer container;
@@ -183,15 +191,17 @@ namespace CodeGenerationSample
 
             this.proxies = new Dictionary<Type, object>();
             this.container = container;
-            this.generator = new ProxyGenerator(new PersistentProxyBuilder());
+            this.generator = new ProxyGenerator(new ModuleScope(true));
             Initialize();
-            generator.ProxyBuilder.ModuleScope.Save();
+            generator.ModuleScope.Save();
         }
 
         protected virtual void Initialize()
         {
             var options = new ProxyGeneratorOptions();
-            options.CodeGenerator = new ViewModelCodeGenerator();
+            options.AdditionalCode = new ViewModelAdditionalCode();
+            // And / or create a custom builder
+            options.ServiceProvider = new CustomServiceProvider();
             proxies.Add(typeof(MainWindowViewModel), generator.CreateClassProxy<MainWindowViewModel>(options));
         }
 

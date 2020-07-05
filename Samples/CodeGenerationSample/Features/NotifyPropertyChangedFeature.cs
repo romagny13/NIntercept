@@ -1,66 +1,102 @@
 ﻿using NIntercept;
-using NIntercept.Definition;
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
 namespace CodeGenerationSample
 {
+
     public class NotifyPropertyChangedFeature
     {
         private static readonly ConstructorInfo PropertyChangedEventArgsConstructor = typeof(PropertyChangedEventArgs).GetConstructor(new Type[] { typeof(string) });
         private static readonly MethodInfo InvokeMethod = typeof(PropertyChangedEventHandler).GetMethod("Invoke", new Type[] { typeof(object), typeof(PropertyChangedEventArgs) });
+
+        private static Type interfaceType = typeof(INotifyPropertyChanged);
 
         public const string SetConstant = "set_";
         public const string FieldName = "_propertyChanged";
         public const string EventName = "PropertyChanged";
         public const string ParameterName = "propertyName";
         public const string MethodName = "OnPropertyChanged";
-        private MethodBuilder onPropertyChangedMethodBuilder;
 
-        public MethodBuilder OnPropertyChangedMethodBuilder
+        public bool HasINotifyPropertyChangedInterface(TypeBuilder typeBuilder)
         {
-            get { return onPropertyChangedMethodBuilder; }
+            return typeBuilder.ImplementedInterfaces.FirstOrDefault(p => p.UnderlyingSystemType == typeof(INotifyPropertyChanged)) != null;
         }
 
-        public void ImplementFeature(TypeBuilder typeBuilder, ProxyTypeDefinition typeDefinition)
+        public void ImplementFeature(ProxyScope proxyScope)
         {
-            typeBuilder.AddInterfaceImplementation(typeof(INotifyPropertyChanged));
+            // interface
+            AddINotifyPropertyChangedInterface(proxyScope);
 
-            FieldBuilder eventFieldBuilder = typeBuilder.DefineField(FieldName, typeof(PropertyChangedEventHandler), FieldAttributes.Private);
-            EventBuilder propertyChangedEventBuilder = typeBuilder.DefineFullEvent(EventName, EventAttributes.None, typeof(PropertyChangedEventHandler), eventFieldBuilder);
+            // event
+            CreatePropertyChangedEventHandler(proxyScope);
 
-            onPropertyChangedMethodBuilder = typeBuilder.DefineMethod(MethodName, MethodAttributes.Family, typeof(void), new Type[] { typeof(string) });
+            // Method
+            CreateOnPropertyChangedMethod(proxyScope);
+        }
 
-            onPropertyChangedMethodBuilder.DefineParameter(1, ParameterAttributes.None, ParameterName);
+        public void AddINotifyPropertyChangedInterface(ProxyScope proxyScope)
+        {
+            TypeBuilder typeBuilder = proxyScope.TypeBuilder;
+            if (!typeBuilder.HasImplementedInterface(interfaceType))
+                typeBuilder.AddInterfaceImplementation(interfaceType);
+        }
 
-            var il = onPropertyChangedMethodBuilder.GetILGenerator();
+        public void CreatePropertyChangedEventHandler(ProxyScope proxyScope)
+        {
+            EventBuilder propertyChangedEventBuilder = proxyScope.EventBuilders.FirstOrDefault(p => p.GetName() == EventName);
+            if (propertyChangedEventBuilder == null)
+            {
+                TypeBuilder typeBuilder = proxyScope.TypeBuilder;
+                FieldBuilder eventField = proxyScope.CreateField(FieldName, typeof(PropertyChangedEventHandler), FieldAttributes.Private);
+                typeBuilder.DefineFullEvent(EventName, EventAttributes.None, typeof(PropertyChangedEventHandler), eventField);
+            }
+        }
 
-            var isNullLocal = il.DeclareLocal(typeof(bool));
-            var label = il.DefineLabel();
+        public void CreateOnPropertyChangedMethod(ProxyScope proxyScope)
+        {
+            FieldBuilder eventField = proxyScope.FieldBuilders.FirstOrDefault(p => p.Name == FieldName);
+            if (eventField == null)
+                throw new ArgumentException($"No field '{FieldName}' found.");
 
-            il.Emit(OpCodes.Nop);
-            il.Emit(OpCodes.Ldarg_0);
-            il.Emit(OpCodes.Ldfld, eventFieldBuilder);
-            il.Emit(OpCodes.Ldnull);
-            il.Emit(OpCodes.Cgt_Un);
-            il.Emit(OpCodes.Stloc, isNullLocal);
-            il.Emit(OpCodes.Ldloc, isNullLocal);
-            il.Emit(OpCodes.Brfalse_S, label);
+            var onPropertyChangedMethodBuilder = GetOnPropertyChangedMethod(proxyScope);
+            if (onPropertyChangedMethodBuilder == null)
+            {
+                TypeBuilder typeBuilder = proxyScope.TypeBuilder;
+                onPropertyChangedMethodBuilder = typeBuilder.DefineMethod(MethodName, MethodAttributes.Family, typeof(void), new Type[] { typeof(string) });
 
-            il.Emit(OpCodes.Nop);
-            il.Emit(OpCodes.Ldarg_0);
-            il.Emit(OpCodes.Ldfld, eventFieldBuilder);
-            il.Emit(OpCodes.Ldarg_0);
-            il.Emit(OpCodes.Ldarg_1);
-            il.Emit(OpCodes.Newobj, PropertyChangedEventArgsConstructor);
-            il.Emit(OpCodes.Callvirt, InvokeMethod);
+                onPropertyChangedMethodBuilder.DefineParameter(1, ParameterAttributes.None, ParameterName);
 
-            il.MarkLabel(label);
+                var il = onPropertyChangedMethodBuilder.GetILGenerator();
 
-            il.Emit(OpCodes.Nop);
-            il.Emit(OpCodes.Ret);
+                var isNullLocal = il.DeclareLocal(typeof(bool));
+                var label = il.DefineLabel();
+
+                il.Emit(OpCodes.Nop);
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldfld, eventField);
+                il.Emit(OpCodes.Ldnull);
+                il.Emit(OpCodes.Cgt_Un);
+                il.Emit(OpCodes.Stloc, isNullLocal);
+                il.Emit(OpCodes.Ldloc, isNullLocal);
+                il.Emit(OpCodes.Brfalse_S, label);
+
+                il.Emit(OpCodes.Nop);
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldfld, eventField);
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldarg_1);
+                il.Emit(OpCodes.Newobj, PropertyChangedEventArgsConstructor);
+                il.Emit(OpCodes.Callvirt, InvokeMethod);
+
+                il.MarkLabel(label);
+
+                il.Emit(OpCodes.Nop);
+                il.Emit(OpCodes.Ret);
+            }
         }
 
         public bool IsMethodSet(string methodName)
@@ -73,12 +109,39 @@ namespace CodeGenerationSample
             return methodName.Substring(SetConstant.Length);
         }
 
-        public bool InvokeOnPropertyChanged(ILGenerator il, string methodName)
+        public bool CheckEquals(ProxyScope proxyScope, ILGenerator il, MethodInfo method)
         {
-            if (!IsMethodSet(methodName))
+            if (!IsMethodSet(method.Name))
                 return false;
 
-            string propertyName = GetPropertyName(methodName);
+            string propertyName = GetPropertyName(method.Name);
+            var equalLocalBuilder = il.DeclareLocal(typeof(bool));
+            var equalLabel = il.DefineLabel();
+
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Call, method.DeclaringType.GetMethod($"get_{propertyName}"));
+            il.Emit(OpCodes.Ldarg_1);
+            il.Emit(OpCodes.Ceq);
+
+            il.Emit(OpCodes.Stloc, equalLocalBuilder);
+            il.Emit(OpCodes.Ldloc, equalLocalBuilder);
+
+            il.Emit(OpCodes.Brfalse_S, equalLabel);
+            il.Emit(OpCodes.Ret);
+            il.MarkLabel(equalLabel);
+
+            return true;
+        }
+
+        public bool InvokeOnPropertyChanged(ProxyScope proxyScope, ILGenerator il, MethodInfo method)
+        {
+            if (!IsMethodSet(method.Name))
+                return false;
+
+            string propertyName = GetPropertyName(method.Name);
+            MethodBuilder onPropertyChangedMethodBuilder = GetOnPropertyChangedMethod(proxyScope);
+            if (onPropertyChangedMethodBuilder == null)
+                throw new ArgumentNullException(nameof(onPropertyChangedMethodBuilder));
 
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldstr, propertyName);
@@ -86,7 +149,12 @@ namespace CodeGenerationSample
 
             return true;
         }
+
+        public MethodBuilder GetOnPropertyChangedMethod(ProxyScope proxyScope)
+        {
+            return proxyScope.TypeBuilder.GetMethodBuilders().FirstOrDefault(p => p.Name == MethodName);
+        }
     }
 
-   
+
 }

@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Reflection;
-using System.Reflection.Interception;
 
-namespace NIntercept
+namespace NIntercept.Reflection
 {
     public class EventAccessor : IMemberAccessor
     {
@@ -67,14 +66,14 @@ namespace NIntercept
         {
             var method = @event.AddMethod;
             var target = method.IsStatic ? null : typeAccessor.Target;
-            ReflectionInterception.Intercept(@event, method, target, parameters, typeof(IAddEventInterceptorProvider), interceptors);
+            ReflectionInterception.Intercept(@event, method, target, parameters, typeof(IAddOnInterceptorProvider), interceptors);
         }
 
         public virtual void InterceptRemove(object[] parameters, params IInterceptor[] interceptors)
         {
             var method = @event.RemoveMethod;
             var target = method.IsStatic ? null : typeAccessor.Target;
-            ReflectionInterception.Intercept(@event, method, target, parameters, typeof(IRemoveEventInterceptorProvider), interceptors);
+            ReflectionInterception.Intercept(@event, method, target, parameters, typeof(IRemoveOnInterceptorProvider), interceptors);
         }
 
         public override string ToString()

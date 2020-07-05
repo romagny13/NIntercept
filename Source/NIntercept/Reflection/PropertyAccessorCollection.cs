@@ -1,4 +1,4 @@
-﻿namespace NIntercept
+﻿namespace NIntercept.Reflection
 {
     public class PropertyAccessorCollection : MemberAccessorCollection<PropertyAccessor>
     {

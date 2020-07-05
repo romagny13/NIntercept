@@ -7,14 +7,12 @@ namespace NIntercept
         private Type type;
         private object target;
         private Type proxyType;
-        private ProxyGeneratorOptions options;
 
-        public ProxyTypeCreatedEventArgs(Type type, object target, Type proxyType, ProxyGeneratorOptions options)
+        public ProxyTypeCreatedEventArgs(Type type, object target, Type proxyType)
         {
             this.type = type;
             this.target = target;
             this.proxyType = proxyType;
-            this.options = options;
         }
 
         public Type Type
@@ -30,11 +28,6 @@ namespace NIntercept
         public Type ProxyType
         {
             get { return proxyType; }
-        }
-
-        public ProxyGeneratorOptions Options
-        {
-            get { return options; }
         }
     }
 }

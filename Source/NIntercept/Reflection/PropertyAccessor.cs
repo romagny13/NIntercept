@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Reflection;
-using System.Reflection.Interception;
 
-namespace NIntercept
+namespace NIntercept.Reflection
 {
     public class PropertyAccessor : IMemberAccessor
     {
@@ -99,7 +98,7 @@ namespace NIntercept
 
             var method = property.GetMethod;
             var target = method.IsStatic ? null : typeAccessor.Target;
-            return ReflectionInterception.Intercept(property, method, target, parameters, typeof(IPropertyGetInterceptorProvider), interceptors);
+            return ReflectionInterception.Intercept(property, method, target, parameters, typeof(IGetterInterceptorProvider), interceptors);
         }
 
         public TReturnValue InterceptGet<TReturnValue>(object[] parameters, params IInterceptor[] interceptors)
@@ -114,7 +113,7 @@ namespace NIntercept
 
             var method = property.SetMethod;
             var target = method.IsStatic ? null : typeAccessor.Target;
-            ReflectionInterception.Intercept(property, method, target, parameters, typeof(IPropertySetInterceptorProvider), interceptors);
+            ReflectionInterception.Intercept(property, method, target, parameters, typeof(ISetterInterceptorProvider), interceptors);
         }
     }
 }

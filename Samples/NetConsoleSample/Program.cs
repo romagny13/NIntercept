@@ -14,7 +14,7 @@ namespace NetConsoleSample
     {
         static void Main(string[] args)
         {
-            var generator = new ProxyGenerator(new PersistentProxyBuilder());
+            var generator = new ProxyGenerator(new ModuleScope(true));
 
             RunCompleteSample(generator);
             RunInterfaceProxyWithoutTargetSample(generator);
@@ -24,7 +24,7 @@ namespace NetConsoleSample
             RunIndexerSamples(generator);
             RunAsyncMethodsSample(generator);
 
-            generator.ProxyBuilder.ModuleScope.Save();
+            generator.ModuleScope.Save();
 
             Console.ReadKey();
         }
@@ -36,12 +36,13 @@ namespace NetConsoleSample
             IUnityContainer container = new UnityContainer();
             container.RegisterType<IMyService, MyService>();
 
-            var options = new ProxyGeneratorOptions();
-            options.ConstructorInjectionResolver = new UnityConstructorInjectionResolver(container);
-
-            var proxy = generator.CreateClassProxy<MyClassWithInjections>(options);
+            generator.ConstructorInjectionResolver = new UnityConstructorInjectionResolver(container);
+            var proxy = generator.CreateClassProxy<MyClassWithInjections>();
             proxy.Method();
+
+            generator.ConstructorInjectionResolver = null;
         }
+
         private static void RunCompleteSample(ProxyGenerator generator)
         {
             Console.WriteLine("---------------------- Property, method, event ----------------------");
@@ -153,7 +154,7 @@ namespace NetConsoleSample
     public class MyClass<T, T2> : INotifyPropertyChangedAware
     {
         private string myProperty;
-        [PropertySetInterceptor(typeof(PropertyChangedInterceptor))]
+        [SetterInterceptor(typeof(PropertyChangedInterceptor))]
         public virtual string MyProperty
         {
             get { return myProperty; }
@@ -171,7 +172,7 @@ namespace NetConsoleSample
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        [AddEventInterceptor(typeof(EventInterceptor))]
+        [AddOnInterceptor(typeof(EventInterceptor))]
         public virtual event EventHandler MyEvent;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -244,8 +245,8 @@ namespace NetConsoleSample
 
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Method, AllowMultiple = true)]
     public class MultiTargetInterceptorAttribute : Attribute,
-        IPropertyGetInterceptorProvider,
-        IPropertySetInterceptorProvider,
+        IGetterInterceptorProvider,
+        ISetterInterceptorProvider,
         IMethodInterceptorProvider
     {
         public Type InterceptorType
@@ -402,7 +403,7 @@ namespace NetConsoleSample
     {
         private string title;
 
-        [PropertySetInterceptor(typeof(PropertyChangedNotifierInterceptor))]
+        [SetterInterceptor(typeof(PropertyChangedNotifierInterceptor))]
         public virtual string Title { get => title; set => title = value; }
 
         public MyClassNotified()
@@ -520,4 +521,5 @@ namespace NetConsoleSample
         }
     }
     #endregion
+
 }

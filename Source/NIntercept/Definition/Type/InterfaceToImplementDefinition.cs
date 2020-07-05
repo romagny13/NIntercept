@@ -4,12 +4,12 @@ using System.Reflection;
 namespace NIntercept.Definition
 {
 
-    public class InterfaceToImplementDefinition : TypeDefinition
+    public sealed class InterfaceToImplementDefinition : TypeDefinition
     {
         private TypeDefinition parentTypeDefinition;
 
-        public InterfaceToImplementDefinition(ModuleDefinition moduleDefinition, Type type, object target, TypeDefinition parentTypeDefinition)
-            : base(moduleDefinition, type, target)
+        public InterfaceToImplementDefinition(ModuleDefinition moduleDefinition, Type type, Type targetType, TypeDefinition parentTypeDefinition)
+            : base(moduleDefinition, type, targetType)
         {
             if (parentTypeDefinition is null)
                 throw new ArgumentNullException(nameof(parentTypeDefinition));

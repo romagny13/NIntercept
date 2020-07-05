@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Reflection;
-using System.Reflection.Interception;
 
-namespace NIntercept
+namespace NIntercept.Reflection
 {
     public class MethodAccessor : IMemberAccessor
     {

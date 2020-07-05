@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NIntercept.Reflection;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;

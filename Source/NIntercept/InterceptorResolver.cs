@@ -61,8 +61,9 @@ namespace NIntercept
                     interceptorsPerMemberCache.Add(member, interceptorsForMember);
                 }
 
-                var allInterceptors = interceptors.Concat(interceptorsForMember).ToArray();
-                return allInterceptors;
+                if (interceptors.Length == 0)
+                    return interceptorsForMember;
+                return interceptors.Concat(interceptorsForMember).ToArray();
             }
         }
 

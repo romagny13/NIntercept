@@ -1,12 +1,10 @@
 ﻿using NIntercept.Definition;
 using System.Reflection.Emit;
 
-namespace NIntercept
+namespace NIntercept.Builder
 {
     public interface IProxyEventBuilder
     {
-        IProxyMethodBuilder ProxyMethodBuilder { get; }
-
-        EventBuilder CreateEvent(ModuleScope moduleScope, TypeBuilder proxyTypeBuilder, EventDefinition eventDefinition, FieldBuilder[] fields);
+        EventBuilder CreateEvent(ProxyScope proxyScope, EventDefinition eventDefinition);
     }
 }
