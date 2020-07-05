@@ -642,13 +642,12 @@ Methods
 
 _Note: the **ProxyScope** allows to find field, property, method, event builders._
 
-Simple example:
+**Sample:**
 
 ```cs
 public class MyAdditionalCode : AdditionalCode
 {
     private static readonly MethodInfo WriteLineMethod = typeof(Console).GetMethod("WriteLine", new Type[] { typeof(string) });
-
 
     public override void BeforeInvoke(ProxyScope proxyScope, ILGenerator il, CallbackMethodDefinition callbackMethodDefinition)
     {
@@ -664,7 +663,7 @@ public class MyAdditionalCode : AdditionalCode
 }
 ```
 
-Create a simple class
+Create a simple  **class**
 
 ```cs
 public class MyClass
