@@ -642,10 +642,74 @@ Methods
 
 _Note: the **ProxyScope** allows to find field, property, method, event builders._
 
-_For example allows to implement INotifyPropertyChanged or create the commands for the ViewModel Proxy generated. Take a look to the **CodeGenerationSample**_
+Simple example:
+
+```cs
+public class MyAdditionalCode : AdditionalCode
+{
+    private static readonly MethodInfo WriteLineMethod = typeof(Console).GetMethod("WriteLine", new Type[] { typeof(string) });
 
 
-Create a class that **inherits** from **AdditionalCode**
+    public override void BeforeInvoke(ProxyScope proxyScope, ILGenerator il, CallbackMethodDefinition callbackMethodDefinition)
+    {
+        il.Emit(OpCodes.Ldstr, $"Before {callbackMethodDefinition.Method.Name}");
+        il.Emit(OpCodes.Call, WriteLineMethod);
+    }
+
+    public override void AfterInvoke(ProxyScope proxyScope, ILGenerator il, CallbackMethodDefinition callbackMethodDefinition)
+    {
+        il.Emit(OpCodes.Ldstr, $"After {callbackMethodDefinition.Method.Name}");
+        il.Emit(OpCodes.Call, WriteLineMethod);
+    }
+}
+```
+
+Create a simple class
+
+```cs
+public class MyClass
+{
+    public virtual void MyMethod()
+    {
+        Console.WriteLine("In My Method");
+    }
+}
+```
+
+Define the **options**
+
+```cs
+var generator = new ProxyGenerator();
+
+var options = new ProxyGeneratorOptions();
+options.AdditionalCode = new MyAdditionalCode();
+
+var proxy = generator.CreateClassProxy<MyClass>(options);
+proxy.MyMethod();
+```
+
+**Output**
+
+```
+Before MyMethod
+In My Method
+After MyMethod
+```
+
+Code Generated for the callback method:
+
+```cs
+public void MyMethod_Callback()
+{
+    Console.WriteLine("Before MyMethod");
+    base.MyMethod();
+    Console.WriteLine("After MyMethod");
+}
+```
+
+**Advanced sample**:  Take a look at the **CodeGenerationSample**
+
+_For example allows to implement INotifyPropertyChanged or create the commands for the ViewModel Proxy generated._
 
 ```cs
 public class ViewModelAdditionalCode : AdditionalCode
@@ -683,14 +747,6 @@ public class ViewModelAdditionalCode : AdditionalCode
         }
     }
 }
-```
-
-.. And define the **options**
-
-```cs
-var options = new ProxyGeneratorOptions();
-options.AdditionalCode = new ViewModelAdditionalCode();
-var proxy generator.CreateClassProxy<MainWindowViewModel>(options);
 ```
 
 _Another alternative is to create a **custom ProxyMethodBuilder** and change the **service provider** (ProxyGeneratorOptions). Update the proxy and implement INotifyPropertyChanged (add INotifyPropertyChanged interface, event and protected method to raise the event)  and call OnPropertyChanged method in properties._
