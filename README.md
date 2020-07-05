@@ -682,8 +682,7 @@ options.AdditionalCode = new ViewModelAdditionalCode();
 var proxy generator.CreateClassProxy<MainWindowViewModel>(options);
 ```
 
-_Another alternative is to create a **custom ProxyMethodBuilder** and change the **service provider** (ProxyGeneratorOptions). 
-We implement INotifyPropertyChanged (add INotifyPropertyChanged interface, event and protected method to raise the event to the proxy)  and call OnPropertyChanged method in properties._
+_Another alternative is to create a **custom ProxyMethodBuilder** and change the **service provider** (ProxyGeneratorOptions). Update the proxy and implement INotifyPropertyChanged (add INotifyPropertyChanged interface, event and protected method to raise the event)  and call OnPropertyChanged method in properties._
 
 
 ## Save The Assembly (.NET Framework Only)
