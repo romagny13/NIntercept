@@ -564,7 +564,7 @@ public class MainWindowViewModel
 }
 ```
 
-Definethe **Mixin**
+Define the **Mixin**
 
 ```cs
 public interface IPropertyChangedMixin : INotifyPropertyChanged
