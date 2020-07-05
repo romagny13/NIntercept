@@ -71,12 +71,6 @@ namespace MvvmSample.ViewModels
         }
     }
 
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Property)]
-    public class PropertyChangedAttribute : Attribute, ISetterInterceptorProvider
-    {
-        public Type InterceptorType => typeof(PropertyChangedInterceptor);
-    }
-
     public interface IPropertyChangedMixin : INotifyPropertyChanged
     {
         void OnPropertyChanged(object target, string propertyName);
@@ -93,6 +87,12 @@ namespace MvvmSample.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
     }
 
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Property)]
+    public class PropertyChangedAttribute : Attribute, ISetterInterceptorProvider
+    {
+        public Type InterceptorType => typeof(PropertyChangedInterceptor);
+    }
+
     public class PropertyChangedInterceptor : Interceptor
     {
         protected override void OnEnter(IInvocation invocation) { }
@@ -103,11 +103,11 @@ namespace MvvmSample.ViewModels
 
         protected override void OnExit(IInvocation invocation)
         {
-            IPropertyChangedMixin propertyChangedNotifier = invocation.Proxy as IPropertyChangedMixin;
-            if (propertyChangedNotifier != null)
+            IPropertyChangedMixin mixin = invocation.Proxy as IPropertyChangedMixin;
+            if (mixin != null)
             {
                 string propertyName = invocation.Member.Name;
-                propertyChangedNotifier.OnPropertyChanged(invocation.Proxy, propertyName);
+                mixin.OnPropertyChanged(invocation.Proxy, propertyName);
             }
         }
     }

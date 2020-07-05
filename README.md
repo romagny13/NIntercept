@@ -521,8 +521,8 @@ public interface IMyClass
 }
 
 public class GetSetTitleAttribute : Attribute, 
-    IPropertyGetInterceptorProvider, 
-    IPropertySetInterceptorProvider
+    IGetterInterceptorProvider, 
+    ISetterInterceptorProvider
 {
     public Type InterceptorType => typeof(MyInterceptor);
 }
@@ -564,19 +564,16 @@ public class MainWindowViewModel
 }
 ```
 
-```cs
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Property)]
-public class PropertyChangedAttribute : Attribute, IPropertySetInterceptorProvider
-{
-    public Type InterceptorType => typeof(PropertyChangedInterceptor);
-}
+Definethe **Mixin**
 
-public interface IPropertyChangedNotifier : INotifyPropertyChanged
+```cs
+public interface IPropertyChangedMixin : INotifyPropertyChanged
 {
     void OnPropertyChanged(object target, string propertyName);
 }
 
-public class PropertyChangedNotifier : IPropertyChangedNotifier
+[Serializable]
+public class PropertyChangedMixin : IPropertyChangedMixin
 {
     public void OnPropertyChanged(object target, string propertyName)
     {
@@ -584,6 +581,16 @@ public class PropertyChangedNotifier : IPropertyChangedNotifier
     }
 
     public event PropertyChangedEventHandler PropertyChanged;
+}
+```
+
+Define an attribute and an **interceptor**
+
+```cs
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Property)]
+public class PropertyChangedAttribute : Attribute, ISetterInterceptorProvider
+{
+    public Type InterceptorType => typeof(PropertyChangedInterceptor);
 }
 
 public class PropertyChangedInterceptor : Interceptor
@@ -596,22 +603,22 @@ public class PropertyChangedInterceptor : Interceptor
 
     protected override void OnExit(IInvocation invocation)
     {
-        IPropertyChangedNotifier propertyChangedNotifier = invocation.Proxy as IPropertyChangedNotifier;
-        if (propertyChangedNotifier != null)
+        IPropertyChangedMixin mixin = invocation.Proxy as IPropertyChangedMixin;
+        if (mixin != null)
         {
             string propertyName = invocation.Member.Name;
-            propertyChangedNotifier.OnPropertyChanged(invocation.Proxy, propertyName);
+            mixin.OnPropertyChanged(invocation.Proxy, propertyName);
         }
     }
 }
 ```
 
-Define the options
+Define the **options**
 
 ```cs
 var options = new ProxyGeneratorOptions();
-options.AddMixinInstance(new PropertyChangedNotifier());
-generator.CreateClassProxy<MainWindowViewModel>(options);
+options.AddMixinInstance(new PropertyChangedMixin());
+var proxy = generator.CreateClassProxy<MainWindowViewModel>(options);
 ```
 
 _Note: **caution** with **proxies** that have a **target**. After calling a target member, we are out of the proxy (For example a method that updates a target property)_
