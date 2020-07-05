@@ -2,7 +2,6 @@
 
 > Allows to create **proxies** for class and interface, **intercept** properties, methods, events and **customize the code generated**.
 
-
 Proxies
 
 * **Class Proxy**: a **Proxy** that inherits from the **class** is created. **Virtual** members (properties, methods end events) are **overridden**. The **base class members** are **invoked** after interception.
@@ -22,7 +21,7 @@ Invocation Members:
 * **CallerMethod**: the method of the proxy
 * **InterceptorProviderType**: IGetterInterceptorProvider, ISetterInterceptorProvider,IMethodInterceptorProvider ,IAddOnInterceptorProvider, IRemoveOnInterceptorProvider
 * **Member** : property, method, event of the class to invoke after interception
-* **Parameters*: the method parameters
+* **Parameters**: the method parameters
 * **Proxy**: the class or interface proxy
 * **ReturnValue**: the result value
 * **Target**: the target or null
