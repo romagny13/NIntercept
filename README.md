@@ -470,7 +470,7 @@ container.RegisterType<IService2, Service2>();
 etc.
 ```
 
-... Allows to inject dependencies in interceptor
+... Allows to **inject dependencies** in **interceptors** used with interceptor attributes 
 
 
 ```cs
