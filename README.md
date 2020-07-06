@@ -453,7 +453,9 @@ _Note: By default the first constructor of the proxied class is selected. Create
 
 ## ObjectFactory
 
-Change the default **factory** with an **IoC Container**
+> Allows to **inject dependencies** in **interceptors** used with interceptor **attributes**
+
+**Sample 1:** Change the default **factory** with an **IoC Container**
 
 ```cs
 var generator = new ProxyGenerator();
@@ -469,9 +471,7 @@ container.RegisterType<IService2, Service2>();
 
 etc.
 ```
-
-... Allows to **inject dependencies** in **interceptors** used with interceptor attributes 
-
+Create an interceptor with injections.
 
 ```cs
 public class MyInterceptor : IInterceptor
@@ -492,7 +492,7 @@ public class MyInterceptor : IInterceptor
 }
 ```
 
-... Or get the **same instance** of the **interceptor**. Usefull for Example with **InterfaceProxy without target**.
+**Sample 2:** get the **same instance** of the **interceptor**. Usefull with **InterfaceProxy without target**.
 
 
 ```cs
