@@ -382,6 +382,22 @@ _Note: the DefaultConstructorInjectionResolver returns defaults (default values 
 **Sample** use **Unity Container** to resolve injection parameters
 
 ```cs
+public class MyClass
+{
+    private readonly IMyService myService;
+  
+    // constructor with injection
+    public MyClass(IMyService myService)
+    {
+        this.myService = myService;
+    }
+
+    public void Method()
+    {
+        Console.WriteLine($"{myService.GetMessage("World")}");
+    }
+}
+
 public interface IMyService
 {
     string GetMessage(string name);
@@ -392,21 +408,6 @@ public class MyService : IMyService
     public string GetMessage(string name)
     {
         return $"Hello {name}!";
-    }
-}
-
-public class MyClass
-{
-    private readonly IMyService myService;
-
-    public MyClass(IMyService myService)
-    {
-        this.myService = myService;
-    }
-
-    public void Method()
-    {
-        Console.WriteLine($"{myService.GetMessage("World")}");
     }
 }
 ```
