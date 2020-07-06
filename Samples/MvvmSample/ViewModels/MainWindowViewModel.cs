@@ -71,13 +71,12 @@ namespace MvvmSample.ViewModels
         }
     }
 
-    public interface IPropertyChangedMixin : INotifyPropertyChanged
+    public interface INotifyPropertyChangedMixin : INotifyPropertyChanged
     {
         void OnPropertyChanged(object target, string propertyName);
     }
 
-    [Serializable]
-    public class PropertyChangedMixin : IPropertyChangedMixin
+    public class PropertyChangedMixin : INotifyPropertyChangedMixin
     {
         public void OnPropertyChanged(object target, string propertyName)
         {
@@ -103,7 +102,7 @@ namespace MvvmSample.ViewModels
 
         protected override void OnExit(IInvocation invocation)
         {
-            IPropertyChangedMixin mixin = invocation.Proxy as IPropertyChangedMixin;
+            INotifyPropertyChangedMixin mixin = invocation.Proxy as INotifyPropertyChangedMixin;
             if (mixin != null)
             {
                 string propertyName = invocation.Member.Name;

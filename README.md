@@ -576,12 +576,12 @@ public class MainWindowViewModel
 Define the **Mixin**
 
 ```cs
-public interface IPropertyChangedMixin : INotifyPropertyChanged
+public interface INotifyPropertyChangedMixin : INotifyPropertyChanged
 {
     void OnPropertyChanged(object target, string propertyName);
 }
 
-public class PropertyChangedMixin : IPropertyChangedMixin
+public class PropertyChangedMixin : INotifyPropertyChangedMixin
 {
     public void OnPropertyChanged(object target, string propertyName)
     {
@@ -611,7 +611,7 @@ public class PropertyChangedInterceptor : Interceptor
 
     protected override void OnExit(IInvocation invocation)
     {
-        IPropertyChangedMixin mixin = invocation.Proxy as IPropertyChangedMixin;
+        INotifyPropertyChangedMixin mixin = invocation.Proxy as INotifyPropertyChangedMixin;
         if (mixin != null)
         {
             string propertyName = invocation.Member.Name;
