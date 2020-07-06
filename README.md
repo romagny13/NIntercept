@@ -375,7 +375,9 @@ public class MyAsyncInterceptor : AsyncInterceptor
 
 ## Constructor Injection Resolver
 
-> Allows to resolve **constructor parameters** of the class for a **Class Proxy**.
+> Allows to resolve **parameters** of the **base class contructor** for a **Class Proxy**.
+
+_Note: the DefaultConstructorInjectionResolver returns defaults (default values for value types, null for objects)._
 
 **Sample** use **Unity Container** to resolve injection parameters
 
