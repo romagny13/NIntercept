@@ -173,7 +173,7 @@ namespace CodeGenerationSample
 
     public class CustomServiceProvider : DefaultServiceProvider
     {
-        IProxyMethodBuilder proxyMethodBuilder = new CleanProxyMethodBuilder();
+        IProxyMethodBuilder proxyMethodBuilder = new CleanPropertyProxyMethodBuilder();
 
         public override IProxyMethodBuilder ProxyMethodBuilder => proxyMethodBuilder;
     }

@@ -154,7 +154,7 @@ public class MyClass
     }
 
     [AddOnInterceptor(typeof(MyAddOnInterceptor))]
-    [AddOnInterceptor(typeof(MyRemoveOnInterceptor))]
+    [RemoveOnInterceptor(typeof(MyRemoveOnInterceptor))]
     public virtual event EventHandler MyEvent;
 }
 ```
