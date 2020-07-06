@@ -492,7 +492,7 @@ public class MyInterceptor : IInterceptor
 }
 ```
 
-**Sample 2:** get the **same instance** of the **interceptor**. Usefull with **InterfaceProxy without target**.
+**Sample 2:** get the **same instance** of the **interceptor**. Usefull for **Interface Proxy without target**.
 
 
 ```cs
