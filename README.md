@@ -751,7 +751,7 @@ public class ViewModelAdditionalCode : AdditionalCode
 }
 ```
 
-_Another alternative is to create a **custom ProxyMethodBuilder** and change the **service provider** (ProxyGeneratorOptions). Update the proxy and implement INotifyPropertyChanged (add INotifyPropertyChanged interface, event and protected method to raise the event)  and call OnPropertyChanged method in properties._
+_Another alternative is to create a **custom InterceptableMethodBuilder**. Update the proxy and implement INotifyPropertyChanged (add INotifyPropertyChanged interface, event and protected method to raise the event)  and call OnPropertyChanged method in properties._
 
 
 ## Save The Assembly (.NET Framework Only)
