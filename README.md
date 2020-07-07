@@ -1,6 +1,6 @@
 # NIntercept
 
-> Allows to create **proxies** for class and interface, **intercept** properties, methods, events and **customize the code generated**.
+> Allows to create **proxies** for classes and interfaces, **intercept** properties, methods, events and **customize the code generated**.
 
 
 Proxies
