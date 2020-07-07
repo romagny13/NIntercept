@@ -37,6 +37,7 @@ Options:
 * **ClassProxyMemberSelector**: allows to **filter members to include** for **Class Proxy**. For example create an attribute and include only virtual members decorated with the attribute.
 * **AdditionalTypeAttributes**: allows to add **custom attributes** on proxy generated.
 * **ConstructorSelector**: allows to **select** the **base constructor** to call.
+* **InterceptableMethodBuilder**: allows to provide a custom **InterceptableMethodBuilder**.
 
 And
 
