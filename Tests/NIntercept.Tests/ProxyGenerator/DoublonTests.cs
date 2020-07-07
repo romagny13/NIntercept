@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace NIntercept.Tests
 {
+
     [TestClass]
     public class DoublonTests
     {

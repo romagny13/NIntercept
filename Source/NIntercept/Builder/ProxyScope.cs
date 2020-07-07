@@ -143,7 +143,7 @@ namespace NIntercept
         private void CreateFields()
         {
             // fields injected in ctor
-            var fieldList =  new List<FieldBuilder>();
+            var fieldList = new List<FieldBuilder>();
             fieldList.Add(DefineField(IntercetorsFieldName, typeof(IInterceptor[]), FieldAttributes.Private));
 
             if (typeDefinition.TargetType != null)
@@ -238,17 +238,39 @@ namespace NIntercept
             return propertyBuilder;
         }
 
-        public PropertyBuilder DefineFullProperty(FieldBuilder field, string propertyName, PropertyAttributes propertyAttributes, Type returnType, Type[] parameterTypes, MethodAttributes methodAttributes)
+        public PropertyBuilder DefineFullProperty(string propertyName, PropertyAttributes propertyAttributes, Type returnType, Type[] parameterTypes, MethodAttributes methodAttributes, FieldBuilder field)
         {
-            PropertyBuilder propertyBuilder = typeBuilder.DefineFullProperty(field, propertyName, propertyAttributes, returnType, parameterTypes, methodAttributes);
-            properties.Add(propertyBuilder);
+            if (propertyName is null)
+                throw new ArgumentNullException(nameof(propertyName));
+            if (field is null)
+                throw new ArgumentNullException(nameof(field));
+
+            PropertyBuilder propertyBuilder = DefineProperty(propertyName, propertyAttributes, returnType, parameterTypes);
+
+            MethodBuilder getMethodBuilder = typeBuilder.DefineGetMethod( propertyName, methodAttributes, returnType, field);
+            propertyBuilder.SetGetMethod(getMethodBuilder);
+            methods.Add(getMethodBuilder);
+
+            MethodBuilder setMethodBuilder = typeBuilder.DefineSetMethod(propertyName, methodAttributes, parameterTypes, field);
+            propertyBuilder.SetSetMethod(setMethodBuilder);
+            methods.Add(setMethodBuilder);
+
             return propertyBuilder;
         }
 
-        public PropertyBuilder DefineReadOnlyProperty(FieldBuilder field, string propertyName, PropertyAttributes propertyAttributes, Type returnType, Type[] parameterTypes, MethodAttributes methodAttributes)
+        public PropertyBuilder DefineReadOnlyProperty(string propertyName, PropertyAttributes propertyAttributes, Type returnType, Type[] parameterTypes, MethodAttributes methodAttributes, FieldBuilder field)
         {
-            PropertyBuilder propertyBuilder = typeBuilder.DefineReadOnlyProperty(field, propertyName, propertyAttributes, returnType, parameterTypes, methodAttributes);
-            properties.Add(propertyBuilder);
+            if (propertyName is null)
+                throw new ArgumentNullException(nameof(propertyName));
+            if (field is null)
+                throw new ArgumentNullException(nameof(field));
+
+            PropertyBuilder propertyBuilder = DefineProperty(propertyName, propertyAttributes, returnType, parameterTypes);
+
+            MethodBuilder getMethodBuilder = typeBuilder.DefineGetMethod(propertyName, methodAttributes, returnType, field);
+            propertyBuilder.SetGetMethod(getMethodBuilder);
+            methods.Add(getMethodBuilder);
+
             return propertyBuilder;
         }
 
@@ -280,8 +302,23 @@ namespace NIntercept
 
         public EventBuilder DefineFullEvent(string eventName, EventAttributes eventAttributes, Type eventType, FieldBuilder field)
         {
-            EventBuilder eventBuilder = typeBuilder.DefineFullEvent(eventName, eventAttributes, eventType, field);
-            events.Add(eventBuilder);
+            if (eventName is null)
+                throw new ArgumentNullException(nameof(eventName));
+            if (eventType is null)
+                throw new ArgumentNullException(nameof(eventType));
+            if (field is null)
+                throw new ArgumentNullException(nameof(field));
+
+            EventBuilder eventBuilder = DefineEvent(eventName, eventAttributes, eventType);
+
+            MethodBuilder addMethodBuilder = typeBuilder.DefineAddMethod(eventName, eventType, field);
+            eventBuilder.SetAddOnMethod(addMethodBuilder);
+            methods.Add(addMethodBuilder);
+
+            MethodBuilder removeMethodBuilder = typeBuilder.DefineRemoveMethod(eventName, eventType, field);
+            eventBuilder.SetRemoveOnMethod(removeMethodBuilder);
+            methods.Add(removeMethodBuilder);
+
             return eventBuilder;
         }
 
@@ -320,7 +357,6 @@ namespace NIntercept
                 propertyBuilder.SetSetMethod(setMethodBuilder);
             }
 
-            properties.Add(propertyBuilder);
             propertyMappings.Add(new PropertyMapping(propertyDefinition, memberField, getMethodField, setMethodField, propertyBuilder, getMethodBuilder, setMethodBuilder));
 
             return propertyBuilder;
@@ -338,7 +374,6 @@ namespace NIntercept
             FieldBuilder methodField = DefineField(methodDefinition.CallerMethodFieldName, typeof(MethodInfo), attributes);
 
             MethodBuilder methodBuilder = interceptableMethodBuilder.CreateMethod(this, methodDefinition, member, memberField, methodField);
-            methods.Add(methodBuilder);
             methodMappings.Add(new MethodMapping(methodDefinition, memberField, methodField, methodBuilder));
             return methodBuilder;
         }
@@ -365,7 +400,6 @@ namespace NIntercept
             AttributeHelper.AddInterceptorAttributes(removeMethodBuilder, eventDefinition.RemoveOnInterceptorAttributes);
             eventBuilder.SetRemoveOnMethod(removeMethodBuilder);
 
-            events.Add(eventBuilder);
             eventMappings.Add(new EventMapping(eventDefinition, eventBuilder, memberField, addMethodField, removeMethodField, addMethodBuilder, removeMethodBuilder));
 
             return eventBuilder;

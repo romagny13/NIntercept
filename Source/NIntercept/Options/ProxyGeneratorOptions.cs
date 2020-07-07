@@ -59,8 +59,10 @@ namespace NIntercept
         {
             if (instance is null)
                 throw new ArgumentNullException(nameof(instance));
+            if (instance.GetType().GetInterfaces().Length == 0)
+                throw new ArgumentException($"Invalid mixin. The mixin '{instance.GetType().Name}' doesn't implement any interface. An interface is required.");
 
-            this.mixinInstances.Add(instance);
+                this.mixinInstances.Add(instance);
         }
     }
 }

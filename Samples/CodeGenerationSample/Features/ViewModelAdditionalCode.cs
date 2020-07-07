@@ -21,6 +21,11 @@ namespace CodeGenerationSample
             delegateCommandBuilderFeature.ImplementFeature(proxyScope);
         }
 
+        public override void AfterDefine(ProxyScope proxyScope)
+        {
+            base.AfterDefine(proxyScope);
+        }
+
         public override void BeforeInvoke(ProxyScope proxyScope, ILGenerator il, CallbackMethodDefinition callbackMethodDefinition)
         {
             if (callbackMethodDefinition.MethodDefinition.MethodDefinitionType == MethodDefinitionType.Setter)

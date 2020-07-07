@@ -20,4 +20,8 @@
     <ProjectReference Include="..\..\Source\NIntercept\NIntercept.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Internals\" />
+  </ItemGroup>
+
 </Project>
