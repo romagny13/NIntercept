@@ -8,10 +8,10 @@ namespace NIntercept.Definition
     {
         private TypeDefinition typeDefinition;
         private EventInfo @event;
-        private AddEventMethodDefinition addEventMethodDefinition;
-        private RemoveEventMethodDefinition removeEventMethodDefinition;
-        private InterceptorAttributeDefinition[] addEventInterceptorAttributes;
-        private InterceptorAttributeDefinition[] removeEventInterceptorAttributes;
+        private AddMethodDefinition addMethodDefinition;
+        private RemoveMethodDefinition removeMethodDefinition;
+        private InterceptorAttributeDefinition[] addOnInterceptorAttributes;
+        private InterceptorAttributeDefinition[] removeOnInterceptorAttributes;
 
         public EventDefinition(TypeDefinition typeDefinition, EventInfo @event)
         {
@@ -49,44 +49,49 @@ namespace NIntercept.Definition
             get { return @event.EventHandlerType; }
         }
 
-        public AddEventMethodDefinition AddEventMethodDefinition
+        public AddMethodDefinition AddMethodDefinition
         {
             get
             {
                 if (@event.AddMethod != null)
-                    addEventMethodDefinition = new AddEventMethodDefinition(typeDefinition, this, @event.AddMethod);
-                return addEventMethodDefinition;
+                    addMethodDefinition = new AddMethodDefinition(typeDefinition, this, @event.AddMethod);
+                return addMethodDefinition;
             }
         }
 
-        public RemoveEventMethodDefinition RemoveEventMethodDefinition
+        public RemoveMethodDefinition RemoveMethodDefinition
         {
             get
             {
                 if (@event.RemoveMethod != null)
-                    removeEventMethodDefinition = new RemoveEventMethodDefinition(typeDefinition, this, @event.RemoveMethod);
-                return removeEventMethodDefinition;
+                    removeMethodDefinition = new RemoveMethodDefinition(typeDefinition, this, @event.RemoveMethod);
+                return removeMethodDefinition;
             }
         }
 
-        public InterceptorAttributeDefinition[] AddEventInterceptorAttributes
+        public InterceptorAttributeDefinition[] AddOnInterceptorAttributes
         {
             get
             {
-                if (addEventInterceptorAttributes == null)
-                    addEventInterceptorAttributes = AttributeDefinitionHelper.GetInterceptorDefinitions(@event, typeof(IAddOnInterceptorProvider));
-                return addEventInterceptorAttributes;
+                if (addOnInterceptorAttributes == null)
+                    addOnInterceptorAttributes = AttributeDefinitionHelper.GetInterceptorDefinitions(@event, typeof(IAddOnInterceptorProvider));
+                return addOnInterceptorAttributes;
             }
         }
 
-        public InterceptorAttributeDefinition[] RemoveEventInterceptorAttributes
+        public InterceptorAttributeDefinition[] RemoveOnInterceptorAttributes
         {
             get
             {
-                if (removeEventInterceptorAttributes == null)
-                    removeEventInterceptorAttributes = AttributeDefinitionHelper.GetInterceptorDefinitions(@event, typeof(IRemoveOnInterceptorProvider));
-                return removeEventInterceptorAttributes;
+                if (removeOnInterceptorAttributes == null)
+                    removeOnInterceptorAttributes = AttributeDefinitionHelper.GetInterceptorDefinitions(@event, typeof(IRemoveOnInterceptorProvider));
+                return removeOnInterceptorAttributes;
             }
+        }
+
+        public string MemberFieldName
+        {
+            get { return $"{typeDefinition.Type.Name}_{Name}"; }
         }
 
         public override string ToString()

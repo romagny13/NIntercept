@@ -33,7 +33,6 @@ namespace NIntercept.Tests
         {
             var generator = new ProxyGenerator();
 
-            Assert.IsNotNull(generator.ModuleDefinition);
             Assert.IsNotNull(generator.ModuleScope);
 
             var scope = generator.ModuleScope;
@@ -46,27 +45,15 @@ namespace NIntercept.Tests
         {
             var generator = new ProxyGenerator();
 
-            var m1 = new ProxyPropertyBuilderMock();
-            var m2 = new ProxyMethodBuilderMock();
-            var m3 = new ProxyEventBuilderMock();
-            var m4 = new CallbackMethodBuilderMock();
+            var m1 = new ProxyMethodBuilderMock();
 
-            var mock = new ServiceLocatorMock();
 
             var options = new ProxyGeneratorOptions();
-            options.ServiceProvider = mock;
-
-            mock.ProxyPropertyBuilder = m1;
-            mock.ProxyMethodBuilder = m2;
-            mock.ProxyEventBuilder = m3;
-            mock.CallbackMethodBuilder = m4;
+            options.InterceptableMethodBuilder = m1;
 
             generator.CreateClassProxy<TypeP2>(options);
 
             Assert.IsTrue(m1.IsUsed);
-            Assert.IsTrue(m2.IsUsed);
-            Assert.IsTrue(m3.IsUsed);
-            Assert.IsTrue(m4.IsUsed);
         }
 
         #region Methods

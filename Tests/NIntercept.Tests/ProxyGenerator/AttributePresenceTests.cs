@@ -22,7 +22,7 @@ namespace NIntercept.Tests.Builder
         public void Attributes_Not_Added_For_Type()
         {
             var generator = new ProxyGenerator();
-            var typeDefiniton = generator.ModuleDefinition.GetTypeDefinition(typeof(TypeA1), null, null);
+            var typeDefiniton = generator.GetTypeDefinition(typeof(TypeA1), null, null);
             Type proxyType = generator.CreateProxyType(typeDefiniton, null);
 
             var typeAtt = proxyType.GetCustomAttributes();
@@ -37,7 +37,7 @@ namespace NIntercept.Tests.Builder
         public void Attributes_Added_For_Interface()
         {
             var generator = new ProxyGenerator();
-            var typeDefiniton = generator.ModuleDefinition.GetTypeDefinition(typeof(ITypeA2), null, null);
+            var typeDefiniton = generator.GetTypeDefinition(typeof(ITypeA2), null, null);
             Type proxyType = generator.CreateProxyType(typeDefiniton, null);
 
             var typeAtt = proxyType.GetCustomAttributes();
@@ -52,7 +52,7 @@ namespace NIntercept.Tests.Builder
         public void Attributes_Added_For_Interface_With_Ancestors()
         {
             var generator = new ProxyGenerator();
-            var typeDefiniton = generator.ModuleDefinition.GetTypeDefinition(typeof(ITypeA2_b), null, null);
+            var typeDefiniton = generator.GetTypeDefinition(typeof(ITypeA2_b), null, null);
             Type proxyType = generator.CreateProxyType(typeDefiniton, null);
 
             var typeAtt = proxyType.GetCustomAttributes();
@@ -67,7 +67,7 @@ namespace NIntercept.Tests.Builder
         public void Attributes_Added_For_Set_And_Get_Properties()
         {
             var generator = new ProxyGenerator();
-            var typeDefiniton = generator.ModuleDefinition.GetTypeDefinition(typeof(TypeA1), null, null);
+            var typeDefiniton = generator.GetTypeDefinition(typeof(TypeA1), null, null);
             Type proxyType = generator.CreateProxyType(typeDefiniton, null);
 
             var getAtt = proxyType.GetProperty("MyProperty").GetMethod.GetCustomAttributes();
@@ -87,7 +87,7 @@ namespace NIntercept.Tests.Builder
         public void Attributes_Added_For_Set_And_Get_Properties_Full()
         {
             var generator = new ProxyGenerator();
-            var typeDefiniton = generator.ModuleDefinition.GetTypeDefinition(typeof(TypeA1_Full), null, null);
+            var typeDefiniton = generator.GetTypeDefinition(typeof(TypeA1_Full), null, null);
             Type proxyType = generator.CreateProxyType(typeDefiniton, null);
 
             var getAtt = proxyType.GetProperty("MyProperty").GetMethod.GetCustomAttributes();
@@ -105,7 +105,7 @@ namespace NIntercept.Tests.Builder
         public void Attributes_Added_For_Set_And_Get_Properties_For_Interface()
         {
             var generator = new ProxyGenerator();
-            var typeDefiniton = generator.ModuleDefinition.GetTypeDefinition(typeof(ITypeA2), null, null);
+            var typeDefiniton = generator.GetTypeDefinition(typeof(ITypeA2), null, null);
             Type proxyType = generator.CreateProxyType(typeDefiniton, null);
 
             var getAtt = proxyType.GetProperty("MyProperty").GetMethod.GetCustomAttributes();
@@ -123,7 +123,7 @@ namespace NIntercept.Tests.Builder
         public void Attributes_Added_For_Set_And_Get_Properties_For_Interface_With_Ancestor()
         {
             var generator = new ProxyGenerator();
-            var typeDefiniton = generator.ModuleDefinition.GetTypeDefinition(typeof(ITypeA2_b), null, null);
+            var typeDefiniton = generator.GetTypeDefinition(typeof(ITypeA2_b), null, null);
             Type proxyType = generator.CreateProxyType(typeDefiniton, null);
 
             var getAtt = proxyType.GetProperty("MyProperty").GetMethod.GetCustomAttributes();
@@ -141,7 +141,7 @@ namespace NIntercept.Tests.Builder
         public void Attributes_Added_For_Add_And_Remove_Events()
         {
             var generator = new ProxyGenerator();
-            var typeDefiniton = generator.ModuleDefinition.GetTypeDefinition(typeof(TypeA1), null, null);
+            var typeDefiniton = generator.GetTypeDefinition(typeof(TypeA1), null, null);
             Type proxyType = generator.CreateProxyType(typeDefiniton, null);
 
             var addAtt = proxyType.GetEvent("MyEvent").AddMethod.GetCustomAttributes();
@@ -161,7 +161,7 @@ namespace NIntercept.Tests.Builder
         public void Attributes_Added_For_Add_And_Remove_Events_Full()
         {
             var generator = new ProxyGenerator();
-            var typeDefiniton = generator.ModuleDefinition.GetTypeDefinition(typeof(TypeA1_Full), null, null);
+            var typeDefiniton = generator.GetTypeDefinition(typeof(TypeA1_Full), null, null);
             Type proxyType = generator.CreateProxyType(typeDefiniton, null);
 
             var addAtt = proxyType.GetEvent("MyEvent").AddMethod.GetCustomAttributes();
@@ -179,7 +179,7 @@ namespace NIntercept.Tests.Builder
         public void Attributes_Added_For_Add_And_Remove_Events_For_Interface()
         {
             var generator = new ProxyGenerator();
-            var typeDefiniton = generator.ModuleDefinition.GetTypeDefinition(typeof(ITypeA2), null, null);
+            var typeDefiniton = generator.GetTypeDefinition(typeof(ITypeA2), null, null);
             Type proxyType = generator.CreateProxyType(typeDefiniton, null);
 
             var addAtt = proxyType.GetEvent("MyEvent").AddMethod.GetCustomAttributes();
@@ -197,7 +197,7 @@ namespace NIntercept.Tests.Builder
         public void Attributes_Added_For_Add_And_Remove_Events_For_Interface_With_Ancestor()
         {
             var generator = new ProxyGenerator();
-            var typeDefiniton = generator.ModuleDefinition.GetTypeDefinition(typeof(ITypeA2_b), null, null);
+            var typeDefiniton = generator.GetTypeDefinition(typeof(ITypeA2_b), null, null);
             Type proxyType = generator.CreateProxyType(typeDefiniton, null);
 
             var addAtt = proxyType.GetEvent("MyEvent").AddMethod.GetCustomAttributes();
@@ -215,7 +215,7 @@ namespace NIntercept.Tests.Builder
         public void Attributes_Not_Added_For_Method()
         {
             var generator = new ProxyGenerator();
-            var typeDefiniton = generator.ModuleDefinition.GetTypeDefinition(typeof(TypeA1), null, null);
+            var typeDefiniton = generator.GetTypeDefinition(typeof(TypeA1), null, null);
             Type proxyType = generator.CreateProxyType(typeDefiniton, null);
 
             var att = proxyType.GetMethod("MyMethod").GetCustomAttributes();
@@ -228,7 +228,7 @@ namespace NIntercept.Tests.Builder
         public void Attributes_Not_Added_For_Method_For_Interface()
         {
             var generator = new ProxyGenerator();
-            var typeDefiniton = generator.ModuleDefinition.GetTypeDefinition(typeof(ITypeA2), null, null);
+            var typeDefiniton = generator.GetTypeDefinition(typeof(ITypeA2), null, null);
             Type proxyType = generator.CreateProxyType(typeDefiniton, null);
 
             var att = proxyType.GetMethod("MyMethod").GetCustomAttributes();
@@ -241,7 +241,7 @@ namespace NIntercept.Tests.Builder
         public void Attributes_Not_Added_For_Method_For_Interface_With_Ancestor()
         {
             var generator = new ProxyGenerator();
-            var typeDefiniton = generator.ModuleDefinition.GetTypeDefinition(typeof(ITypeA2_b), null, null);
+            var typeDefiniton = generator.GetTypeDefinition(typeof(ITypeA2_b), null, null);
             Type proxyType = generator.CreateProxyType(typeDefiniton, null);
 
             var att = proxyType.GetMethod("MyMethod").GetCustomAttributes();

@@ -19,7 +19,7 @@ namespace NIntercept
 
         public virtual BindingFlags Flags
         {
-            get { return BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static; }
+            get { return BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance; }
         }
 
         public static ReflectionCache Default
@@ -129,4 +129,5 @@ namespace NIntercept
             customAttributesOnMembers.Clear();
         }
     }
+
 }

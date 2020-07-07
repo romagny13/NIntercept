@@ -41,8 +41,8 @@ namespace NIntercept
             if (x.ClassProxyMemberSelector?.GetType() != y.ClassProxyMemberSelector?.GetType())
                 return false;
 
-            // ServiceProvider
-            if (x.ServiceProvider?.GetType() != y.ServiceProvider?.GetType())
+            // InterceptableMethodBuilder
+            if (x.InterceptableMethodBuilder?.GetType() != y.InterceptableMethodBuilder?.GetType())
                 return false;         
           
             return true;

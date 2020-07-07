@@ -6,48 +6,33 @@ namespace NIntercept.Helpers
 {
     public static class EmitHelper
     {
-        public static void StoreFieldInLocal(ILGenerator il, FieldBuilder field, LocalBuilder localBuilder)
+        public static void StoreFieldToLocal(ILGenerator il, FieldBuilder field, LocalBuilder localBuilder)
         {
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldfld, field);
             il.Emit(OpCodes.Stloc, localBuilder);
         }
 
-        public static void StoreProxyMethodToLocal(ILGenerator il, LocalBuilder localBuilder)
+        public static void StoreEventToField(ILGenerator il, EventInfo @event, FieldBuilder memberField)
         {
-            il.Emit(OpCodes.Call, Methods.GetCurrentMethod);
-            il.Emit(OpCodes.Castclass, typeof(MethodInfo));
-            il.Emit(OpCodes.Stloc, localBuilder);
-        }
+            il.Emit(OpCodes.Nop);
+            il.Emit(OpCodes.Ldtoken, @event.DeclaringType);
+            il.Emit(OpCodes.Call, Methods.GetTypeFromHandle);
+            il.Emit(OpCodes.Ldstr, @event.Name);
 
-        public static void StoreMemberToLocal(ILGenerator il, MemberInfo member, LocalBuilder localBuilder)
-        {
-            switch (member)
+            if (@event.AddMethod.IsPublic)
             {
-                case MethodInfo method:
-                    StoreMethodToLocal(il, method, localBuilder);
-                    break;
-                case PropertyInfo property:
-                    StorePropertyToLocal(il, property, localBuilder);
-                    break;
-                case EventInfo @event:
-                    StoreEventToLocal(il, @event, localBuilder);
-                    break;
-                default:
-                    throw new NotSupportedException("Unexpected meber type");
+                il.Emit(OpCodes.Callvirt, Methods.GetEvent);
             }
+            else
+            {
+                il.Emit(OpCodes.Ldc_I4_S, 52);
+                il.Emit(OpCodes.Callvirt, Methods.GetEventWithBindingFlags);
+            }
+            il.Emit(OpCodes.Stsfld, memberField);
         }
 
-        private static void StoreMethodToLocal(ILGenerator il, MethodInfo method, LocalBuilder localBuilder)
-        {
-            il.Emit(OpCodes.Ldtoken, method);
-            il.Emit(OpCodes.Ldtoken, method.DeclaringType);
-            il.Emit(OpCodes.Call, Methods.GetMethodFromHandle);
-            il.Emit(OpCodes.Castclass, typeof(MemberInfo));
-            il.Emit(OpCodes.Stloc, localBuilder);
-        }
-
-        private static void StorePropertyToLocal(ILGenerator il, PropertyInfo property, LocalBuilder localBuilder)
+        public static void StorePropertyToField(ILGenerator il, PropertyInfo property, FieldBuilder field)
         {
             bool isPublic = property.CanRead ? property.GetMethod.IsPublic : property.SetMethod.IsPublic;
 
@@ -64,30 +49,19 @@ namespace NIntercept.Helpers
                 il.Emit(OpCodes.Ldc_I4_S, 52);
                 il.Emit(OpCodes.Call, Methods.GetPropertyWithBindingFlags);
             }
-
-            il.Emit(OpCodes.Stloc, localBuilder);
+            il.Emit(OpCodes.Stsfld, field);
         }
 
-        private static void StoreEventToLocal(ILGenerator il, EventInfo @event, LocalBuilder localBuilder)
+        public static void StoreMethodToField(ILGenerator il, MethodInfo method, FieldBuilder field)
         {
-            il.Emit(OpCodes.Nop);
-            il.Emit(OpCodes.Ldtoken, @event.DeclaringType);
-            il.Emit(OpCodes.Call, Methods.GetTypeFromHandle);
-            il.Emit(OpCodes.Ldstr, @event.Name);
-
-            if (@event.AddMethod.IsPublic)
-            {
-                il.Emit(OpCodes.Callvirt, Methods.GetEvent);
-            }
-            else
-            {
-                il.Emit(OpCodes.Ldc_I4_S, 52);
-                il.Emit(OpCodes.Callvirt, Methods.GetEventWithBindingFlags);
-            }
-            il.Emit(OpCodes.Stloc, localBuilder);
+            il.Emit(OpCodes.Ldtoken, method);
+            il.Emit(OpCodes.Ldtoken, method.DeclaringType);
+            il.Emit(OpCodes.Call, Methods.GetMethodFromHandle);
+            //il.Emit(OpCodes.Castclass, typeof(MemberInfo));
+            il.Emit(OpCodes.Stsfld, field);
         }
 
-        public static void StoreThisInLocal(ILGenerator il, LocalBuilder localBuilder)
+        public static void StoreThisToLocal(ILGenerator il, LocalBuilder localBuilder)
         {
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Stloc, localBuilder);

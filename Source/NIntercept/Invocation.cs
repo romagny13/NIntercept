@@ -85,9 +85,7 @@ namespace NIntercept
                 if (currentInterceptorIndex == interceptors.Length)
                     InvokeMethodOnTarget();
                 else if (currentInterceptorIndex < interceptors.Length)
-                {
                     interceptors[currentInterceptorIndex].Intercept(this);
-                }
                 else
                     throw new IndexOutOfRangeException();
             }

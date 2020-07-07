@@ -238,7 +238,7 @@ namespace NIntercept.Tests.Internals
             Assert.AreEqual(true, comparer.Equals(o1, o2));
         }
 
-        // Service provider
+        // InterceptableMethodBuilder
 
         [TestMethod]
         public void ServiceProvider_Null_And_Not_Null_Not_Equals()
@@ -246,14 +246,14 @@ namespace NIntercept.Tests.Internals
             var comparer = new ProxyGeneratorOptionsComparer();
 
             var o1 = new ProxyGeneratorOptions();
-            o1.ServiceProvider = new ServiceProviderMock1();
+            o1.InterceptableMethodBuilder = new InterceptableMethodBuilderMock1();
             var o2 = new ProxyGeneratorOptions();
 
             Assert.AreEqual(false, comparer.Equals(o1, o2));
 
             var o3 = new ProxyGeneratorOptions();
             var o4 = new ProxyGeneratorOptions();
-            o4.ServiceProvider = new ServiceProviderMock1();
+            o4.InterceptableMethodBuilder = new InterceptableMethodBuilderMock1();
             Assert.AreEqual(false, comparer.Equals(o3, o4));
         }
 
@@ -263,9 +263,9 @@ namespace NIntercept.Tests.Internals
             var comparer = new ProxyGeneratorOptionsComparer();
 
             var o1 = new ProxyGeneratorOptions();
-            o1.ServiceProvider = new ServiceProviderMock1();
+            o1.InterceptableMethodBuilder = new InterceptableMethodBuilderMock1();
             var o2 = new ProxyGeneratorOptions();
-            o2.ServiceProvider = new ServiceProviderMock2();
+            o2.InterceptableMethodBuilder = new InterceptableMethodBuilderMock2();
 
             Assert.AreEqual(false, comparer.Equals(o1, o2));
         }
@@ -276,9 +276,9 @@ namespace NIntercept.Tests.Internals
             var comparer = new ProxyGeneratorOptionsComparer();
 
             var o1 = new ProxyGeneratorOptions();
-            o1.ServiceProvider = new ServiceProviderMock1();
+            o1.InterceptableMethodBuilder = new InterceptableMethodBuilderMock1();
             var o2 = new ProxyGeneratorOptions();
-            o2.ServiceProvider = new ServiceProviderMock1();
+            o2.InterceptableMethodBuilder = new InterceptableMethodBuilderMock1();
 
             Assert.AreEqual(true, comparer.Equals(o1, o2));
         }

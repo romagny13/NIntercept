@@ -5,10 +5,9 @@ namespace NIntercept.Definition
 {
     public sealed class MixinDefinition : TypeDefinition
     {
+        private Type[] interfaces;
         private ProxyTypeDefinition proxyTypeDefinition;
         private object mixinInstance;
-        private Type[] interfaces;
-        private InterfaceToImplementDefinition[] interfacesToImplement;
         private string targetFieldName;
 
         public MixinDefinition(ModuleDefinition moduleDefinition, ProxyTypeDefinition proxyTypeDefinition, object mixinInstance)
@@ -51,16 +50,6 @@ namespace NIntercept.Definition
             }
         }
 
-        public InterfaceToImplementDefinition[] InterfacesToImplement
-        {
-            get
-            {
-                if (interfacesToImplement == null)
-                    interfacesToImplement = GetInterfacesToImplement();
-                return interfacesToImplement;
-            }
-        }
-
         public override string TargetFieldName
         {
             get
@@ -71,21 +60,34 @@ namespace NIntercept.Definition
             }
         }
 
-        protected override TypeDefinition GetTypeDefinition()
+        protected override PropertyDefinition[] GetProperties()
         {
-            return this;
-        }
-
-        private InterfaceToImplementDefinition[] GetInterfacesToImplement()
-        {
-            Type[] interfaces = Interfaces;
-            int length = interfaces.Length;
-            var typesToImplement = new InterfaceToImplementDefinition[length];
+            var properties = InterceptableMemberHelper.GetInterceptableProperties(Type, Interfaces);
+            int length = properties.Count;
+            PropertyDefinition[] propertyDefinitions = new PropertyDefinition[length];
             for (int i = 0; i < length; i++)
-                typesToImplement[i] = new InterfaceToImplementDefinition(ModuleDefinition, interfaces[i], TargetType, this);
-            return typesToImplement;
+                propertyDefinitions[i] = new PropertyDefinition(this, properties[i]);
+            return propertyDefinitions;
         }
 
-    }
+        protected override MethodDefinition[] GetMethods()
+        {
+            var methods = InterceptableMemberHelper.GetInterceptableMethods(Type, Interfaces);
+            int length = methods.Count;
+            MethodDefinition[] methodDefinitions = new MethodDefinition[length];
+            for (int i = 0; i < length; i++)
+                methodDefinitions[i] = new MethodDefinition(this, methods[i]);
+            return methodDefinitions;
+        }
 
+        protected override EventDefinition[] GetEvents()
+        {
+            var events = InterceptableMemberHelper.GetInterceptableEvents(Type, Interfaces);
+            int length = events.Count;
+            EventDefinition[] eventDefinitions = new EventDefinition[length];
+            for (int i = 0; i < length; i++)
+                eventDefinitions[i] = new EventDefinition(this, events[i]);
+            return eventDefinitions;
+        }
+    }
 }

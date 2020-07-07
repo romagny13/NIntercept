@@ -39,16 +39,16 @@ namespace NIntercept.Tests.Helpers
         }
 
         [TestMethod]
-        public void et_InvocationType_Name_With_Interface()
+        public void Get_InvocationType_Name_With_Interface()
         {
             var collector = new ModuleDefinition();
             var typeDefinition = collector.GetTypeDefinition(typeof(IMyCol1), null, null) as InterfaceProxyDefinition;
 
-            Assert.AreEqual("GetEnumerator", typeDefinition.InterfacesToImplement[0].MethodDefinitions[0].Name);
-            Assert.AreEqual("GetEnumerator", typeDefinition.InterfacesToImplement[1].MethodDefinitions[0].Name);
+            Assert.AreEqual("GetEnumerator", typeDefinition.MethodDefinitions[0].Name);
+            Assert.AreEqual("GetEnumerator", typeDefinition.MethodDefinitions[1].Name);
 
-            Assert.AreEqual("IMyCol1_Proxy_IEnumerable`1_GetEnumerator_Invocation", typeDefinition.InterfacesToImplement[0].MethodDefinitions[0].InvocationTypeDefinition.Name);
-            Assert.AreEqual("IMyCol1_Proxy_IEnumerable_GetEnumerator_Invocation", typeDefinition.InterfacesToImplement[1].MethodDefinitions[0].InvocationTypeDefinition.Name);
+            Assert.AreEqual("IMyCol1_Proxy_IEnumerable`1_GetEnumerator_Invocation", typeDefinition.MethodDefinitions[0].InvocationTypeDefinition.Name);
+            Assert.AreEqual("IMyCol1_Proxy_IEnumerable_GetEnumerator_Invocation", typeDefinition.MethodDefinitions[1].InvocationTypeDefinition.Name);
         }
     }
 

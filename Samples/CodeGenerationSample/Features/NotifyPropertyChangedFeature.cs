@@ -40,33 +40,30 @@ namespace CodeGenerationSample
 
         public void AddINotifyPropertyChangedInterface(ProxyScope proxyScope)
         {
-            TypeBuilder typeBuilder = proxyScope.TypeBuilder;
-            if (!typeBuilder.HasImplementedInterface(interfaceType))
-                typeBuilder.AddInterfaceImplementation(interfaceType);
+            if (!proxyScope.HasImplementedInterface(interfaceType))
+                proxyScope.AddInterfaceImplementation(interfaceType);
         }
 
         public void CreatePropertyChangedEventHandler(ProxyScope proxyScope)
         {
-            EventBuilder propertyChangedEventBuilder = proxyScope.EventBuilders.FirstOrDefault(p => p.GetName() == EventName);
+            EventBuilder propertyChangedEventBuilder = proxyScope.Events.FirstOrDefault(p => p.GetName() == EventName);
             if (propertyChangedEventBuilder == null)
             {
-                TypeBuilder typeBuilder = proxyScope.TypeBuilder;
-                FieldBuilder eventField = proxyScope.CreateField(FieldName, typeof(PropertyChangedEventHandler), FieldAttributes.Private);
-                typeBuilder.DefineFullEvent(EventName, EventAttributes.None, typeof(PropertyChangedEventHandler), eventField);
+                FieldBuilder eventField = proxyScope.DefineField(FieldName, typeof(PropertyChangedEventHandler), FieldAttributes.Private);
+                proxyScope.DefineFullEvent(EventName, EventAttributes.None, typeof(PropertyChangedEventHandler), eventField);
             }
         }
 
         public void CreateOnPropertyChangedMethod(ProxyScope proxyScope)
         {
-            FieldBuilder eventField = proxyScope.FieldBuilders.FirstOrDefault(p => p.Name == FieldName);
+            FieldBuilder eventField = proxyScope.Fields.FirstOrDefault(p => p.Name == FieldName);
             if (eventField == null)
                 throw new ArgumentException($"No field '{FieldName}' found.");
 
             var onPropertyChangedMethodBuilder = GetOnPropertyChangedMethod(proxyScope);
             if (onPropertyChangedMethodBuilder == null)
             {
-                TypeBuilder typeBuilder = proxyScope.TypeBuilder;
-                onPropertyChangedMethodBuilder = typeBuilder.DefineMethod(MethodName, MethodAttributes.Family, typeof(void), new Type[] { typeof(string) });
+                onPropertyChangedMethodBuilder = proxyScope.DefineMethod(MethodName, MethodAttributes.Family, typeof(void), new Type[] { typeof(string) });
 
                 onPropertyChangedMethodBuilder.DefineParameter(1, ParameterAttributes.None, ParameterName);
 
@@ -152,7 +149,7 @@ namespace CodeGenerationSample
 
         public MethodBuilder GetOnPropertyChangedMethod(ProxyScope proxyScope)
         {
-            return proxyScope.TypeBuilder.GetMethodBuilders().FirstOrDefault(p => p.Name == MethodName);
+            return proxyScope.Methods.FirstOrDefault(p => p.Name == MethodName);
         }
     }
 

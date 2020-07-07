@@ -5,6 +5,7 @@ namespace NIntercept.Reflection
 {
     public class TypeAccessor
     {
+        private static readonly StaticMemberCache reflectionCache;
         private Type type;
         private object target;
         private FieldAccessorCollection fields;
@@ -13,10 +14,16 @@ namespace NIntercept.Reflection
         private MethodAccessorCollection methodAccessors;
         private EventAccessorCollection events;
 
+        static TypeAccessor()
+        {
+            reflectionCache = new StaticMemberCache();
+        }
+
         public TypeAccessor(Type type)
         {
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
+
             this.type = type;
         }
 
@@ -91,7 +98,7 @@ namespace NIntercept.Reflection
 
         protected virtual FieldAccessorCollection GetFields()
         {
-            var fields = ReflectionCache.Default.GetFields(type);
+            var fields = reflectionCache.GetFields(type);
             int length = fields.Length;
             var accessors = new FieldAccessor[length];
             for (int i = 0; i < length; i++)
@@ -106,12 +113,12 @@ namespace NIntercept.Reflection
 
         protected virtual ConstructorInfo[] GetConstructors()
         {
-            return ReflectionCache.Default.GetConstructors(type);
+            return reflectionCache.GetConstructors(type);
         }
 
         protected virtual PropertyAccessorCollection GetProperties()
         {
-            var properties = ReflectionCache.Default.GetProperties(type);
+            var properties = reflectionCache.GetProperties(type);
             int length = properties.Length;
             var accessors = new PropertyAccessor[length];
             for (int i = 0; i < length; i++)
@@ -126,7 +133,7 @@ namespace NIntercept.Reflection
 
         protected virtual MethodAccessorCollection GetMethods()
         {
-            var methods = ReflectionCache.Default.GetMethods(type);
+            var methods = reflectionCache.GetMethods(type);
             int length = methods.Length;
             var accessors = new MethodAccessor[length];
             for (int i = 0; i < length; i++)
@@ -141,7 +148,7 @@ namespace NIntercept.Reflection
 
         protected virtual EventAccessorCollection GetEvents()
         {
-            var events = ReflectionCache.Default.GetEvents(type);
+            var events = reflectionCache.GetEvents(type);
             int length = events.Length;
             var accessors = new EventAccessor[length];
             for (int i = 0; i < length; i++)
@@ -152,6 +159,11 @@ namespace NIntercept.Reflection
         protected virtual EventAccessor CreateEventAccessor(EventInfo @event)
         {
             return new EventAccessor(this, @event);
+        }
+
+        public static void ClearCache()
+        {
+            reflectionCache.ClearCache();
         }
 
         public override string ToString()

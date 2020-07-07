@@ -9,10 +9,10 @@ namespace NIntercept.Definition
         private TypeDefinition typeDefinition;
         private PropertyInfo property;
         private ParameterInfo[] indexParameters;
-        private PropertyGetMethodDefinition getMethodDefinition;
-        private PropertySetMethodDefinition setMethodDefinition;
-        private InterceptorAttributeDefinition[] propertyGetInterceptorAttributes;
-        private InterceptorAttributeDefinition[] propertySetInterceptorAttributes;
+        private GetMethodDefinition getMethodDefinition;
+        private SetMethodDefinition setMethodDefinition;
+        private InterceptorAttributeDefinition[] getterInterceptorAttributes;
+        private InterceptorAttributeDefinition[] setterInterceptorAttributes;
 
         public PropertyDefinition(TypeDefinition typeDefinition, PropertyInfo property)
         {
@@ -60,58 +60,62 @@ namespace NIntercept.Definition
             }
         }
 
-        public PropertyGetMethodDefinition GetMethodDefinition
+        public GetMethodDefinition GetMethodDefinition
         {
             get
             {
                 if (property.CanRead)
                 {
                     if (getMethodDefinition == null)
-                        getMethodDefinition = new PropertyGetMethodDefinition(TypeDefinition, this, property.GetMethod);
+                        getMethodDefinition = new GetMethodDefinition(TypeDefinition, this, property.GetMethod);
 
                 }
                 return getMethodDefinition;
             }
         }
 
-        public PropertySetMethodDefinition SetMethodDefinition
+        public SetMethodDefinition SetMethodDefinition
         {
             get
             {
                 if (property.CanWrite)
                 {
                     if (setMethodDefinition == null)
-                        setMethodDefinition = new PropertySetMethodDefinition(TypeDefinition, this, property.SetMethod);
+                        setMethodDefinition = new SetMethodDefinition(TypeDefinition, this, property.SetMethod);
                 }
                 return setMethodDefinition;
             }
         }
 
 
-        public InterceptorAttributeDefinition[] PropertyGetInterceptorAttributes
+        public InterceptorAttributeDefinition[] GettterInterceptorAttributes
         {
             get
             {
-                if (propertyGetInterceptorAttributes == null)
-                    propertyGetInterceptorAttributes = AttributeDefinitionHelper.GetInterceptorDefinitions(property, typeof(IGetterInterceptorProvider));
-                return propertyGetInterceptorAttributes;
+                if (getterInterceptorAttributes == null)
+                    getterInterceptorAttributes = AttributeDefinitionHelper.GetInterceptorDefinitions(property, typeof(IGetterInterceptorProvider));
+                return getterInterceptorAttributes;
             }
         }
 
-        public InterceptorAttributeDefinition[] PropertySetInterceptorAttributes
+        public InterceptorAttributeDefinition[] SetterInterceptorAttributes
         {
             get
             {
-                if (propertySetInterceptorAttributes == null)
-                    propertySetInterceptorAttributes = AttributeDefinitionHelper.GetInterceptorDefinitions(property, typeof(ISetterInterceptorProvider));
-                return propertySetInterceptorAttributes;
+                if (setterInterceptorAttributes == null)
+                    setterInterceptorAttributes = AttributeDefinitionHelper.GetInterceptorDefinitions(property, typeof(ISetterInterceptorProvider));
+                return setterInterceptorAttributes;
             }
+        }
+
+        public string MemberFieldName
+        {
+            get { return $"{typeDefinition.Type.Name}_{Name}"; }
         }
 
         public override string ToString()
         {
             return Name;
         }
-
     }
 }

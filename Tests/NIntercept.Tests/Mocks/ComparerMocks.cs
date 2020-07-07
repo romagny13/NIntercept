@@ -1,4 +1,5 @@
-﻿using NIntercept.Definition;
+﻿using NIntercept.Builder;
+using NIntercept.Definition;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,22 +29,22 @@ namespace NIntercept.Tests
 
     }
 
-    public class ClassProxyMemberSelectorMock1 : DefaultClassProxyMemberSelector
+    public class ClassProxyMemberSelectorMock1 : ClassProxyMemberSelector
     {
 
     }
 
-    public class ClassProxyMemberSelectorMock2 : DefaultClassProxyMemberSelector
+    public class ClassProxyMemberSelectorMock2 : ClassProxyMemberSelector
     {
 
     }
 
-    public class ServiceProviderMock1 : DefaultServiceProvider
+    public class InterceptableMethodBuilderMock1 : InterceptableMethodBuilder
     {
 
     }
 
-    public class ServiceProviderMock2 : DefaultServiceProvider
+    public class InterceptableMethodBuilderMock2 : InterceptableMethodBuilder
     {
 
     }

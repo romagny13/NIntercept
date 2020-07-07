@@ -1,4 +1,5 @@
-﻿using NIntercept.Definition;
+﻿using NIntercept.Builder;
+using NIntercept.Definition;
 using System;
 using System.Collections.Generic;
 
@@ -7,11 +8,11 @@ namespace NIntercept
     public class ProxyGeneratorOptions
     {
         private List<object> mixinInstances;
-        private IClassProxyMemberSelector classProxyMemberSelector;
-        private List<CustomAttributeDefinition> additionalTypeAttributes;
+        private ClassProxyMemberSelector classProxyMemberSelector;
         private IConstructorSelector constructorSelector;
+        private List<CustomAttributeDefinition> additionalTypeAttributes;
         private AdditionalCode additionalCode;
-        private IProxyServiceProvider serviceProvider;
+        private InterceptableMethodBuilder interceptableMethodBuilder;
 
         public ProxyGeneratorOptions()
         {
@@ -25,6 +26,12 @@ namespace NIntercept
             set { constructorSelector = value; }
         }
 
+        public ClassProxyMemberSelector ClassProxyMemberSelector
+        {
+            get { return classProxyMemberSelector; }
+            set { classProxyMemberSelector = value; }
+        }
+
         public AdditionalCode AdditionalCode
         {
             get { return additionalCode; }
@@ -36,21 +43,16 @@ namespace NIntercept
             get { return mixinInstances; }
         }
 
-        public IClassProxyMemberSelector ClassProxyMemberSelector
-        {
-            get { return classProxyMemberSelector; }
-            set { classProxyMemberSelector = value; }
-        }
-
         public List<CustomAttributeDefinition> AdditionalTypeAttributes
         {
             get { return additionalTypeAttributes; }
         }
 
-        public IProxyServiceProvider ServiceProvider
+
+        public InterceptableMethodBuilder InterceptableMethodBuilder
         {
-            get { return serviceProvider; }
-            set { serviceProvider = value; }
+            get { return interceptableMethodBuilder; }
+            set { interceptableMethodBuilder = value; }
         }
 
         public void AddMixinInstance(object instance)

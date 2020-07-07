@@ -1,0 +1,67 @@
+﻿
+Class Proxy
+
+public class MyClass
+{
+	public virtual string myProperty {get; set}
+
+	public virtual void Method(){}
+
+	public virtual event EventHandler MyEvent;
+}
+
+=> override virtual members (properties, methods, events) public and protected + internal? (x private and static members cannot be virtual)
+
+
+Interface Proxy
+
+Implement all interfaces
+
+public interface IAncestor1
+{
+	 string myProperty {get; set}
+
+	 void Method(){}
+
+	event EventHandler MyEvent;
+}
+
+public interface IAncestor1_bis
+{
+	 string myProperty {get; set}
+
+	 void Method(){}
+
+	event EventHandler MyEvent;
+}
+
+public interface IEnum
+{
+	 object GeEnum(){}
+
+}
+
+public interface IEnum<T>
+{
+	 T GeEnum(){}
+
+}
+
+public interface IAncestor2 : IAncestor1: IAncestor1_bis, IEnum, IEnum<string>
+{
+	 string myProperty2 {get; set}
+
+	 void Method2(){}
+
+	event EventHandler MyEvent2;
+}
+
+public interface IEnumerable
+{
+    IEnumerator GetEnumerator();
+}
+public interface IEnumerable<out T> : IEnumerable
+{
+    IEnumerator<T> GetEnumerator();
+}
+

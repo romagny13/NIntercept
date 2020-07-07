@@ -32,11 +32,6 @@ namespace NIntercept
             get { return moduleScope; }
         }
 
-        public ModuleDefinition ModuleDefinition
-        {
-            get { return moduleDefinition; }
-        }
-
         public virtual IConstructorInjectionResolver ConstructorInjectionResolver
         {
             get { return constructorInjectionResolver ?? defaultConstructorInjectionResolver; }
@@ -139,6 +134,12 @@ namespace NIntercept
 
         #endregion
 
+
+        public ProxyTypeDefinition GetTypeDefinition(Type type, object target, ProxyGeneratorOptions options)
+        {
+            return moduleDefinition.GetTypeDefinition(type, target?.GetType(), options);
+        }
+
         protected object ProtectedCreateClassProxy(Type type, object target, ProxyGeneratorOptions options, IInterceptor[] interceptors)
         {
             if (type is null)
@@ -147,8 +148,7 @@ namespace NIntercept
                 throw new InvalidOperationException($"Unexpected interface for '{type.Name}'");
             if (target != null && !type.IsAssignableFrom(target.GetType()))
                 throw new InvalidOperationException($"The target '{target.GetType().Name}' is not assignable from '{type.Name}'");
-
-            ProxyTypeDefinition typeDefinition = moduleDefinition.GetTypeDefinition(type, target?.GetType(), options);
+            ProxyTypeDefinition typeDefinition = GetTypeDefinition(type, target, options);
             return CreateProxy(typeDefinition, interceptors, target);
         }
 
@@ -161,7 +161,7 @@ namespace NIntercept
             if (target != null && !type.IsAssignableFrom(target.GetType()))
                 throw new InvalidOperationException($"The target '{target.GetType().Name}' is not assignable from '{type.Name}'");
 
-            ProxyTypeDefinition typeDefinition = moduleDefinition.GetTypeDefinition(type, target?.GetType(), options);
+            ProxyTypeDefinition typeDefinition = GetTypeDefinition(type, target, options);
             return CreateProxy(typeDefinition, interceptors, target);
         }
 
@@ -176,9 +176,9 @@ namespace NIntercept
 
             object[] args = GetArguments(typeDefinition, interceptors, target, proxyType);
 
-            //#if NET45 || NET472
-            //            ProxyBuilder.ModuleScope.Save();
-            //#endif
+//#if NET45 || NET472
+//            moduleScope.Save();
+//#endif
 
             return CreateProxyInstance(proxyType, args);
         }

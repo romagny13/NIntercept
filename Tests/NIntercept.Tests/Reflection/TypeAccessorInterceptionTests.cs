@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 namespace NIntercept.Tests.Reflection
 {
+
     [TestClass]
     public class TypeAccessorInterceptionTests
     {

@@ -6,7 +6,6 @@ namespace NIntercept
     public interface IProxyGenerator
     {
         IConstructorInjectionResolver ConstructorInjectionResolver { get; set; }
-        ModuleDefinition ModuleDefinition { get; }
         ModuleScope ModuleScope { get; }
 
         event EventHandler<ProxyTypeCreatedEventArgs> ProxyTypeCreated;
@@ -28,5 +27,6 @@ namespace NIntercept
         TInterface CreateInterfaceProxyWithTarget<TInterface>(TInterface target, params IInterceptor[] interceptors) where TInterface : class;
         TInterface CreateInterfaceProxyWithTarget<TInterface>(TInterface target, ProxyGeneratorOptions options, params IInterceptor[] interceptors) where TInterface : class;
         Type CreateProxyType(ProxyTypeDefinition typeDefinition, object target);
+        ProxyTypeDefinition GetTypeDefinition(Type type, object target, ProxyGeneratorOptions options);
     }
 }

@@ -4,7 +4,6 @@
     {
         ClassProxy,
         InterfaceProxy,
-        InterfaceToImplement,
         Mixin
     }
 }

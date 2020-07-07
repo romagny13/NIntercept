@@ -15,6 +15,15 @@ namespace NetConsoleSample
         {
             var generator = new ProxyGenerator(new ModuleScope(true));
 
+            RunTests(generator);
+        }
+
+        private static void RunTests(ProxyGenerator generator)
+        {
+            var watcher = new TestWatcher();
+
+            watcher.Start();
+
             RunCompleteSample(generator);
             RunProtectedMembersSample(generator);
             RunInterfaceProxyWithoutTargetSample(generator);
@@ -22,17 +31,26 @@ namespace NetConsoleSample
             RunMixinsSample(generator);
             RunConstructorInjectionSample(generator);
             RunIndexerSamples(generator);
-            RunAsyncMethodsSample(generator);
 
-            generator.ModuleScope.Save();
+            watcher.Stop();
 
-            Console.ReadKey();
+            RunAsyncMethodsSample(generator).GetAwaiter().GetResult();
+
+            if (!generator.ModuleScope.IsSaved)
+                generator.ModuleScope.Save();
+
+            Console.WriteLine();
+            Console.WriteLine($"Test duration: {watcher.Milliseconds}ms (async sample with Task.Delay not include)");
+            Console.WriteLine("Press Enter to restart the test");
+            var k = Console.ReadKey();
+            if (k.Key == ConsoleKey.Enter)
+                RunTests(generator);
         }
 
         private static void RunCompleteSample(ProxyGenerator generator)
         {
             Console.WriteLine("---------------------- Property, method, event ----------------------");
-            var proxy = generator.CreateClassProxy<MyClass<MyItem, string>>();
+            var proxy = generator.CreateClassProxy<MyClass>();
             // property
             proxy.MyProperty = "New value";
             Console.WriteLine($"Property: '{proxy.MyProperty}'");
@@ -77,10 +95,11 @@ namespace NetConsoleSample
             var proxy = generator.CreateClassProxy<MyCollection>();
             proxy.Add("Item 1");
             Console.WriteLine($"Item value at index 0: '{proxy[0]}'");
-            //proxy3[0] = "New Item value";
+            proxy[0] = "New Item value";
 
             Console.WriteLine("----------------------  Indexer with interface ----------------------");
             var proxyB = generator.CreateInterfaceProxyWithTarget<IMyCollection>(new MyCollectionNotVirtual());
+
             proxyB.Add("Item 1");
             Console.WriteLine($"Item value at index 0: '{proxyB[0]}'");
             proxyB[0] = "New Item value";
@@ -101,7 +120,7 @@ namespace NetConsoleSample
         }
 
         // caution with async void, only for demo
-        private async static void RunAsyncMethodsSample(ProxyGenerator generator)
+        private async static Task RunAsyncMethodsSample(ProxyGenerator generator)
         {
             Console.WriteLine("----------------------   Async Sample - Task   ----------------------");
             var proxy = generator.CreateClassProxy<MyClassWithAsyncMethods>(new MyAsyncInterceptor());
@@ -116,9 +135,9 @@ namespace NetConsoleSample
             Console.WriteLine("----------------------           Mixins          ----------------------");
 
             var options = new ProxyGeneratorOptions();
-            options.AddMixinInstance(new PropertyChangedNotifier());
+            options.AddMixinInstance(new PropertyChangedMixin());
 
-            var proxy = generator.CreateClassProxy<MyClassNotified>(options); // new LogInterceptor());
+            var proxy = generator.CreateClassProxy<MyClassWithMixin>(options); // new LogInterceptor());
 
             proxy.Title = "New title";
 
@@ -160,7 +179,7 @@ namespace NetConsoleSample
     #region Complete sample
 
     [AllInterceptor(typeof(LogInterceptor))]
-    public class MyClass<T, T2> : INotifyPropertyChangedAware
+    public class MyClass : INotifyPropertyChangedAware
     {
         private string myProperty;
         [SetterInterceptor(typeof(PropertyChangedInterceptor))]
@@ -447,14 +466,14 @@ namespace NetConsoleSample
 
     #region Mixin
 
-    public class MyClassNotified
+    public class MyClassWithMixin
     {
         private string title;
 
-        [SetterInterceptor(typeof(PropertyChangedNotifierInterceptor))]
+        [SetterInterceptor(typeof(PropertyChangedMixinInterceptor))]
         public virtual string Title { get => title; set => title = value; }
 
-        public MyClassNotified()
+        public MyClassWithMixin()
         {
 
         }
@@ -465,13 +484,13 @@ namespace NetConsoleSample
         }
     }
 
-    public interface IPropertyChangedNotifier : INotifyPropertyChanged
+    public interface IPropertyChangedMixin : INotifyPropertyChanged
     {
         void OnPropertyChanged(object target, string propertyName);
     }
 
     [Serializable]
-    public class PropertyChangedNotifier : IPropertyChangedNotifier
+    public class PropertyChangedMixin : IPropertyChangedMixin
     {
         public void OnPropertyChanged(object target, string propertyName)
         {
@@ -481,19 +500,19 @@ namespace NetConsoleSample
         public event PropertyChangedEventHandler PropertyChanged;
     }
 
-    public class PropertyChangedNotifierInterceptor : Interceptor
+    public class PropertyChangedMixinInterceptor : Interceptor
     {
         protected override void OnEnter(IInvocation invocation) { }
         protected override void OnException(IInvocation invocation, Exception exception) { }
 
         protected override void OnExit(IInvocation invocation)
         {
-            IPropertyChangedNotifier propertyChangedNotifier = invocation.Proxy as IPropertyChangedNotifier;
-            if (propertyChangedNotifier != null)
+            IPropertyChangedMixin mixin = invocation.Proxy as IPropertyChangedMixin;
+            if (mixin != null)
             {
                 string propertyName = invocation.Member.Name;
-                Console.WriteLine($"[PropertyChangedNotifierInterceptor] Notify changed:{propertyName}");
-                propertyChangedNotifier.OnPropertyChanged(invocation.Proxy, propertyName);
+                Console.WriteLine($"[PropertyChangedMixinInterceptor] Notify changed:{propertyName}");
+                mixin.OnPropertyChanged(invocation.Proxy, propertyName);
             }
         }
     }

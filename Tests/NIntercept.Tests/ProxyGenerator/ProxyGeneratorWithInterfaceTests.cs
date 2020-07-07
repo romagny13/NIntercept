@@ -1049,27 +1049,6 @@ namespace NIntercept.Tests
         }
 
         [TestMethod]
-        public void Set_Properties_With_Same_Name_That_Implement_2_Interfaces()
-        {
-            var generator = new ProxyGenerator();
-            var target = new TypeS13();
-            var proxy = generator.CreateInterfaceProxyWithTarget<IContracts>(target);
-
-            ((IContract1)proxy).MyProperty = "A";
-
-            Assert.AreEqual(0, TypeS13.States.Count);
-
-            ((IContract2)proxy).MyProperty = "B";
-
-            Assert.AreEqual(2, TypeS13.States.Count);
-            Assert.AreEqual(StateTypes.Interceptor1_IsCalledBefore, TypeS13.States[0]);
-            Assert.AreEqual(StateTypes.Interceptor1_IsCalledAfter, TypeS13.States[1]);
-
-            Assert.AreEqual("A", ((IContract1)proxy).MyProperty);
-            Assert.AreEqual("B", ((IContract2)proxy).MyProperty);
-        }
-
-        [TestMethod]
         public void Event_Generic_Test()
         {
             var proxyGenerator = new ProxyGenerator();
@@ -1273,43 +1252,6 @@ namespace NIntercept.Tests
             States.Add(StateTypes.Class_Method);
             IsMethodCCalled = true;
             return new T();
-        }
-    }
-
-    public interface IContract1
-    {
-        string MyProperty { get; set; }
-    }
-
-    public interface IContract2
-    {
-        [SetterInterceptor(typeof(IntForS13))]
-        string MyProperty { get; set; }
-    }
-
-    public interface IContracts : IContract1, IContract2
-    {
-
-    }
-
-    public class TypeS13 : IContracts
-    {
-        public static List<StateTypes> States = new List<StateTypes>();
-
-        public string MyProperty { get; set; }
-
-        string IContract2.MyProperty { get; set; }
-    }
-
-    public class IntForS13 : IInterceptor
-    {
-        public void Intercept(IInvocation invocation)
-        {
-            TypeS13.States.Add(StateTypes.Interceptor1_IsCalledBefore);
-
-            invocation.Proceed();
-
-            TypeS13.States.Add(StateTypes.Interceptor1_IsCalledAfter);
         }
     }
 

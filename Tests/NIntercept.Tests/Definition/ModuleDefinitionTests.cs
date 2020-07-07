@@ -439,27 +439,27 @@ namespace NIntercept.Tests
 
             var p1 = typeDef.PropertyDefinitions[0];
             Assert.AreEqual("MyProperty", p1.Name);
-            Assert.AreEqual(1, p1.PropertyGetInterceptorAttributes.Length);
-            Assert.AreEqual(typeof(Int1), p1.PropertyGetInterceptorAttributes[0].InterceptorType);
+            Assert.AreEqual(1, p1.GettterInterceptorAttributes.Length);
+            Assert.AreEqual(typeof(Int1), p1.GettterInterceptorAttributes[0].InterceptorType);
 
-            Assert.AreEqual(2, p1.PropertySetInterceptorAttributes.Length);
-            Assert.AreEqual(typeof(Int2), p1.PropertySetInterceptorAttributes[0].InterceptorType);
-            Assert.AreEqual(typeof(Int3), p1.PropertySetInterceptorAttributes[1].InterceptorType);
+            Assert.AreEqual(2, p1.SetterInterceptorAttributes.Length);
+            Assert.AreEqual(typeof(Int2), p1.SetterInterceptorAttributes[0].InterceptorType);
+            Assert.AreEqual(typeof(Int3), p1.SetterInterceptorAttributes[1].InterceptorType);
 
             var p2 = typeDef.PropertyDefinitions[1];
             Assert.AreEqual("FullProperty", p2.Name);
-            Assert.AreEqual(1, p2.PropertyGetInterceptorAttributes.Length);
-            Assert.AreEqual(typeof(Int1), p2.PropertyGetInterceptorAttributes[0].InterceptorType);
-            Assert.AreEqual(0, p2.PropertySetInterceptorAttributes.Length);
+            Assert.AreEqual(1, p2.GettterInterceptorAttributes.Length);
+            Assert.AreEqual(typeof(Int1), p2.GettterInterceptorAttributes[0].InterceptorType);
+            Assert.AreEqual(0, p2.SetterInterceptorAttributes.Length);
 
             Assert.AreEqual(1, p2.SetMethodDefinition.InterceptorAttributes.Length);
             Assert.AreEqual(typeof(Int3), p2.SetMethodDefinition.InterceptorAttributes[0].InterceptorType);
 
             var p3 = typeDef.PropertyDefinitions[2];
             Assert.AreEqual("ReadOnlyProp", p3.Name);
-            Assert.AreEqual(1, p3.PropertyGetInterceptorAttributes.Length);
-            Assert.AreEqual(typeof(Int1), p3.PropertyGetInterceptorAttributes[0].InterceptorType);
-            Assert.AreEqual(0, p3.PropertySetInterceptorAttributes.Length);
+            Assert.AreEqual(1, p3.GettterInterceptorAttributes.Length);
+            Assert.AreEqual(typeof(Int1), p3.GettterInterceptorAttributes[0].InterceptorType);
+            Assert.AreEqual(0, p3.SetterInterceptorAttributes.Length);
         }
 
         [TestMethod]
@@ -471,8 +471,8 @@ namespace NIntercept.Tests
 
             var p1 = typeDef.PropertyDefinitions[0];
             Assert.AreEqual("MyProperty", p1.Name);
-            Assert.AreEqual(0, p1.PropertyGetInterceptorAttributes.Length);
-            Assert.AreEqual(0, p1.PropertySetInterceptorAttributes.Length);
+            Assert.AreEqual(0, p1.GettterInterceptorAttributes.Length);
+            Assert.AreEqual(0, p1.SetterInterceptorAttributes.Length);
             Assert.AreEqual(1, p1.Property.GetCustomAttributes(false).Length);
         }
 
@@ -485,10 +485,10 @@ namespace NIntercept.Tests
 
             var p1 = typeDef.PropertyDefinitions[1];
             Assert.AreEqual("MyProperty2", p1.Name);
-            Assert.AreEqual(0, p1.PropertyGetInterceptorAttributes.Length);
-            Assert.AreEqual(1, p1.PropertySetInterceptorAttributes.Length);
-            Assert.AreEqual(typeof(MySetAtt), p1.PropertySetInterceptorAttributes[0].AttributeType);
-            Assert.AreEqual(typeof(Int1), p1.PropertySetInterceptorAttributes[0].InterceptorType);
+            Assert.AreEqual(0, p1.GettterInterceptorAttributes.Length);
+            Assert.AreEqual(1, p1.SetterInterceptorAttributes.Length);
+            Assert.AreEqual(typeof(MySetAtt), p1.SetterInterceptorAttributes[0].AttributeType);
+            Assert.AreEqual(typeof(Int1), p1.SetterInterceptorAttributes[0].InterceptorType);
             Assert.AreEqual(1, p1.Property.GetCustomAttributes(false).Length);
         }
 
@@ -502,17 +502,17 @@ namespace NIntercept.Tests
 
             var p1 = typeDef.PropertyDefinitions[0];
             Assert.AreEqual("MyProperty", p1.Name);
-            Assert.AreEqual(1, p1.PropertyGetInterceptorAttributes.Length);
-            Assert.AreEqual(typeof(Int1), p1.PropertyGetInterceptorAttributes[0].InterceptorType);
+            Assert.AreEqual(1, p1.GettterInterceptorAttributes.Length);
+            Assert.AreEqual(typeof(Int1), p1.GettterInterceptorAttributes[0].InterceptorType);
 
-            Assert.AreEqual(1, p1.PropertySetInterceptorAttributes.Length);
-            Assert.AreEqual(typeof(Int2), p1.PropertySetInterceptorAttributes[0].InterceptorType);
+            Assert.AreEqual(1, p1.SetterInterceptorAttributes.Length);
+            Assert.AreEqual(typeof(Int2), p1.SetterInterceptorAttributes[0].InterceptorType);
 
             var p2 = typeDef.PropertyDefinitions[1];
             Assert.AreEqual("ReadOnlyProp", p2.Name);
-            Assert.AreEqual(1, p2.PropertyGetInterceptorAttributes.Length);
-            Assert.AreEqual(typeof(Int1), p2.PropertyGetInterceptorAttributes[0].InterceptorType);
-            Assert.AreEqual(0, p2.PropertySetInterceptorAttributes.Length);
+            Assert.AreEqual(1, p2.GettterInterceptorAttributes.Length);
+            Assert.AreEqual(typeof(Int1), p2.GettterInterceptorAttributes[0].InterceptorType);
+            Assert.AreEqual(0, p2.SetterInterceptorAttributes.Length);
         }
 
         [TestMethod]
@@ -689,15 +689,15 @@ namespace NIntercept.Tests
 
             Assert.AreEqual(2, typeDef.EventDefinitions.Length);
             Assert.AreEqual("MyEvent", typeDef.EventDefinitions[0].Name);
-            Assert.AreEqual("add_MyEvent", typeDef.EventDefinitions[0].AddEventMethodDefinition.Name);
-            Assert.AreEqual(1, typeDef.EventDefinitions[0].AddEventInterceptorAttributes.Length);
-            Assert.AreEqual(typeof(MyEventAtt), typeDef.EventDefinitions[0].AddEventInterceptorAttributes[0].AttributeType);
-            Assert.AreEqual("remove_MyEvent", typeDef.EventDefinitions[0].RemoveEventMethodDefinition.Name);
+            Assert.AreEqual("add_MyEvent", typeDef.EventDefinitions[0].AddMethodDefinition.Name);
+            Assert.AreEqual(1, typeDef.EventDefinitions[0].AddOnInterceptorAttributes.Length);
+            Assert.AreEqual(typeof(MyEventAtt), typeDef.EventDefinitions[0].AddOnInterceptorAttributes[0].AttributeType);
+            Assert.AreEqual("remove_MyEvent", typeDef.EventDefinitions[0].RemoveMethodDefinition.Name);
 
             Assert.AreEqual("MyEvent3", typeDef.EventDefinitions[1].Name);
-            Assert.AreEqual("add_MyEvent3", typeDef.EventDefinitions[1].AddEventMethodDefinition.Name);
-            Assert.AreEqual("remove_MyEvent3", typeDef.EventDefinitions[1].RemoveEventMethodDefinition.Name);
-            Assert.AreEqual(typeof(MyEventAtt), typeDef.EventDefinitions[1].AddEventInterceptorAttributes[0].AttributeType);
+            Assert.AreEqual("add_MyEvent3", typeDef.EventDefinitions[1].AddMethodDefinition.Name);
+            Assert.AreEqual("remove_MyEvent3", typeDef.EventDefinitions[1].RemoveMethodDefinition.Name);
+            Assert.AreEqual(typeof(MyEventAtt), typeDef.EventDefinitions[1].AddOnInterceptorAttributes[0].AttributeType);
         }
 
         [TestMethod]
@@ -708,15 +708,15 @@ namespace NIntercept.Tests
 
             Assert.AreEqual(2, typeDef.EventDefinitions.Length);
             Assert.AreEqual("MyEvent", typeDef.EventDefinitions[0].Name);
-            Assert.AreEqual("add_MyEvent", typeDef.EventDefinitions[0].AddEventMethodDefinition.Name);
-            Assert.AreEqual(1, typeDef.EventDefinitions[0].AddEventInterceptorAttributes.Length);
-            Assert.AreEqual(typeof(MyEventAtt), typeDef.EventDefinitions[0].AddEventInterceptorAttributes[0].AttributeType);
-            Assert.AreEqual("remove_MyEvent", typeDef.EventDefinitions[0].RemoveEventMethodDefinition.Name);
+            Assert.AreEqual("add_MyEvent", typeDef.EventDefinitions[0].AddMethodDefinition.Name);
+            Assert.AreEqual(1, typeDef.EventDefinitions[0].AddOnInterceptorAttributes.Length);
+            Assert.AreEqual(typeof(MyEventAtt), typeDef.EventDefinitions[0].AddOnInterceptorAttributes[0].AttributeType);
+            Assert.AreEqual("remove_MyEvent", typeDef.EventDefinitions[0].RemoveMethodDefinition.Name);
 
             Assert.AreEqual("MyEvent3", typeDef.EventDefinitions[1].Name);
-            Assert.AreEqual("add_MyEvent3", typeDef.EventDefinitions[1].AddEventMethodDefinition.Name);
-            Assert.AreEqual("remove_MyEvent3", typeDef.EventDefinitions[1].RemoveEventMethodDefinition.Name);
-            Assert.AreEqual(typeof(MyEventAtt), typeDef.EventDefinitions[1].AddEventInterceptorAttributes[0].AttributeType);
+            Assert.AreEqual("add_MyEvent3", typeDef.EventDefinitions[1].AddMethodDefinition.Name);
+            Assert.AreEqual("remove_MyEvent3", typeDef.EventDefinitions[1].RemoveMethodDefinition.Name);
+            Assert.AreEqual(typeof(MyEventAtt), typeDef.EventDefinitions[1].AddOnInterceptorAttributes[0].AttributeType);
         }
 
         #endregion // Events

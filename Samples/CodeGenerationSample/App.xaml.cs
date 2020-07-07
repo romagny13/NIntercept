@@ -171,13 +171,6 @@ namespace CodeGenerationSample
         }
     }
 
-    public class CustomServiceProvider : DefaultServiceProvider
-    {
-        IProxyMethodBuilder proxyMethodBuilder = new CleanPropertyProxyMethodBuilder();
-
-        public override IProxyMethodBuilder ProxyMethodBuilder => proxyMethodBuilder;
-    }
-
     public class DefaultLocator : IContainerLocator
     {
         private IUnityContainer container;
@@ -201,7 +194,7 @@ namespace CodeGenerationSample
             var options = new ProxyGeneratorOptions();
             options.AdditionalCode = new ViewModelAdditionalCode();
             // And / or create a custom builder
-            options.ServiceProvider = new CustomServiceProvider();
+            options.InterceptableMethodBuilder = new CleanPropertyMethodBuilder();
             proxies.Add(typeof(MainWindowViewModel), generator.CreateClassProxy<MainWindowViewModel>(options));
         }
 

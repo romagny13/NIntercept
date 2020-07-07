@@ -16,6 +16,8 @@ namespace NIntercept.Definition
         private ParameterDefinition[] parameterDefinitions;
         private CallbackMethodDefinition callbackMethodDefinition;
         private InvocationTypeDefinition invocationTypeDefinition;
+        private string callerMethodFieldName;
+        private string memberFieldName;
 
         public MethodDefinition(TypeDefinition typeDefinition, MethodInfo method)
         {
@@ -135,6 +137,35 @@ namespace NIntercept.Definition
                 if (invocationTypeDefinition == null)
                     invocationTypeDefinition = new InvocationTypeDefinition(typeDefinition, this);
                 return invocationTypeDefinition;
+            }
+        }
+
+        public string CallerMethodFieldName
+        {
+            get
+            {
+                if (callerMethodFieldName == null)
+                {
+
+                    string name = MethodDefinitionType == MethodDefinitionType.Method ? NamingHelper.GetUniqueName(method) : Name;
+                    // MyClass_Proxy_MyMethod
+                    if (typeDefinition.TypeDefinitionType == TypeDefinitionType.Mixin)
+                        callerMethodFieldName = $"{((MixinDefinition)typeDefinition).ProxyTypeDefinition.Name}_{name}";
+                    else
+                        callerMethodFieldName = $"{typeDefinition.Name}_{name}";
+                }
+                return callerMethodFieldName;
+            }
+        }
+
+        public virtual string MemberFieldName
+        {
+            get
+            {
+                // MyClass_MyMethod
+                if (memberFieldName == null)
+                    memberFieldName = $"{typeDefinition.Type.Name}_{NamingHelper.GetUniqueName(method)}";
+                return memberFieldName;
             }
         }
 

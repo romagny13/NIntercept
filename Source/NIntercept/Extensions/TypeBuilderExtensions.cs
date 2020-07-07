@@ -189,8 +189,7 @@ namespace NIntercept
 
         #region Property
 
-        public static MethodBuilder DefineGetMethod(this TypeBuilder typeBuilder,
-             string propertyName, MethodAttributes methodAttributes, Type returnType, FieldBuilder field)
+        public static MethodBuilder DefineGetMethod(this TypeBuilder typeBuilder, string propertyName, MethodAttributes methodAttributes, Type returnType, FieldBuilder field)
         {
             if (typeBuilder is null)
                 throw new ArgumentNullException(nameof(typeBuilder));
@@ -214,8 +213,7 @@ namespace NIntercept
             return DefineGetMethod(typeBuilder, propertyName, MethodAttributes.Public, returnType, field);
         }
 
-        public static MethodBuilder DefineSetMethod(this TypeBuilder typeBuilder,
-            string propertyName, MethodAttributes methodAttributes, Type[] parameterTypes, FieldBuilder field)
+        public static MethodBuilder DefineSetMethod(this TypeBuilder typeBuilder, string propertyName, MethodAttributes methodAttributes, Type[] parameterTypes, FieldBuilder field)
         {
             if (typeBuilder is null)
                 throw new ArgumentNullException(nameof(typeBuilder));
@@ -265,18 +263,6 @@ namespace NIntercept
             return property;
         }
 
-        public static PropertyBuilder DefineFullProperty(this TypeBuilder typeBuilder,
-           FieldBuilder field, string propertyName, PropertyAttributes propertyAttributes, Type returnType, Type[] parameterTypes)
-        {
-            return DefineFullProperty(typeBuilder, field, propertyName, propertyAttributes, returnType, parameterTypes, MethodAttributes.Public);
-        }
-
-        public static PropertyBuilder DefineFullProperty(this TypeBuilder typeBuilder, FieldBuilder field,
-            string propertyName, Type returnType, Type[] parameterTypes)
-        {
-            return DefineFullProperty(typeBuilder, field, propertyName, PropertyAttributes.None, returnType, parameterTypes, MethodAttributes.Public);
-        }
-
         public static PropertyBuilder DefineReadOnlyProperty(this TypeBuilder typeBuilder,
          FieldBuilder field, string propertyName, PropertyAttributes propertyAttributes, Type returnType, Type[] parameterTypes, MethodAttributes methodAttributes)
         {
@@ -296,18 +282,6 @@ namespace NIntercept
             property.SetGetMethod(getMethod);
 
             return property;
-        }
-
-        public static PropertyBuilder DefineReadOnlyProperty(this TypeBuilder typeBuilder,
-            FieldBuilder field, string propertyName, PropertyAttributes propertyAttributes, Type returnType, Type[] parameterTypes)
-        {
-            return DefineReadOnlyProperty(typeBuilder, field, propertyName, propertyAttributes, returnType, parameterTypes, MethodAttributes.Public);
-        }
-
-        public static PropertyBuilder DefineReadOnlyProperty(this TypeBuilder typeBuilder,
-         FieldBuilder field, string propertyName, Type returnType, Type[] parameterTypes)
-        {
-            return DefineReadOnlyProperty(typeBuilder, field, propertyName, PropertyAttributes.None, returnType, parameterTypes, MethodAttributes.Public);
         }
 
         #endregion
