@@ -285,7 +285,12 @@ namespace NIntercept.Tests.Options
 
     }
 
-    public class TypeITD
+    public interface ITypeITD
+    {
+        void Method();
+    }
+
+    public class TypeITD : ITypeITD
     {
         public virtual void Method()
         {

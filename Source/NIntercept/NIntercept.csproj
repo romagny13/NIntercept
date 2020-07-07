@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <FileVersion>0.3.0.1</FileVersion>
-    <AssemblyVersion>0.3.0.1</AssemblyVersion>
+    <FileVersion>0.3.0.2</FileVersion>
+    <AssemblyVersion>0.3.0.2</AssemblyVersion>
     <PackageId>NIntercept</PackageId>
     <Description>Interception for NET
 
@@ -11,12 +11,12 @@ Allows to create proxies for classes and interfaces, intercept properties, metho
     <PackageProjectUrl>https://github.com/romagny13/NIntercept</PackageProjectUrl>
     <RepositoryUrl>https://github.com/romagny13/NIntercept</RepositoryUrl>
     <PackageLicenseUrl></PackageLicenseUrl>
-    <PackageTags>interception proxy</PackageTags>
+    <PackageTags>interception proxy msil</PackageTags>
     <RepositoryType>git</RepositoryType>
-    <Authors>ROMAGNY13</Authors>
-    <Company>ROMAGNY13</Company>
+    <Authors>Romagny13</Authors>
+    <Company>Romagny13</Company>
     <TargetFrameworks>net45;net472;netstandard2.0;netcoreapp3.1</TargetFrameworks>
-    <Version>0.3.0.1</Version>
+    <Version>0.3.0.2</Version>
     <RootNamespace>NIntercept</RootNamespace>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIcon>nintercept.png</PackageIcon>

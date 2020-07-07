@@ -1,6 +1,7 @@
 ﻿using NIntercept.Definition;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using NIntercept.Tests.Builder;
 
 namespace NIntercept.Tests
 {
@@ -145,7 +146,7 @@ namespace NIntercept.Tests
             var moduleDefinition = new ModuleDefinition();
 
             var o = new ProxyGeneratorOptions();
-            o.AddMixinInstance(new MyItem());
+            o.AddMixinInstance(new MyMixin());
 
             var typeDefinition = moduleDefinition.GetTypeDefinition(typeof(TypeM1), null, o);
 
@@ -161,7 +162,7 @@ namespace NIntercept.Tests
             // returns same type definition for same type with same target type or null and same options
 
             var o2 = new ProxyGeneratorOptions();
-            o2.AddMixinInstance(new MyItem());
+            o2.AddMixinInstance(new MyMixin());
 
             var typeDefinition2 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), null, o2);
             Assert.AreEqual(TypeDefinitionType.ClassProxy, typeDefinition2.TypeDefinitionType);
@@ -184,7 +185,7 @@ namespace NIntercept.Tests
 
             var target = typeof(TypeM1);
             var o = new ProxyGeneratorOptions();
-            o.AddMixinInstance(new MyItem());
+            o.AddMixinInstance(new MyMixin());
 
             var typeDefinition = moduleDefinition.GetTypeDefinition(typeof(TypeM1), target, o);
 
@@ -200,7 +201,7 @@ namespace NIntercept.Tests
 
             var target2 = typeof(TypeM1);
             var o2 = new ProxyGeneratorOptions();
-            o2.AddMixinInstance(new MyItem());
+            o2.AddMixinInstance(new MyMixin());
 
             var typeDefinition2 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), target2, o2);
             Assert.AreEqual(TypeDefinitionType.ClassProxy, typeDefinition2.TypeDefinitionType);
@@ -284,7 +285,7 @@ namespace NIntercept.Tests
             var typeDefinition2 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), target, null);
 
             var o = new ProxyGeneratorOptions();
-            o.AddMixinInstance(new MyItem());
+            o.AddMixinInstance(new MyMixin());
             var typeDefinition3 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), null, o);
 
             var typeDefinition4 = moduleDefinition.GetTypeDefinition(typeof(ITypeM1), target, null);
@@ -311,7 +312,7 @@ namespace NIntercept.Tests
             var typeDefinition2 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), target, null);
 
             var o = new ProxyGeneratorOptions();
-            o.AddMixinInstance(new MyItem());
+            o.AddMixinInstance(new MyMixin());
             var typeDefinition3 = moduleDefinition.GetTypeDefinition(typeof(TypeM1), null, o);
 
             var typeDefinition4 = moduleDefinition.GetTypeDefinition(typeof(ITypeM1), target, null);

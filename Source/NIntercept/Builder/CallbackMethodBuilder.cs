@@ -12,6 +12,8 @@ namespace NIntercept.Builder
     {
         public MethodBuilder CreateMethod(ProxyScope proxyScope, CallbackMethodDefinition callbackMethodDefinition)
         {
+            AdditionalCode additionalCode = (callbackMethodDefinition.TypeDefinition as ProxyTypeDefinition)?.Options?.AdditionalCode;
+
             // method
             MethodBuilder methodBuilder = proxyScope.DefineMethod(callbackMethodDefinition.Name, callbackMethodDefinition.MethodAttributes);
             methodBuilder.SetReturnType(callbackMethodDefinition.ReturnType);
@@ -41,7 +43,9 @@ namespace NIntercept.Builder
 
             il.Emit(OpCodes.Nop);
 
-            BeforeInvoke(proxyScope, il, callbackMethodDefinition);
+            // before 
+            if (additionalCode != null)
+                additionalCode.BeforeInvoke(proxyScope, il, callbackMethodDefinition);
 
             if (targetType != null)
             {
@@ -69,7 +73,9 @@ namespace NIntercept.Builder
                 if (returnType != typeof(void))
                     il.Emit(OpCodes.Stloc, resultLocalBuilder);
 
-                AfterInvoke(proxyScope, il, callbackMethodDefinition);
+                // after
+                if (additionalCode != null)
+                    additionalCode.AfterInvoke(proxyScope, il, callbackMethodDefinition);
 
                 if (returnType != typeof(void))
                     il.Emit(OpCodes.Ldloc, resultLocalBuilder);
@@ -88,20 +94,6 @@ namespace NIntercept.Builder
             int index = 1;
             foreach (var parameterDefinition in methodCallbackDefinition.ParameterDefinitions)
                 methodBuilder.DefineParameter(index++, parameterDefinition.Attributes, parameterDefinition.Name);
-        }
-
-        private void BeforeInvoke(ProxyScope proxyScope, ILGenerator il, CallbackMethodDefinition callbackMethodDefinition)
-        {
-            AdditionalCode additionalCode = (callbackMethodDefinition.TypeDefinition as ProxyTypeDefinition)?.Options?.AdditionalCode;
-            if (additionalCode != null)
-                additionalCode.BeforeInvoke(proxyScope, il, callbackMethodDefinition);
-        }
-
-        private void AfterInvoke(ProxyScope proxyScope, ILGenerator il, CallbackMethodDefinition callbackMethodDefinition)
-        {
-            AdditionalCode additionalCode = (callbackMethodDefinition.TypeDefinition as ProxyTypeDefinition)?.Options?.AdditionalCode;
-            if (additionalCode != null)
-                additionalCode.AfterInvoke(proxyScope, il, callbackMethodDefinition);
         }
 
         private void ThrowInterfaceProxyWithoutTargetException(ILGenerator il, CallbackMethodDefinition callbackMethodDefinition)

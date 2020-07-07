@@ -192,7 +192,7 @@ namespace NIntercept
         }
 #endif
 
-        public Type GetOrCreateProxyType(ProxyTypeDefinition typeDefinition)
+        internal Type GetOrCreateProxyType(ProxyTypeDefinition typeDefinition)
         {
             if (typeDefinition is null)
                 throw new ArgumentNullException(nameof(typeDefinition));
@@ -210,7 +210,7 @@ namespace NIntercept
             return type;
         }
 
-        public Type GetOrCreateInvocationType(InvocationTypeDefinition invocationTypeDefinition, MethodBuilder callbackMethodBuilder)
+        internal Type GetOrCreateInvocationType(InvocationTypeDefinition invocationTypeDefinition, MethodBuilder callbackMethodBuilder)
         {
             string name = invocationTypeDefinition.Name;
             Type type = invocationTypes.FirstOrDefault(p => p.Name == name);
