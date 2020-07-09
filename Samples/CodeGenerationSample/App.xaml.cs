@@ -192,9 +192,9 @@ namespace CodeGenerationSample
         protected virtual void Initialize()
         {
             var options = new ProxyGeneratorOptions();
-            options.AdditionalCode = new ViewModelAdditionalCode();
-            // And / or create a custom builder
-            options.InterceptableMethodBuilder = new CleanPropertyMethodBuilder();
+            options.AdditionalCode = new ViewModelBuilder();
+            // create clean properties (without invocations) that raise OnPropertyChanged and CanExecuteChanged
+            // options.InterceptableMethodBuilder = new CleanGetAndSetMethodBuilder();
             proxies.Add(typeof(MainWindowViewModel), generator.CreateClassProxy<MainWindowViewModel>(options));
         }
 

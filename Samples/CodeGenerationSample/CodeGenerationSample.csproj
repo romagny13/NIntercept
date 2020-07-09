@@ -70,10 +70,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Features\CleanPropertyMethodBuilder.cs" />
-    <Compile Include="Features\DelegateCommandBuilderFeature.cs" />
+    <Compile Include="CustomMethodBuilder\CleanGetAndSetMethodBuilder.cs" />
+    <Compile Include="Features\DelegateCommandBuilder.cs" />
     <Compile Include="Features\NotifyPropertyChangedFeature.cs" />
-    <Compile Include="Features\ViewModelAdditionalCode.cs" />
+    <Compile Include="Features\ViewModelBuilder.cs" />
+    <Compile Include="Features\ViewModelSupport.cs" />
     <Compile Include="ViewModelLocationProvider.cs" />
     <Compile Include="ViewModelLocator.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
