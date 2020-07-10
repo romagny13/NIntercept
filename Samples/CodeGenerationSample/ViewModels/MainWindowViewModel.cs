@@ -10,7 +10,7 @@ namespace CodeGenerationSample.ViewModels
     {
         public MainWindowViewModel()
         {
-            Title = "Main title";
+            Title = "The title";
         }
 
         public virtual string Title { get; set; }
