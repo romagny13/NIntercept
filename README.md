@@ -391,6 +391,13 @@ public class MyClassProxyMemberSelector : ClassProxyMemberSelector
         return base.Filter(member);
     }
 }
+public class MyClass
+{
+    public virtual void MyMethod()
+    {
+        Console.WriteLine("In MyMethod");
+    }
+}
 ```
 
 Define the option
