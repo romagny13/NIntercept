@@ -388,7 +388,7 @@ public class MyClassProxyMemberSelector : ClassProxyMemberSelector
         if (member.DeclaringType == typeof(MyClass) && member.Name == "MyMethod")
             return false;
 
-        return base.Filter(member);
+        return true;
     }
 }
 public class MyClass
