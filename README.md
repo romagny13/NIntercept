@@ -415,7 +415,7 @@ proxy.MyMethod(); // not intercepted
 
 ## InterceptorSelector
 
-> Usefull to select "global" interceptors to use for each method when we don't use attributes.
+> Usefull to select interceptors to use for each method when we don't use attributes.
 
 **Sample**
 

@@ -23,5 +23,7 @@ namespace NIntercept
 
         public static readonly MethodInfo GetEventWithBindingFlags = typeof(Type).GetMethod("GetEvent", new Type[] { typeof(string), typeof(BindingFlags) });
 
+        public static readonly MethodInfo SelectInterceptorsMethod = typeof(IInterceptorSelector).GetMethod("SelectInterceptors", new Type[] { typeof(Type), typeof(MethodInfo), typeof(IInterceptor[]) });
+
     }
 }
