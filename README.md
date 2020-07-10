@@ -773,8 +773,8 @@ public class MainWindowViewModel
         Title = "The title";
     }
     
-    // INotifyPropertyChanged implementation is added to proxy 
-    // On PropertyChanged is raised in properties
+    // The proxy implements INotifyPropertyChanged 
+    // The properties raise On PropertyChanged
     public virtual string Title { get; set; }
 
     public virtual bool CanExecute { get; set; }
