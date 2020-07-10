@@ -779,8 +779,8 @@ public class MainWindowViewModel
 
     public virtual bool CanExecute { get; set; }
     
-    // Create a DelegateCommand "UpdateTitleCommand" with CanExecute Method
-    // RaiseCanExecuteChanged is added to the set method of CanExecute property
+    // A (Prism) DelegateCommand "UpdateTitleCommand" with CanExecute Method is created
+    // CanExecute property raises CanExecuteChanged
     [Command("UpdateTitleCommand", CanExecuteMethodName = nameof(CanExecuteUpdateTitle), CanExecutePropertyNames = new[] { nameof(CanExecute) })]
     protected void ExecuteUpdateTitleCommand()
     {
