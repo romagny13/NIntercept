@@ -176,9 +176,9 @@ namespace NIntercept
 
             object[] args = GetArguments(typeDefinition, interceptors, target, proxyType);
 
-//#if NET45 || NET472
-//            moduleScope.Save();
-//#endif
+            //#if NET45 || NET472
+            //            moduleScope.Save();
+            //#endif
 
             return CreateProxyInstance(proxyType, args);
         }
@@ -194,8 +194,13 @@ namespace NIntercept
             if (target != null)
                 args.Add(target);
 
-            // mixins
+            // interceptorSelector
             ProxyGeneratorOptions options = typeDefinition.Options;
+            IInterceptorSelector interceptorSelector = options?.InterceptorSelector;
+            if(interceptorSelector != null)
+                args.Add(interceptorSelector);
+
+            // mixins
             if (options != null && options.MixinInstances.Count > 0)
                 args.AddRange(options.MixinInstances);
 

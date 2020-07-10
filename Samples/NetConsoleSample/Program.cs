@@ -3,12 +3,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Unity;
 
 namespace NetConsoleSample
-{
+{  
+
     class Program
     {
         static void Main(string[] args)
@@ -26,6 +28,7 @@ namespace NetConsoleSample
 
             RunCompleteSample(generator);
             RunProtectedMembersSample(generator);
+            RunInterceptorSelectorSample(generator);
             RunInterfaceProxyWithoutTargetSample(generator);
             RunMultiTargetAttributeSample(generator);
             RunMixinsSample(generator);
@@ -77,6 +80,27 @@ namespace NetConsoleSample
             var proxy = generator.CreateClassProxy<ProtectedMembers>();
 
             proxy.Execute();
+        }
+
+        private static void RunInterceptorSelectorSample(ProxyGenerator generator)
+        {
+            Console.WriteLine("---------------------- InterceptorSelector ----------------------");
+
+            var options = new ProxyGeneratorOptions();
+            options.InterceptorSelector = new MyInterceptorSelector();
+            options.ClassProxyMemberSelector = new MyClassProxyMemberSelector();
+
+            var proxy = generator.CreateClassProxy<MyClassWithInterceptorSelector>(options, new GetMethodInterceptor(), new SetMethodInterceptor(), new MethodInterceptor());
+
+            proxy.MyProperty = "New Value";
+
+            Console.WriteLine($"Get: {proxy.MyProperty}");
+
+            proxy.MyMethod();
+
+            proxy.MyMethod("My parameter");
+
+            proxy.MyMethod2(); // not intercepted
         }
 
         private static void RunMultiTargetAttributeSample(ProxyGenerator generator)
@@ -307,6 +331,126 @@ namespace NetConsoleSample
     }
 
     #endregion
+
+    #region InterceptorSelector 
+
+    public class GetMethodInterceptor : IInterceptor
+    {
+        public void Intercept(IInvocation invocation)
+        {
+            Console.WriteLine($"[GetMethodInterceptor] {invocation.CallerMethod.Name}");
+            invocation.Proceed();
+        }
+    }
+
+    public class SetMethodInterceptor : IInterceptor
+    {
+        public void Intercept(IInvocation invocation)
+        {
+            Console.WriteLine($"[SetMethodInterceptor] {invocation.CallerMethod.Name}");
+            invocation.Proceed();
+        }
+    }
+
+    public class MethodInterceptor : IInterceptor
+    {
+        public void Intercept(IInvocation invocation)
+        {
+            Console.WriteLine($"[MethodInterceptor] {invocation.CallerMethod.Name}");
+            invocation.Proceed();
+        }
+    }
+
+    public class MyInterceptorSelector : IInterceptorSelector
+    {
+        private static readonly IInterceptor[] emptyInterceptorArray = new IInterceptor[0];
+
+        public IInterceptor[] SelectInterceptors(Type type, MethodInfo method, IInterceptor[] interceptors)
+        {
+            if (IsGetMethod(method))
+            {
+                var getMethodInterceptor = interceptors.First(p => p.GetType() == typeof(GetMethodInterceptor));
+                return new IInterceptor[] { getMethodInterceptor };
+            }
+            else if (IsSetMethod(method))
+            {
+                var setMethodInterceptor = interceptors.First(p => p.GetType() == typeof(SetMethodInterceptor));
+                return new IInterceptor[] { setMethodInterceptor };
+            }
+            else if (IsAddmethod(method)) { }
+            else if (IsRemoveMethod(method)) { }
+            else
+            {
+                var methodInterceptor = interceptors.First(p => p.GetType() == typeof(MethodInterceptor));
+                return new IInterceptor[] { methodInterceptor };
+            }
+            return emptyInterceptorArray;
+        }
+
+        private bool IsGetMethod(MethodInfo method)
+        {
+            return method.Name.StartsWith("get_");
+        }
+
+        private bool IsSetMethod(MethodInfo method)
+        {
+            return method.Name.StartsWith("set_");
+        }
+
+        private bool IsAddmethod(MethodInfo method)
+        {
+            return method.Name.StartsWith("add_");
+        }
+
+        private bool IsRemoveMethod(MethodInfo method)
+        {
+            return method.Name.StartsWith("remove_");
+        }
+    }
+
+    public class MyClassWithInterceptorSelector
+    {
+        public virtual string MyProperty { get; set; }
+
+        public virtual void MyMethod()
+        {
+            Console.WriteLine("In MyMethod");
+        }
+
+        public virtual void MyMethod2()
+        {
+            Console.WriteLine("In MyMethod2");
+        }
+
+        public virtual void MyMethod(string p1)
+        {
+            Console.WriteLine($"In MyMethod with p1 {p1}");
+        }
+
+        public void MyMethodNotVirtual()
+        {
+            Console.WriteLine("In MyMethodNotVirtual");
+        }
+
+        public static void MyStaticMethod()
+        {
+            Console.WriteLine("In MyStaticMethod");
+        }
+    }
+
+    public class MyClassProxyMemberSelector : ClassProxyMemberSelector
+    {
+        public override bool Filter(MemberInfo member)
+        {
+            if (member.DeclaringType == typeof(MyClassWithInterceptorSelector) && member.Name == "MyMethod2")
+                return false;
+
+            return true;
+        }
+    }
+
+    #endregion
+
 
     #region multi targets
 

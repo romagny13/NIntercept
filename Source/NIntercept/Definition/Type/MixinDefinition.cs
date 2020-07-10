@@ -55,7 +55,7 @@ namespace NIntercept.Definition
             get
             {
                 if (targetFieldName == null)
-                    targetFieldName = $"_{NamingHelper.ToCamelCase(Name)}";
+                    targetFieldName = $"__{NamingHelper.ToCamelCase(Name)}";
                 return targetFieldName;
             }
         }

@@ -4,5 +4,4 @@
     {
         void Intercept(IInvocation invocation);
     }
-
 }

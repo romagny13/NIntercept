@@ -18,6 +18,8 @@ namespace NIntercept.Definition
         private InvocationTypeDefinition invocationTypeDefinition;
         private string callerMethodFieldName;
         private string memberFieldName;
+        private string uniqueMethodName;
+        private string interceptorSelectorFieldName;
 
         public MethodDefinition(TypeDefinition typeDefinition, MethodInfo method)
         {
@@ -140,19 +142,37 @@ namespace NIntercept.Definition
             }
         }
 
+        public string UniqueMethodName
+        {
+            get
+            {
+                if (uniqueMethodName == null)
+                    uniqueMethodName = MethodDefinitionType == MethodDefinitionType.Method ? NamingHelper.GetUniqueName(method) : Name;
+                return uniqueMethodName;
+            }
+        }
+
+        public string InterceptorSelectorFieldName
+        {
+            get
+            {
+                if (interceptorSelectorFieldName == null)
+                    interceptorSelectorFieldName = $"__interceptors_{UniqueMethodName}";
+                return interceptorSelectorFieldName;
+            }
+        }
+
         public string CallerMethodFieldName
         {
             get
             {
                 if (callerMethodFieldName == null)
                 {
-
-                    string name = MethodDefinitionType == MethodDefinitionType.Method ? NamingHelper.GetUniqueName(method) : Name;
                     // MyClass_Proxy_MyMethod
                     if (typeDefinition.TypeDefinitionType == TypeDefinitionType.Mixin)
-                        callerMethodFieldName = $"{((MixinDefinition)typeDefinition).ProxyTypeDefinition.Name}_{name}";
+                        callerMethodFieldName = $"{((MixinDefinition)typeDefinition).ProxyTypeDefinition.Name}_{UniqueMethodName}";
                     else
-                        callerMethodFieldName = $"{typeDefinition.Name}_{name}";
+                        callerMethodFieldName = $"{typeDefinition.Name}_{UniqueMethodName}";
                 }
                 return callerMethodFieldName;
             }

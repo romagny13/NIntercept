@@ -42,6 +42,14 @@ namespace NIntercept.Builder
             var il = methodBuilder.GetILGenerator();
 
             // locals
+            IInterceptorSelector interceptorSelector = proxyScope.TypeDefinition.Options?.InterceptorSelector;
+            FieldBuilder interceptorSelectorField = null;
+            FieldBuilder interceptorMethodField = null;
+            if (interceptorSelector != null)
+            {
+                interceptorSelectorField = proxyScope.ConstructorFields.First(p => p.Name == ProxyScope.InterceptorSelectorFieldName);
+                interceptorMethodField = proxyScope.DefineField(methodDefinition.InterceptorSelectorFieldName, typeof(IInterceptor[]), FieldAttributes.Private);
+            }
             var returnType = methodDefinition.ReturnType;
             Type targetType = methodDefinition.TypeDefinition.TargetType;
             Type localBuilderType = targetType != null ? targetType : typeof(object);
@@ -57,15 +65,52 @@ namespace NIntercept.Builder
                 returnValueLocalBuilder = il.DeclareLocal(returnType);
 
             FieldBuilder interceptorsField = proxyScope.ConstructorFields[0];
+
             if (targetType != null)
             {
                 FieldBuilder targetField = FindConstructorField(proxyScope, methodDefinition.TypeDefinition.TargetFieldName);
                 EmitHelper.StoreFieldToLocal(il, targetField, targetLocalBuilder);
             }
-            EmitHelper.StoreFieldToLocal(il, interceptorsField, interceptorsLocalBuilder);
+
+            //EmitHelper.StoreFieldToLocal(il, interceptorsField, interceptorsLocalBuilder);
             EmitHelper.StoreFieldToLocal(il, memberField, memberLocalBuilder);
             EmitHelper.StoreFieldToLocal(il, callerMethodField, callerMethodLocalBuilder);
             EmitHelper.StoreThisToLocal(il, proxyLocalBuilder);
+
+            if (interceptorSelector != null)
+            {
+                LocalBuilder isNullLocal = il.DeclareLocal(typeof(bool));
+                Label isNullLabel = il.DefineLabel();
+
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldfld, interceptorMethodField);
+                il.Emit(OpCodes.Ldnull);
+                il.Emit(OpCodes.Ceq);
+                il.Emit(OpCodes.Stloc, isNullLocal);
+                il.Emit(OpCodes.Ldloc, isNullLocal);
+
+                il.Emit(OpCodes.Brfalse_S, isNullLabel);
+
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldfld, interceptorSelectorField);
+                il.Emit(OpCodes.Ldtoken, member.DeclaringType);
+                il.Emit(OpCodes.Call, Methods.GetTypeFromHandle);
+                il.Emit(OpCodes.Ldloc, callerMethodLocalBuilder);
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldfld, interceptorsField);
+                il.Emit(OpCodes.Callvirt, typeof(IInterceptorSelector).GetMethod("SelectInterceptors", new Type[] { typeof(Type), typeof(MethodInfo), typeof(IInterceptor[]) }));
+                il.Emit(OpCodes.Stfld, interceptorMethodField);
+
+                il.MarkLabel(isNullLabel);
+
+                EmitHelper.StoreFieldToLocal(il, interceptorMethodField, interceptorsLocalBuilder);
+            }
+            else
+            {
+                EmitHelper.StoreFieldToLocal(il, interceptorsField, interceptorsLocalBuilder);
+            }
+
             StoreArgsToArray(il, methodDefinition.ParameterDefinitions, parametersLocalBuilder);
 
             EmitHelper.CreateInvocation(il, invocationType, targetLocalBuilder, interceptorsLocalBuilder, memberLocalBuilder, callerMethodLocalBuilder, proxyLocalBuilder, parametersLocalBuilder, invocationLocalBuilder);

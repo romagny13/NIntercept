@@ -1,4 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using System.Reflection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NIntercept.Definition;
 
 namespace NIntercept.Tests.Options
@@ -283,7 +285,54 @@ namespace NIntercept.Tests.Options
             Assert.AreEqual(true, comparer.Equals(o1, o2));
         }
 
+
+        // InterceptorSelector
+
+
+        [TestMethod]
+        public void InterceptorSelector_Null_And_Not_Null_Not_Equals()
+        {
+            var comparer = new ProxyGeneratorOptionsComparer();
+
+            var o1 = new ProxyGeneratorOptions();
+            o1.InterceptorSelector = new MYInterceptorSelectorMock();
+            var o2 = new ProxyGeneratorOptions();
+
+            Assert.AreEqual(false, comparer.Equals(o1, o2));
+
+            var o3 = new ProxyGeneratorOptions();
+            var o4 = new ProxyGeneratorOptions();
+            o4.InterceptorSelector = new MYInterceptorSelectorMock();
+            Assert.AreEqual(false, comparer.Equals(o3, o4));
+        }
+
+        [TestMethod]
+        public void InterceptorSelector_Not_Same_Not_Equals()
+        {
+            var comparer = new ProxyGeneratorOptionsComparer();
+
+            var o1 = new ProxyGeneratorOptions();
+            o1.InterceptorSelector = new MYInterceptorSelectorMock();
+            var o2 = new ProxyGeneratorOptions();
+            o2.InterceptorSelector = new MYInterceptorSelectorMock2();
+
+            Assert.AreEqual(false, comparer.Equals(o1, o2));
+        }
+
+        [TestMethod]
+        public void InterceptorSelector_Same_Equals()
+        {
+            var comparer = new ProxyGeneratorOptionsComparer();
+
+            var o1 = new ProxyGeneratorOptions();
+            o1.InterceptorSelector = new MYInterceptorSelectorMock();
+            var o2 = new ProxyGeneratorOptions();
+            o2.InterceptorSelector = new MYInterceptorSelectorMock();
+
+            Assert.AreEqual(true, comparer.Equals(o1, o2));
+        }
     }
+
 
     public interface ITypeITD
     {

@@ -43,8 +43,12 @@ namespace NIntercept
 
             // InterceptableMethodBuilder
             if (x.InterceptableMethodBuilder?.GetType() != y.InterceptableMethodBuilder?.GetType())
-                return false;         
-          
+                return false;
+
+            // InterceptorSelector
+            if (x.InterceptorSelector?.GetType() != y.InterceptorSelector?.GetType())
+                return false;
+
             return true;
         }
 

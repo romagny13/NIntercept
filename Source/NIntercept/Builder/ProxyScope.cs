@@ -10,7 +10,8 @@ namespace NIntercept
 {
     public sealed class ProxyScope
     {
-        private const string IntercetorsFieldName = "_interceptors";
+        public const string IntercetorsFieldName = "__interceptors";
+        public const string InterceptorSelectorFieldName = "__interceptorSelector";
         private const FieldAttributes StaticReadOnlyFieldAttributes = FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.InitOnly;
         private ModuleScope moduleScope;
         private TypeBuilder typeBuilder;
@@ -148,6 +149,9 @@ namespace NIntercept
 
             if (typeDefinition.TargetType != null)
                 fieldList.Add(DefineField(typeDefinition.TargetFieldName, typeDefinition.TargetType, FieldAttributes.Private));
+
+            if (typeDefinition.Options?.InterceptorSelector != null)
+                fieldList.Add(DefineField(InterceptorSelectorFieldName, typeof(IInterceptorSelector), FieldAttributes.Private));
 
             foreach (var mixinDefinition in typeDefinition.MixinDefinitions)
                 fieldList.Add(DefineField(mixinDefinition.TargetFieldName, mixinDefinition.Type, FieldAttributes.Private));

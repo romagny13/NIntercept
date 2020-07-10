@@ -8,6 +8,7 @@ namespace NIntercept.Tests
     [TestClass]
     public class InterfaceProxyWithoutTargetTests
     {
+
         [TestMethod]
         public void Works()
         {

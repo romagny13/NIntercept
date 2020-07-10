@@ -54,10 +54,10 @@ namespace NIntercept.Tests.Builder
             proxyScope.DefineTypeAndMembers();
 
             Assert.AreEqual(1, proxyScope.ConstructorFields.Length);
-            Assert.AreEqual("_interceptors", proxyScope.ConstructorFields[0].Name);
+            Assert.AreEqual("__interceptors", proxyScope.ConstructorFields[0].Name);
 
             Assert.AreEqual(9, proxyScope.Fields.Count);
-            Assert.AreEqual("_interceptors", proxyScope.Fields[0].Name);
+            Assert.AreEqual("__interceptors", proxyScope.Fields[0].Name);
             Assert.AreEqual("TypeScope1_MyProperty", proxyScope.Fields[1].Name);
             Assert.AreEqual("TypeScope1_Proxy_get_MyProperty", proxyScope.Fields[2].Name);
             Assert.AreEqual("TypeScope1_Proxy_set_MyProperty", proxyScope.Fields[3].Name);
@@ -83,9 +83,9 @@ namespace NIntercept.Tests.Builder
             proxyScope.DefineTypeAndMembers();
 
             Assert.AreEqual(1, proxyScope.ConstructorFields.Length);
-            Assert.AreEqual("_interceptors", proxyScope.ConstructorFields[0].Name);
+            Assert.AreEqual("__interceptors", proxyScope.ConstructorFields[0].Name);
             Assert.AreEqual(1, proxyScope.Fields.Count);
-            Assert.AreEqual("_interceptors", proxyScope.Fields[0].Name);
+            Assert.AreEqual("__interceptors", proxyScope.Fields[0].Name);
 
             var field = proxyScope.DefineField("A", typeof(string), FieldAttributes.Private);
             Assert.AreEqual(1, proxyScope.ConstructorFields.Length);
@@ -399,12 +399,12 @@ namespace NIntercept.Tests.Builder
 
             // fields
             Assert.AreEqual(2, proxyScope.ConstructorFields.Length);
-            Assert.AreEqual("_interceptors", proxyScope.ConstructorFields[0].Name);
-            Assert.AreEqual("_myMixin", proxyScope.ConstructorFields[1].Name);
+            Assert.AreEqual("__interceptors", proxyScope.ConstructorFields[0].Name);
+            Assert.AreEqual("__myMixin", proxyScope.ConstructorFields[1].Name);
 
             Assert.AreEqual(10, proxyScope.Fields.Count);
-            Assert.AreEqual("_interceptors", proxyScope.Fields[0].Name);
-            Assert.AreEqual("_myMixin", proxyScope.Fields[1].Name);
+            Assert.AreEqual("__interceptors", proxyScope.Fields[0].Name);
+            Assert.AreEqual("__myMixin", proxyScope.Fields[1].Name);
             Assert.AreEqual("MyMixin_MyProperty", proxyScope.Fields[2].Name);
             Assert.AreEqual("EmpyType_Proxy_get_MyProperty", proxyScope.Fields[3].Name);
             Assert.AreEqual("EmpyType_Proxy_set_MyProperty", proxyScope.Fields[4].Name);
@@ -487,12 +487,12 @@ namespace NIntercept.Tests.Builder
 
             // fields
             Assert.AreEqual(2, proxyScope.ConstructorFields.Length);
-            Assert.AreEqual("_interceptors", proxyScope.ConstructorFields[0].Name);
-            Assert.AreEqual("_myMixin", proxyScope.ConstructorFields[1].Name);
+            Assert.AreEqual("__interceptors", proxyScope.ConstructorFields[0].Name);
+            Assert.AreEqual("__myMixin", proxyScope.ConstructorFields[1].Name);
 
             Assert.AreEqual(10, proxyScope.Fields.Count);
-            Assert.AreEqual("_interceptors", proxyScope.Fields[0].Name);
-            Assert.AreEqual("_myMixin", proxyScope.Fields[1].Name);
+            Assert.AreEqual("__interceptors", proxyScope.Fields[0].Name);
+            Assert.AreEqual("__myMixin", proxyScope.Fields[1].Name);
             Assert.AreEqual("TypeScope1_MyProperty", proxyScope.Fields[2].Name);
             Assert.AreEqual("TypeScope1_Proxy_get_MyProperty", proxyScope.Fields[3].Name);
             Assert.AreEqual("TypeScope1_Proxy_set_MyProperty", proxyScope.Fields[4].Name);

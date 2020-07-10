@@ -13,6 +13,7 @@ namespace NIntercept
         private List<CustomAttributeDefinition> additionalTypeAttributes;
         private AdditionalCode additionalCode;
         private InterceptableMethodBuilder interceptableMethodBuilder;
+        private IInterceptorSelector interceptorSelector;
 
         public ProxyGeneratorOptions()
         {
@@ -48,11 +49,16 @@ namespace NIntercept
             get { return additionalTypeAttributes; }
         }
 
-
         public InterceptableMethodBuilder InterceptableMethodBuilder
         {
             get { return interceptableMethodBuilder; }
             set { interceptableMethodBuilder = value; }
+        }
+
+        public IInterceptorSelector InterceptorSelector
+        {
+            get { return interceptorSelector; }
+            set { interceptorSelector = value; }
         }
 
         public void AddMixinInstance(object instance)
