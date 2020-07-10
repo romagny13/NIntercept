@@ -374,6 +374,37 @@ public class MyAsyncInterceptor : AsyncInterceptor
 }
 ```
 
+## ClassProxy Member Selector
+
+> Allows to **filter members to include** for **Class Proxy**.
+
+**Sample:** ignore virtual Method named "MyMethod"
+
+```cs
+public class MyClassProxyMemberSelector : ClassProxyMemberSelector
+{
+    public override bool Filter(MemberInfo member)
+    {
+        if (member.DeclaringType == typeof(MyClass) && member.Name == "MyMethod")
+            return false;
+
+        return base.Filter(member);
+    }
+}
+```
+
+Define the option
+
+```cs
+var generator = new ProxyGenerator();
+var options = new ProxyGeneratorOptions();
+options.ClassProxyMemberSelector = new MyClassProxyMemberSelector();
+
+var proxy = generator.CreateClassProxy<MyClass>(options, new LogInterceptor());
+
+proxy.MyMethod(); // not intercepted
+```
+
 ## Constructor Injection Resolver
 
 > Allows to resolve **parameters** of the **base class contructor** for a **Class Proxy**.
