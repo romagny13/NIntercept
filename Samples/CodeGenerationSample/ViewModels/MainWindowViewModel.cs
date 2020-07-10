@@ -1,4 +1,5 @@
 ﻿using Prism.Commands;
+using System;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -22,10 +23,11 @@ namespace CodeGenerationSample.ViewModels
         //    get
         //    {
         //        if (updateTitleGenericCommand == null)
-        //            updateTitleGenericCommand = new DelegateCommand<string>(ExecuteUpdateTitleGenericCommand).ObservesCanExecute(() => CanExecute); 
+        //            updateTitleGenericCommand = new DelegateCommand<string>(ExecuteUpdateTitleGenericCommand).ObservesCanExecute(() => CanExecute);
         //        return updateTitleGenericCommand;
         //    }
         //}
+
 
         [Command("UpdateTitleCommand", CanExecuteMethodName = nameof(CanExecuteUpdateTitle), CanExecutePropertyNames = new[] { nameof(CanExecute) })]
         protected async void ExecuteUpdateTitleCommand()

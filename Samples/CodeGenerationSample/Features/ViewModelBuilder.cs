@@ -29,7 +29,7 @@ namespace CodeGenerationSample
 
         public override void BeforeInvoke(ProxyScope proxyScope, ILGenerator il, CallbackMethodDefinition callbackMethodDefinition)
         {
-            // never called with clean proxy method builder
+            // never called with clean get and set method builder
 
             if (callbackMethodDefinition.MethodDefinition.MethodDefinitionType == MethodDefinitionType.Setter && ViewModelSupport.IsViewModel(proxyScope.TypeDefinition.Type))
             {
@@ -39,7 +39,7 @@ namespace CodeGenerationSample
 
         public override void AfterInvoke(ProxyScope proxyScope, ILGenerator il, CallbackMethodDefinition callbackMethodDefinition)
         {
-            // never called with clean proxy method builder
+            // never called with clean get and set method builder
 
             if (callbackMethodDefinition.MethodDefinition.MethodDefinitionType == MethodDefinitionType.Setter && ViewModelSupport.IsViewModel(proxyScope.TypeDefinition.Type))
             {

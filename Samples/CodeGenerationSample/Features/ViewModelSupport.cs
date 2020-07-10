@@ -62,7 +62,7 @@ namespace CodeGenerationSample
                     MethodInfo canExecuteMethod = null;
                     if (attribute.CanExecuteMethodName != null)
                     {
-                        canExecuteMethod = methods.FirstOrDefault(p => p.Name == attribute.CanExecuteMethodName);
+                        canExecuteMethod =  methods.FirstOrDefault(p => p.Name == attribute.CanExecuteMethodName);
                         if (canExecuteMethod == null)
                             throw new ArgumentException($"Cannot find the method for the CanExecuteMethodName '{attribute.CanExecuteMethodName}'");
                     }

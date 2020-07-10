@@ -715,39 +715,78 @@ public void MyMethod_Callback()
 _For example allows to implement INotifyPropertyChanged or create the commands for the ViewModel Proxy generated._
 
 ```cs
-public class ViewModelAdditionalCode : AdditionalCode
+public class ViewModelBuilder : AdditionalCode
 {
     private NotifyPropertyChangedFeature notifyPropertyChangedFeature;
-    private DelegateCommandBuilderFeature delegateCommandBuilderFeature;
+    private DelegateCommandBuilder delegateCommandBuilder;
 
-    public ViewModelAdditionalCode()
+    public ViewModelBuilder()
     {
         notifyPropertyChangedFeature = new NotifyPropertyChangedFeature();
-        delegateCommandBuilderFeature = new DelegateCommandBuilderFeature();
+        delegateCommandBuilder = new DelegateCommandBuilder();
     }
 
     public override void BeforeDefine(ProxyScope proxyScope)
     {
-        notifyPropertyChangedFeature.ImplementFeature(proxyScope);
-        delegateCommandBuilderFeature.ImplementFeature(proxyScope);
+        if (ViewModelSupport.IsViewModel(proxyScope.TypeDefinition.Type))
+        {
+            notifyPropertyChangedFeature.ImplementFeature(proxyScope);
+
+            var commands = ViewModelSupport.GetCommandInfos(proxyScope.TypeDefinition.Type);
+            delegateCommandBuilder.CreateCommands(proxyScope, commands);
+        }
     }
 
     public override void BeforeInvoke(ProxyScope proxyScope, ILGenerator il, CallbackMethodDefinition callbackMethodDefinition)
     {
-        if (callbackMethodDefinition.MethodDefinition.MethodDefinitionType == MethodDefinitionType.Setter)
+        // never called with clean get and set method builder
+
+        if (callbackMethodDefinition.MethodDefinition.MethodDefinitionType == MethodDefinitionType.Setter && ViewModelSupport.IsViewModel(proxyScope.TypeDefinition.Type))
         {
-            // never called with clean proxy method builder
             notifyPropertyChangedFeature.CheckEquals(proxyScope, il, callbackMethodDefinition.Method);
         }
     }
 
     public override void AfterInvoke(ProxyScope proxyScope, ILGenerator il, CallbackMethodDefinition callbackMethodDefinition)
     {
-        if (callbackMethodDefinition.MethodDefinition.MethodDefinitionType == MethodDefinitionType.Setter)
+        // never called with clean get and set method builder
+
+        if (callbackMethodDefinition.MethodDefinition.MethodDefinitionType == MethodDefinitionType.Setter && ViewModelSupport.IsViewModel(proxyScope.TypeDefinition.Type))
         {
-            // never called with clean proxy method builder
             notifyPropertyChangedFeature.InvokeOnPropertyChanged(proxyScope, il, callbackMethodDefinition.Method);
+
+            string propertyName = (callbackMethodDefinition.MethodDefinition as SetMethodDefinition).PropertyDefinition.Name;
+            delegateCommandBuilder.RaiseCanExecuteChangedFor(proxyScope, il, propertyName);
         }
+    }
+}
+```
+
+ViewModel 
+
+```cs
+[ViewModel]
+public class MainWindowViewModel
+{
+    public MainWindowViewModel()
+    {
+        Title = "Main title";
+    }
+
+    public virtual string Title { get; set; }
+    public virtual bool CanExecute { get; set; }
+    
+    // Create a DelegateCommand "UpdateTitleCommand" with CanExecute Method
+    // RaiseCanExecuteChanged is added to the set method of CanExecute property
+    [Command("UpdateTitleCommand", CanExecuteMethodName = nameof(CanExecuteUpdateTitle), CanExecutePropertyNames = new[] { nameof(CanExecute) })]
+    protected void ExecuteUpdateTitleCommand()
+    {
+        Title += "!";
+    }
+
+    protected bool CanExecuteUpdateTitle()
+    {
+        return CanExecute; 
     }
 }
 ```
