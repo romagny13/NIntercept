@@ -38,7 +38,7 @@ Options:
 * **AdditionalTypeAttributes**: allows to add **custom attributes** on proxy generated.
 * **ConstructorSelector**: allows to **select** the **base constructor** to call.
 * **InterceptableMethodBuilder**: allows to provide a custom **InterceptableMethodBuilder**.
-* **InterceptorSelector**: usefull to select "global" interceptors to use for each method.
+* **InterceptorSelector**: usefull to select interceptors to use for each method when we don't use attributes.
 
 And
 
