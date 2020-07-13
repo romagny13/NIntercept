@@ -10,7 +10,7 @@ namespace NIntercept
 {
     public sealed class ProxyScope
     {
-        public const string IntercetorsFieldName = "__interceptors";
+        public const string InterceptorsFieldName = "__interceptors";
         public const string InterceptorSelectorFieldName = "__interceptorSelector";
         private const FieldAttributes StaticReadOnlyFieldAttributes = FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.InitOnly;
         private ModuleScope moduleScope;
@@ -145,7 +145,7 @@ namespace NIntercept
         {
             // fields injected in ctor
             var fieldList = new List<FieldBuilder>();
-            fieldList.Add(DefineField(IntercetorsFieldName, typeof(IInterceptor[]), FieldAttributes.Private));
+            fieldList.Add(DefineField(InterceptorsFieldName, typeof(IInterceptor[]), FieldAttributes.Private));
 
             if (typeDefinition.TargetType != null)
                 fieldList.Add(DefineField(typeDefinition.TargetFieldName, typeDefinition.TargetType, FieldAttributes.Private));

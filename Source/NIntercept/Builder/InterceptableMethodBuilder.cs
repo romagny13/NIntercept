@@ -47,7 +47,7 @@ namespace NIntercept.Builder
             FieldBuilder interceptorMethodField = null;
             if (interceptorSelector != null)
             {
-                interceptorSelectorField = proxyScope.ConstructorFields.First(p => p.Name == ProxyScope.InterceptorSelectorFieldName);
+                interceptorSelectorField = FindConstructorField(proxyScope, ProxyScope.InterceptorSelectorFieldName);
                 interceptorMethodField = proxyScope.DefineField(methodDefinition.InterceptorSelectorFieldName, typeof(IInterceptor[]), FieldAttributes.Private);
             }
             var returnType = methodDefinition.ReturnType;

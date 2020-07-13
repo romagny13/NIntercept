@@ -6,7 +6,7 @@ namespace NIntercept.Definition
 {
     public abstract class TypeDefinition
     {
-        private const string DefaultTargetFieldName = "_target";
+        private const string DefaultTargetFieldName = "__target";
         private ModuleDefinition moduleDefinition;
         private Type type;
         private Type targetType;
