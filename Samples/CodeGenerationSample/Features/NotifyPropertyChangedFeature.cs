@@ -12,7 +12,9 @@ namespace CodeGenerationSample
     {
         private static readonly ConstructorInfo PropertyChangedEventArgsConstructor = typeof(PropertyChangedEventArgs).GetConstructor(new Type[] { typeof(string) });
         private static readonly MethodInfo InvokeMethod = typeof(PropertyChangedEventHandler).GetMethod("Invoke", new Type[] { typeof(object), typeof(PropertyChangedEventArgs) });
+       
         private static Type interfaceType = typeof(INotifyPropertyChanged);
+       
         public const string SetConstant = "set_";
         public const string EventName = "PropertyChanged";
         public const string ParameterName = "propertyName";
