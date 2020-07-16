@@ -16,7 +16,6 @@ namespace CodeGenerationSample
         private static Type interfaceType = typeof(INotifyPropertyChanged);
 
         public const string SetConstant = "set_";
-        public const string FieldName = "_propertyChanged";
         public const string EventName = "PropertyChanged";
         public const string ParameterName = "propertyName";
         public const string MethodName = "OnPropertyChanged";
@@ -49,16 +48,16 @@ namespace CodeGenerationSample
             EventBuilder propertyChangedEventBuilder = proxyScope.Events.FirstOrDefault(p => p.GetName() == EventName);
             if (propertyChangedEventBuilder == null)
             {
-                FieldBuilder eventField = proxyScope.DefineField(FieldName, typeof(PropertyChangedEventHandler), FieldAttributes.Private);
+                FieldBuilder eventField = proxyScope.DefineField(EventName, typeof(PropertyChangedEventHandler), FieldAttributes.Private);
                 proxyScope.DefineFullEvent(EventName, EventAttributes.None, typeof(PropertyChangedEventHandler), eventField);
             }
         }
 
         public void CreateOnPropertyChangedMethod(ProxyScope proxyScope)
         {
-            FieldBuilder eventField = proxyScope.Fields.FirstOrDefault(p => p.Name == FieldName);
+            FieldBuilder eventField = proxyScope.Fields.FirstOrDefault(p => p.Name == EventName);
             if (eventField == null)
-                throw new ArgumentException($"No field '{FieldName}' found.");
+                throw new ArgumentException($"No field '{EventName}' found.");
 
             var onPropertyChangedMethodBuilder = GetOnPropertyChangedMethod(proxyScope);
             if (onPropertyChangedMethodBuilder == null)
